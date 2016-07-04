@@ -1,0 +1,14 @@
+{
+  "name": "catproxy",
+  "description": "host proxy",
+  "dependencies": {
+   
+  },
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
