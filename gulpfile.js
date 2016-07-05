@@ -5,7 +5,7 @@ var babel = require('gulp-babel');
 gulp.task('src', function() {
 	return gulp.src('src/**/*.*')
 		.pipe(babel({
-			only: '*.es6',
+			only: '*.js',
 			presets: ['es2015', "stage-0"],
 			plugins: ['transform-es2015-modules-commonjs']
 		}))
@@ -15,7 +15,7 @@ gulp.task('src', function() {
 gulp.task('web', function() {
 	return gulp.src('web/src/**/*.*')
 		.pipe(babel({
-			only: '*.es6',
+			only: '*.js',
 			presets: ['es2015', "stage-0"],
 			plugins: ["transform-es2015-modules-amd"]
 		}))

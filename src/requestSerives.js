@@ -1,20 +1,22 @@
 import url from 'url';
 import Promise from 'promise';
 import {Buffer} from 'buffer';
-import responseService from './responseService';
 import log from './log';
 //请求到后的解析
 let requestHandler = function(req, res) {
+	var com = this;
 	//build  req info object
 	let headers = req.headers,
 			method = req.method,
 			host =  req.headers.host,
-			protocol = req.protocol || 'http',
+			protocol = req.headers['user-server-type'] || 'http',
 			fullUrl = protocol === "http" ? req.url : (protocol + '://' + host + req.url),
 			urlObject = url.parse(fullUrl),
-			path = urlObject.path,
-			visitUrl = protocol + "://" + host + path;
-	console.log(req.url);
+			port = urlObject.port || (protocol === "http" ? '80': '443'),
+			pathStr = urlObject.path,
+			visitUrl = protocol + "://" + host + pathStr;
+	log.debug("url: " + req.url);
+	log.debug(`secure: + ${req.secure}--user-server-type:${req.headers['user-server-type']}`);
 	let reqInfo = {
 		headers,
 		host,
@@ -22,8 +24,9 @@ let requestHandler = function(req, res) {
 		protocol,
 		fullUrl,
 		req,
+		port,
 		startTime : new Date().getTime(),
-		path,
+		path: pathStr,
 		url: visitUrl,
 		bodyData: ''
 	};
@@ -45,7 +48,7 @@ let requestHandler = function(req, res) {
 	})
 	//转发请求 本地转发或者 向远程服务器转发
 	.then((reqInfo) => {
-		responseService(reqInfo, resInfo);
+		com.responseService(reqInfo, resInfo);
 	})
 	.then(null, (err)=>{
 		log.error(err);
