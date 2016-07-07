@@ -83,5 +83,6 @@ export {
 	setCertPath,
 	getCertPath,
 	emptyCertDir,
-	getCert
+	getCert,
+	getRootCert
 };

@@ -29,7 +29,7 @@ let createKeyandCert = ()=> {
 	let today = new Date().getTime();
 	let tenYearMin = 10 * 365 * 24 * 60 * 60 * 1000;
 	cert.publicKey = keys.publicKey;
-	cert.serialNumber = '01';
+	cert.serialNumber = "" + new Date().getTime();
 	cert.validity.notBefore = new Date(today - tenYearMin);
 	cert.validity.notAfter = new Date(today + tenYearMin);
 	return {cert, keys};

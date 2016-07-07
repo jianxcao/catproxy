@@ -30,7 +30,6 @@ class CatProxy extends EventEmitter{
 		this.beforeReq = beforeReq.bind(this); 
 		//请求后
 		this.afterRes = afterRes.bind(this); 
-
 		return Promise.resolve()
 		.then(this.createCache.bind(this))
 		.then(this.checkParam.bind(this))
@@ -52,6 +51,7 @@ class CatProxy extends EventEmitter{
 	proxyHttps() {
 		if (this.option.model === 'proxy') {
 			this.server.on('connect', (req, cltSocket, head) => {
+				console.log('proxy https connect');
 				try{
 					// req.secure;
 					req.headers['user-server-type'] = "https";
@@ -67,6 +67,9 @@ class CatProxy extends EventEmitter{
 						srvSocket.on('error',(err) => {
 							log.error(err);
 						});
+						srvSocket.on('timeout', function(){
+							log.debug('**************https-timeout************');
+						})
 					});
 				} catch(err) {
 					log.error('https proxy err' + err.message);
@@ -140,4 +143,6 @@ class CatProxy extends EventEmitter{
 	}
 
 }
+process.on('uncaughtException', err => log.error("出现错误：" + err));
+process.on('exit', ()=> log.info('服务器退出'));
 export {CatProxy};
