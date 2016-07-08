@@ -15,6 +15,7 @@
   "license": "MIT",
   "dependencies": {
     "body-parser": "^1.15.2",
+    "empty-port": "0.0.2",
     "express": "^4.14.0",
     "fs-extra": "^0.30.0",
     "iconv-lite": "^0.4.13",

@@ -37,7 +37,7 @@ server.on('tlsClientError', function(err) {
 	console.log(err);
 });
 // https默认de监听端口时443，启动1000以下的端口时需要sudo权限
-//server.listen(443, function() {
-//	console.log("https listening on port: 443");
-//});
+server.listen(443, function() {
+	console.log("https listening on port: 443");
+});
 // 

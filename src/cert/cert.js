@@ -76,7 +76,7 @@ var setCertPath = (path) => {
 	certCachePath = path.resolve(certDir, 'certCache');
 };
 var getCertPath = () => certDir;
-getCert('lmlc.com');
+//getCert('lmlc.com');
 // emptyCertDir();
 export {
 	isRootCertExits,

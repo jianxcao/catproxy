@@ -9,9 +9,11 @@ import reqSer from './requestSerives';
 import resSer from './responseService';
 import {local, remote} from './responseService';
 import {beforeReq, afterRes} from './evt';
-import net from 'net';
 import url from 'url';
 import EventEmitter from 'events';
+import express from 'express';
+import {getCert} from './cert/cert.js';
+
 //主类
 class CatProxy extends EventEmitter{
 	constructor(option) {
@@ -22,10 +24,11 @@ class CatProxy extends EventEmitter{
 		//请求事件方法
 		this.requestHandler = reqSer.requestHandler.bind(this);
 		this.requestConnectHandler = reqSer.requestConnectHandler.bind(this);
+		this.requestUpgradeHandler = reqSer.requestUpgradeHandler.bind(this);
 		//response 服务
 		this.responseService = resSer.bind(this);
-		this.responseServiceRemote = remote.bind(this);
-		this.responseServiceLocal = local.bind(this);
+		//this.responseServiceRemote = remote.bind(this);
+		//this.responseServiceLocal = local.bind(this);
 		//请求前
 		this.beforeReq = beforeReq.bind(this); 
 		//请求后
@@ -33,8 +36,8 @@ class CatProxy extends EventEmitter{
 		return Promise.resolve()
 		.then(this.createCache.bind(this))
 		.then(this.checkParam.bind(this))
+		.then(this.createApp.bind(this))
 		.then(this.createServer.bind(this))
-		.then(this.proxyHttps.bind(this))
 		.then(this.checkEnv.bind(this))
 		.then(null, this.errorHandle.bind(this));
 	}
@@ -46,102 +49,46 @@ class CatProxy extends EventEmitter{
 	//环境检测
 	checkEnv() {
 	}
-	//代理https
-	//直接代理后https请求不明文通过
-	proxyHttps() {
-		if (this.option.model === 'proxy') {
-			this.server.on('connect', (req, cltSocket, head) => {
-				console.log('proxy https connect');
-				try{
-					// req.secure;
-					req.headers['user-server-type'] = "https";
-					// connect to an origin server
-					var srvUrl = url.parse(`http://${req.url}`);
-					var srvSocket = net.connect(srvUrl.port, srvUrl.hostname, () => {
-						cltSocket.write('HTTP/1.1 200 Connection Established\r\n' +
-														'Proxy-agent: Node-CatProxy\r\n' +
-														'\r\n');
-						srvSocket.write(head);
-						srvSocket.pipe(cltSocket);
-						cltSocket.pipe(srvSocket);
-						srvSocket.on('error',(err) => {
-							log.error(err);
-						});
-						srvSocket.on('timeout', function(){
-							log.debug('**************https-timeout************');
-						})
-					});
-				} catch(err) {
-					log.error('https proxy err' + err.message);
-				}
-			});
-			//处理转发ws请求
-			this.server.on('upgrade', (req, socket) => {
-				socket.write('HTTP/1.1 101 Web Socket Protocol Handshake\r\n' +
-										 'Upgrade: WebSocket\r\n' +
-										 'Connection: Upgrade\r\n' +
-										 '\r\n');
-				socket.pipe(socket); // echo back
-			});
-		}
-	}
 	//出错处理
 	errorHandle(err) {
 		if (err) {
 			log.error(err);
 		}
 	}
+	//创建一个express的app
+	createApp() {
+		this.app = express();
+		//绑定到远程应用
+		this.app.use("/", this.requestHandler);
+	}
 	//根据配置创建服务器
-	createServer() {
+	createServer(server) {
 		let opt = this.option;
-		let server;
-		let httpsServer;
-		let com = this;
-		if (opt.model === 'host') {
-				server = https.createServer((req, res)=> {
-					//当前服务器类型
-					req.proxyServerType = "https";
-					//用户请求类型 --标记所用
-					req.headers['user-server-type'] = "https";
-					com.requestHandler(req, res);
-				});
-				//找到证书，创建https的服务器
-				httpsServer = https.createServer((req, res)=>{
-					//当前服务器类型
-					req.proxyServerType = "http";
-					//用户请求类型 --标记所用
-					req.headers['user-server-type'] = "http";
-					com.requestHandler(req, res);
-				});
-				httpsServer.listen(opt.httpsPort);
-				this.httpsServer = httpsServer;
-				server.listen(opt.httpPort);
-		} else if (opt.model === 'proxy') {
+		//可以自定义server或者用系统内置的server
+		if (!(server instanceof http.Server || server instanceof https.Server)) {
 			if (opt.type === 'https') {
 				//找到证书，创建https的服务器
-				server = https.createServer((req, res)=>{
-					req.proxyServerType = "https";
-					if (!req.headers['user-server-type']) {
-						req.headers['user-server-type'] = 'http';
-					}
-					com.requestHandler(req, res);
-				});
+				let {privateKey: key, cert} = getCert(opt.host);
+				server = https.createServer({key,cert, rejectUnauthorized: false});
 			} else {
-				server = http.createServer((req, res)=>{
-					req.proxyServerType = "http";
-					if (!req.headers['user-server-type']) {
-						req.headers['user-server-type'] = 'http';
-					}
-					com.requestHandler(req, res);
-				});
+				server = http.createServer();
 			}
-			server.listen(opt.port, function() {
+		}
+		//如果是https，则需要过度下请求
+		if (server instanceof  http.Server) {
+			server.on('connect', this.requestConnectHandler);
+			server.on('upgrade', this.requestUpgradeHandler);
+		}
+		//与express绑定
+		server.on('request', this.app);
+		//如果server没有被监听，则调用默认端口监听
+		if (!server.listening) {
+			server.listen(opt.port, function () {
 				log.info('proxy server start from ' + 'http://127.0.0.1:' + opt.port);
-			});
+			});			
 		}
 		this.server = server;
 	}
-
 }
 process.on('uncaughtException', err => log.error("出现错误：" + err));
 process.on('exit', ()=> log.info('服务器退出'));
