@@ -4,9 +4,10 @@ import tls from 'tls';
 import {Buffer} from 'buffer';
 import log from './log';
 import net from 'net';
-import getHttpsSer from './httpsProxySer' ;
+import getHttpsSer from './httpsProxySer';
+import {STATUS, LIMIT_SIZE} from './defCon';
 //请求到后的解析
-let requestHandler = function (req, res) {
+let requestHandler = function(req, res) {
 	var com = this;
 	//build  req info object
 	let isSecure = req.socket instanceof tls.TLSSocket,
@@ -20,50 +21,85 @@ let requestHandler = function (req, res) {
 		pathStr = urlObject.path,
 		visitUrl = protocol + "://" + host + pathStr;
 	log.verbose("request url: " + fullUrl);
+	//请求信息
 	let reqInfo = {
 		headers,
 		host,
 		method,
 		protocol,
-		fullUrl,
-		req,
 		port,
-		startTime: new Date().getTime(),
 		path: pathStr,
-		url: visitUrl,
-		bodyData: ''
 	};
+	Object.defineProperties(reqInfo, {
+		req: {
+			writable: false,
+			value: req,
+			enumerable: true
+		},
+		originalFullUrl: {
+			writable: false,
+			value: fullUrl,
+			enumerable: true
+		},
+		originalUrl: {
+			writable: false,
+			value: visitUrl,
+			enumerable: true
+		},
+		startTime:{
+			writable: false,
+			value: new Date().getTime(),
+			enumerable: true
+		}
+	});
+	//响应信息
 	let resInfo = {
-		res
+		headers: {}
 	};
-	Promise.resolve(reqInfo)
-		//拼接req body的数据
-		.then((reqInfo)=> {
-			return new Promise((resolve) => {
-				var bufferData = [];
-				req.on('data', (chunk)=> bufferData.push(chunk));
-				req.on('end', ()=> {
-					reqInfo.bodyData = Buffer.concat(bufferData) || new Buffer('');
-					resolve(reqInfo);
-				});
-			});
-		})
-		//转发请求 本地转发或者 向远程服务器转发
-		.then((reqInfo) => {
-			com.responseService(reqInfo, resInfo);
-		})
-		.then(null, (err)=> {
-			log.error(err);
-		});
+	Object.defineProperties(resInfo, {
+		res: {
+			writable: false,
+			value: res,
+			enumerable: true
+		}
+	});
+
+	com.responseService(reqInfo, resInfo);
+	let reqBodyData = [];
+	let l = 0;
+	let end = () => {
+		req.emit('reqBodyDataReady', null, Buffer.concat(reqBodyData));
+	};		
+	let data = (buffer)=> {
+		l = l + buffer.length;
+		reqBodyData.push(buffer);
+		//超过长度了
+		if (l > LIMIT_SIZE) {
+			req.pause();
+			req.unpipe();
+			req.removeListener('data', data);
+			req.removeListener('end', end);
+			req.emit('reqBodyDataReady', {
+				message: 'request entity too large',
+				status: STATUS.LIMIT_ERROR
+			}, Buffer.concat(reqBodyData));
+		}
+	};
+	req
+	.on('data', data)
+	.on('end', end)
+	.on('error', err => {
+		log.error('error req', err);
+	});
 };
 
-var httpsSerInfo = null;
-var getSer = requestHandler => {
+let httpsSerInfo = null;
+let getSer = requestHandler => {
 	if (httpsSerInfo) {
 		return Promise.resolve(httpsSerInfo);
 	} else {
 		return getHttpsSer('localhost', requestHandler)
-			.then((info)=> {
+			.then((info) => {
 				httpsSerInfo = info;
 				return info;
 			});
@@ -75,13 +111,15 @@ var getSer = requestHandler => {
  * @param cltSocket
  * @param head
  */
-let requestConnectHandler = function(req, cltSocket, head){
+let requestConnectHandler = function(req, cltSocket, head) {
 	let opt = this.option;
 	//如果需要捕获https的请求
 	if (opt.crackHttps) {
 		log.verbose(`crack https http://${req.url}`);
 		getSer(this.requestHandler)
-		.then(({port}) =>{
+			.then(({
+				port
+			}) => {
 				var srvSocket = net.connect(port, "localhost", () => {
 					cltSocket.write(`HTTP/${req.httpVersion} 200 Connection Established\r\n` +
 						'Proxy-agent: Node-CatProxy\r\n' +
@@ -90,9 +128,9 @@ let requestConnectHandler = function(req, cltSocket, head){
 					srvSocket.pipe(cltSocket);
 					cltSocket.pipe(srvSocket);
 				});
-				cltSocket.on('error', err => log.error(`crack https请求出现错误1: ${err}`));
-				srvSocket.on('error', err => log.error(`crack https请求出现错误2: ${err}`));
-		});
+				cltSocket.on('error', err => log.error(`crack https请求出现错误: ${err}`));
+				srvSocket.on('error', err => log.error(`crack https请求出现错误: ${err}`));
+			});
 	} else {
 		log.verbose(` through https connect http://${req.url}`);
 		// connect to an origin server
@@ -119,4 +157,8 @@ let requestUpgradeHandler = function(req, socket) {
 	socket.write('HTTP/1.1 101 Web Socket Protocol Handshake\r\n' + 'Upgrade: WebSocket\r\n' + 'Connection: Upgrade\r\n' + '\r\n');
 	socket.pipe(socket); // echo back
 };
-export default {requestHandler, requestConnectHandler, requestUpgradeHandler};
+export default {
+	requestHandler,
+	requestConnectHandler,
+	requestUpgradeHandler
+};

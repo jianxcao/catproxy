@@ -16,6 +16,7 @@ let SNICallback = (servername, callback) => {
 		callback(e);
 	}
 };
+export {SNICallback};
 export default (host, port, callback) => {
 	if (util.isFunction(port)) {
 		callback = port;
@@ -33,7 +34,7 @@ export default (host, port, callback) => {
 					if (err) {
 						reject(err);
 					} else {
-						resolve(port)
+						resolve(port);
 					}
 				});				
 			});

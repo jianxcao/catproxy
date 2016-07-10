@@ -14,14 +14,13 @@
   "author": "jianxcao",
   "license": "MIT",
   "dependencies": {
-    "body-parser": "^1.15.2",
     "empty-port": "0.0.2",
-    "express": "^4.14.0",
     "fs-extra": "^0.30.0",
     "iconv-lite": "^0.4.13",
     "merge": "^1.2.0",
     "node-forge": "^0.6.40",
     "promise": "^g7.1.1",
+    "through2": "^2.0.1",
     "winston": "^2.2.0"
   },
   "devDependencies": {
