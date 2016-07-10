@@ -3,7 +3,7 @@ var logger = new (winston.Logger)({
 	transports: [
 	  new (winston.transports.Console)({
 			levels: winston.config.npm.levels,
-			level: 'info',
+			level: 'debug',
 			stripColors: true,
 			colorize: 'all'
 		}),

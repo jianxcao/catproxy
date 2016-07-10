@@ -8,7 +8,7 @@ import log from './log';
 import reqSer from './requestSerives';
 import resSer from './responseService';
 import {local, remote} from './responseService';
-import {beforeReq, afterRes} from './evt';
+import {beforeReq, afterRes, beforeRes} from './evt';
 import EventEmitter from 'events';
 import {getCert} from './cert/cert.js';
 import {SNICallback} from './httpsProxySer';
@@ -30,7 +30,9 @@ class CatProxy extends EventEmitter{
 		//请求前
 		this.beforeReq = beforeReq.bind(this); 
 		//请求后
-		this.afterRes = afterRes.bind(this); 
+		this.afterRes = afterRes.bind(this);
+		//请求前 
+		this.beforeRes = beforeRes.bind(this); 
 		return Promise.resolve()
 		.then(this.createCache.bind(this))
 		.then(this.checkParam.bind(this))

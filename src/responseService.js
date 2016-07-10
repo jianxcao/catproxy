@@ -6,40 +6,110 @@ import zlib from 'zlib';
 import {Buffer} from 'buffer';
 import fs from 'fs';
 import merge from 'merge';
-import through2 from 'through2';
 import {STATUS, LIMIT_SIZE} from './defCon';
 import Promise from 'promise';
-//处理本地数据
-export let local = function(reqInfo, resInfo, fileAbsPath, bodyData) {
-	return new Promise(resolve => {
+
+//解压数据
+let decodeCompress = function(bodyData, encode) {
+	return new Promise(function(resolve, reject) {
+		//成功的取到bodyData
 		if (bodyData) {
-			resInfo.bodyData = bodyData;
-			resolve(resInfo);
-			if (!resInfo.statusCode) {
-				resInfo.statusCode = 200;
+			let isZip = /gzip/i.test(encode);
+			let isDeflate = /deflate/i.test(encode);
+			if (isZip) {
+					zlib.gunzip(bodyData, function(err, buff) {
+						if (err) {
+							reject(err.message);
+							log.error('decompress err: ', err.message);
+						} else {
+							resolve(buff);
+						}
+					}); 
+			} else if(isDeflate) {
+					zlib.inflateRaw(bodyData, function(err, buff) {
+						if (err) {
+							reject(err.message);
+							log.error('decompress err: ', err.message);
+						} else {
+							resolve(buff);
+						}
+					});
+			} else {
+				resolve(bodyData);
 			}
 		} else {
-			fs.readFile(fileAbsPath, function(err, buffer) {
-				if (err) {
-					resInfo.bodyData = new Buffer("local file error" + err);
-					//如果用户没有设置statusCode就设置默认的
-					if (!resInfo.statusCode) {
-						resInfo.statusCode = 404;
-					}
-					resolve(resInfo);
-				} else {
-					//如果用户没有设置statusCode就设置默认的
-					if (!resInfo.statusCode) {
-						resInfo.statusCode = 200;
-					}
-					resInfo.bodyData = buffer;
-					resolve(resInfo);
-				}
-			});
+			resolve([]);
 		}
+	});
+};
+
+let triggerBeforeRes = (resInfo, com) => {
+	let headers = resInfo.headers || {};
+	return decodeCompress(resInfo.bodyData, headers['content-encoding'])
+	.then((bodyData) => {
+		//不压缩
+		delete headers['content-encoding'];
+		resInfo.bodyData = bodyData;
+		let result;
+		try{
+			result = com.beforeRes(resInfo);
+		} catch(e) {
+			log.error('调用beforeRes出错', e.message);
+		}
+		//如果有返回结果
+		if (result) {
+			//返回的是一个promise
+			if(result.then) {
+				return result.then(result => result || resInfo, () => resInfo);
+			//返回的是一个resInfo
+			} else if (result.res) {
+				resInfo = result;
+			}
+		}
+		return  Promise.resolve(resInfo);
+	});
+};
+
+let getUrl = ({port, path: pathname, protocol, hostname})=> {
+	if (hostname && protocol) {
+		hostname = hostname.split(':')[0];
+		port  = ":" + port;
+		protocol === "https" ? "http" : "https";
+		if (+port === 80 && protocol === "http") {
+			port = "";
+		}
+		if (+port === 443 && protocol === "https") {
+			port = "";
+		}
+		pathname = pathname || "";
+		return `${protocol}://${hostname}${port}${pathname}`;
+	}
+} ;
+//处理本地数据
+export let local = function(reqInfo, resInfo, fileAbsPath) {
+	var com = this;
+	resInfo.headers = resInfo.headers || {};
+	return new Promise(resolve => {
+		fs.readFile(fileAbsPath, function(err, buffer) {
+			if (err) {
+				resInfo.bodyData = new Buffer("local file error" + err);
+				//如果用户没有设置statusCode就设置默认的
+				resInfo.statusCode = 404;
+				resolve(resInfo);
+			} else {
+				//如果用户没有设置statusCode就设置默认的
+				resInfo.statusCode = 200;
+				resInfo.bodyData = buffer;
+				resolve(resInfo);
+			}
+		});
 	})
-	.then( resInfo => {
+	.then(resInfo => {
+		return triggerBeforeRes(resInfo, com);
+	})
+	.then(resInfo => {
 			let {bodyData, headers, statusCode, res} = resInfo;
+			headers['loacl-file'] = fileAbsPath;
 			res.writeHead(statusCode, headers || {});
 			if (!res.headers) {
 				res.headers = headers || {};
@@ -52,13 +122,15 @@ export let local = function(reqInfo, resInfo, fileAbsPath, bodyData) {
 export let remote = function(reqInfo, resInfo) {
 	let {req} = reqInfo;
 	let {res} = resInfo;
+	let com = this;
 	Promise.resolve()
 	.then(() => {
+		 	let t = /^\/.*/;
 			//请求选项
 			let options = {
 				hostname: reqInfo.host.split(':')[0],
 				port: reqInfo.port || (reqInfo.protocol === 'http' ? 80 : 443),
-				path: reqInfo.path,
+				path: t.test(reqInfo.path) ? reqInfo.path : "/" + reqInfo.path,
 				method: reqInfo.method,
 				headers: reqInfo.headers //大小写问题，是否需要转换
 			};
@@ -74,53 +146,76 @@ export let remote = function(reqInfo, resInfo) {
 		let proxyReq = (/https/.test(reqInfo.protocol) ? https : http)
 		.request(options, function(proxyRes) {
 			log.verbose('received request from: ' + reqInfo.originalFullUrl);
-			//取到 状态码和 headers
-			let {statusCode, headers} = proxyRes;
-			headers = merge(headers, resInfo.headers);
-			if (resInfo.statusCode) {
-				statusCode = resInfo.statusCode;
-			}
+			resInfo = merge(resInfo, {
+				headers: proxyRes.headers || {},
+				statusCode: proxyRes.statusCode
+			});
 			//delete headers['content-length'];
 			//没有内容
-			//转换head大小写问题
-			res.writeHead(statusCode, headers);
-			if (!res.headers) {
-				res.headers = headers;
-			}
-			if (+statusCode === 204) {
-				res.end();
-			} else {
-				let resBodyData = [];
-				let l = 0;
-				let isFired = false;
-				proxyRes
-				//过滤文件下载，视频音频等文件，这里不监听他们
-				//其他文件考虑写入内存？？还是写入文件？？	
-				.pipe(through2(function(chunk, enc, callback) {
-						if (l > LIMIT_SIZE) {
-							if (!isFired) {
-								res.emit('resBodyDataReady', {
-										message: 'request entity too large',
-										status: STATUS.LIMIT_ERROR
-									}, []);
-								isFired = true;
-							}
-						} else {
-							resBodyData.push(chunk);
-							l += chunk.length;
-						}
-						this.push(chunk);
-						callback();
-				}))
-				.pipe(res);
-				//请求结束
-				res.on('finish', ()=> {
+			// if (+statusCode === 204) {
+			// 	res.end();
+			// } else {
+			// }
+			//数据太大的时候触发
+			let err = {
+				message: 'request entity too large',
+				status: STATUS.LIMIT_ERROR
+			};
+			let resBodyData = [];
+			let l = 0;
+			let isError = false;
+			let isFired = false;
+			proxyRes
+			//过滤大文件，只有小文件才返回	
+			.on('data', chunk => {
+				if (l > LIMIT_SIZE) {
+					isError = true;
 					if (!isFired) {
 						isFired = true;
-						res.emit('resBodyDataReady', null, Buffer.concat(resBodyData));
+						//如果数据太大提前触发事件，没找到更好的方法，这个时候 用户无法设置bodData
+						triggerBeforeRes(merge({}, resInfo, {bodyDataErr: err.message}), com)
+						.then(({statusCode, headers}) => {
+							headers['remote-url'] = getUrl(merge({}, options, {protocol: reqInfo.protocol}));
+							res.writeHead(statusCode || 200, headers);
+							res.write(Buffer.concat(resBodyData));
+							res.write(chunk);
+							resBodyData = [];
+						});
+					} else {
+						res.write(chunk);
 					}
+				} else {
+					resBodyData.push(chunk);
+					l += chunk.length;
+				}
+			})
+			.on('end', ()=> {
+				let bodyData = Buffer.concat(resBodyData);
+				return Promise.resolve(bodyData)
+				.then((bodyData) => {
+					//文件大小没有出错的情况下
+					if (!isError) {
+						return triggerBeforeRes(merge({}, resInfo, {bodyData}), com)
+							.then((resInfo) => {
+								let {statusCode, headers, bodyData} = resInfo;
+								headers['remote-url'] = getUrl(merge({}, options, {protocol: reqInfo.protocol}));
+								res.writeHead(statusCode || 200, headers);
+								res.write(bodyData);
+								return resInfo;
+							});
+					} else {
+						return resInfo;
+					}
+				})
+				.then(({headers, bodyData})=> {
+					//转换head大小写问题
+					if (!res.headers) {
+						res.headers = headers;
+					}
+					res.end();
+					res.emit('resBodyDataReady', isError ? err : null, bodyData || []);
 				});
-			}
+			});
 		});
 		//出错直接结束请求
 		proxyReq.on("error", (err) => {
@@ -159,10 +254,10 @@ export default function(reqInfo, resInfo){
 	res.on("resBodyDataReady", (err, bodyData) => {
 		let headers = res.headers;
 		let result = {};
-		if (resInfo.bodyDataFile) {
-			Object.defineProperty(result, 'bodyDataFile', {
+		if (reqInfo.sendToFile) {
+			Object.defineProperty(result, 'sendToFile', {
 				writable: false,
-				value: resInfo.bodyDataFile,
+				value: reqInfo.sendToFile,
 				enumerable: true
 			});
 		}
@@ -212,86 +307,30 @@ export default function(reqInfo, resInfo){
 				writable: false,
 				value: reqInfo.originalUrl,
 				enumerable: true
+			},
+			endTime: {
+				writable: false,
+				value: new Date().getTime(),
+				enumerable: true
+			},
+			bodyData: {
+				writable: false,
+				value: bodyData,
+				enumerable: true
+			},
+			bodyDataErr: {
+				writable: false,
+				value: err && err.message ? err.message : err,
+				enumerable: true
 			}
 		});
-		return new Promise(function(resolve, reject) {
-			//成功的取到bodyData
-			if (bodyData && !err) {
-				let isZip = /gzip/i.test(headers['content-encoding']);
-				let isDeflate = /deflate/i.test(headers['content-encoding']);
-				if (isZip) {
-						zlib.gunzip(bodyData, function(err, buff) {
-							if (err) {
-								reject(err.message);
-								log.error('decompress err: ', err.message);
-							} else {
-								resolve(buff);
-							}
-						}); 
-				} else if(isDeflate) {
-						zlib.inflateRaw(bodyData, function(err, buff) {
-							if (err) {
-								reject(err.message);
-								log.error('decompress err: ', err.message);
-							} else {
-								resolve(buff);
-							}
-						});
-				} else {
-					resolve(bodyData);
-				}
-			} else {
-				resolve([]);
-			}
-		})
-		.then((bodyData) => {
-			Object.defineProperties(result,  {
-				endTime: {
-					writable: false,
-					value: new Date().getTime(),
-					enumerable: true
-				},
-				bodyData: {
-					writable: false,
-					value: bodyData,
-					enumerable: true
-				},
-				bodyDataErr: {
-					writable: false,
-					value: err && err.message ? err.message : err,
-					enumerable: true
-				},
-			});
-			return result;
-		}, err => {
-			Object.defineProperties(result,  {
-				endTime: {
-					writable: false,
-					value: new Date().getTime(),
-					enumerable: true
-				},
-				bodyData: {
-					writable: false,
-					value: [],
-					enumerable: true
-				},
-				bodyDataErr: {
-					writable: false,
-					value: err,
-					enumerable: true
-				},
-			});	
-			return result;		
-		})
-		.then(result => {
-			return com.afterRes(result);
-		});
+		return com.afterRes(result);
 	});
 	req.on('reqBodyDataReady', (err, reqBodyData) => {
 		reqInfo.bodyData = reqBodyData || [];
 		reqInfo.bodyDataErr = err;
 		//请求前拦截一次--所有的拦截都在evt.js中处理
-		Promise.resolve(com.beforeReq(reqInfo, resInfo))
+		Promise.resolve(com.beforeReq(reqInfo))
 		.then((result) => {
 			if (result && result.res) {
 				reqInfo = result;
@@ -299,16 +338,14 @@ export default function(reqInfo, resInfo){
 			return {reqInfo, resInfo};
 		})
 		.then(({reqInfo, resInfo}) => {
-			//如果在事件里面已经结束了请求，那就结束了
-			if (!resInfo.res.finished) {
-				if (resInfo.bodyDataFile) {
-					local.call(com, reqInfo, resInfo, resInfo.bodyDataFile);
-				} else if (resInfo.bodyData) {
-					local.call(com, reqInfo, resInfo, null, resInfo.bodyData);
-				} else {
-					remote.call(com, reqInfo, resInfo);
-				}
+			if (reqInfo.sendToFile) {
+				local.call(com, reqInfo, resInfo, reqInfo.sendToFile);
+			} else {
+				remote.call(com, reqInfo, resInfo);
 			}
+			// //如果在事件里面已经结束了请求，那就结束了
+			// if (!resInfo.res.finished) {
+			// }
 		});
 	});
 }

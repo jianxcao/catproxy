@@ -1,7 +1,7 @@
 //事件触发中心
 import log from './log';
-import {Buffer} from 'buffer';
 /**
+ * 代理请求发出前
  * 该方法主要是处理在响应前的所有事情，可以用来替换header，替换头部数据等操作
  * 可以直接像res中写数据结束请求
  * 如果是异步请返回promise对象
@@ -39,24 +39,11 @@ import {Buffer} from 'buffer';
  *    //修改方法
  *    reqInfo.method= "post" //注意post方法要有对应的content-type数据才能过去
  *    //修改请求数据
- *    reqInfo.bodyData = "请求数据"
- * 
- *  * resInfo包含的信息
- *  {
- *  	statusCode: "响应状态码, 可以修改"
- *    headers: "请求头,可修改"
- *    ---注意如果有bodyData则会直接用bodyData的数据返回，reqInfo的修改就没有效果了，本地文件拦截也将没有效果
- *		bodyData: "buffer 数据，body参数，可以修改",
- *		//这个时候 reqInfo无效,bodyData无效
- *		bodyDataFile: "绝对值路径的文件"， 如果这个字段存在则会直接调用这个文件返回
- *		res: res 不可以修改，可以调用 (可以直接自己调用法返回想返回的值，但是如果是异步的，请返回promise)
- *	}
- *	
- *   举例说明可以修改响应的地方/
- *  	resInfo.headers['test-cjx'] = 111;
- * 
+ *    reqInfo.bodyData = "请求数据",
+ *    //直接定位到某个文件 --如果返回某个文件，有这个，就会忽略远程的调用即host设置之类的都无效
+ *    reqInfo.sendToFile
  */
-var beforeReq = function(reqInfo, resInfo) {
+var beforeReq = function(reqInfo) {
 	// reqInfo.headers['test-cjx'] = 111;
 	// reqInfo.path = '/hyg/mobile/common/base/base.34b37a3c0b.js';
 	// reqInfo.port = 9090;
@@ -65,40 +52,61 @@ var beforeReq = function(reqInfo, resInfo) {
 	// reqInfo.method = "post";
 	// reqInfo.headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
 	// reqInfo.bodyData = new Buffer('a=b&c=d');	
-	resInfo.headers['cache-control'] = "no-store";
-	resInfo.headers['expires'] = "0";
-	delete resInfo.headers['etag'];
-	delete resInfo.headers['last-modifed'];
-	// resInfo.statusCode = 200;
-	// resInfo.headers['test-cjx'] = 111;
-	// resInfo.bodyData = "test";
-
-	// resInfo.bodyDataFile = "D:/project/gitWork/catproxy/bin.js";
+	// reqInfo.sendToFile = "D:/project/gitWork/catproxy/bin.js";
+	
 	// log.debug(reqInfo.headers);
 	// log.debug(reqInfo.bodyData.toString());
 
 	if (reqInfo.host.indexOf('163.com') > -1) {
-		reqInfo.host = '114.113.198.187';
+		reqInfo.host = '127.0.0.1';
+		reqInfo.port = '8080';
+		reqInfo.path = "/09.rmvb";
 	} else if(reqInfo.host.indexOf('lmlc.com') > -1) {
-		reqInfo.host = "223.252.195.134";
+		reqInfo.host = "127.0.0.1";
 	} else {
-		reqInfo.host = "175.25.168.40";
+		reqInfo.host = "127.0.0.1";
 	}
 	this.emit('beforeReq', reqInfo);
 	return reqInfo;
 };
 
-//请求发出前调用
-var beforeRes = function() {
-
+/**
+ * 准备响应请求前
+ * @param  {[type]} resInfo [响应信息]
+ *  *  resInfo包含的信息
+ *  {
+ *  	statusCode: "响应状态码, 可以修改"
+ *    headers: "请求头,可修改"
+ *    ---注意如果有bodyData则会直接用bodyData的数据返回
+ *		bodyData: "buffer 数据",
+ *		bodyDataErr: "请求出错，目前如果是大文件会触发这个,这个时候bodyData为空，且不可以设置"
+ *		//这个时候 reqInfo无效,bodyData无效
+ *		res: res 不可以修改，可以调用 (可以直接自己调用法返回想返回的值，但是如果是异步的，请返回promise)
+ *	}
+ *	
+ *   举例说明可以修改响应的地方/
+ *  	resInfo.headers['test-cjx'] = 111;
+ * @return {[type]}         [description]
+ */
+var beforeRes = function(resInfo) {
+	resInfo.headers['cache-control'] = "no-store";
+	resInfo.headers['expires'] = "0";
+	delete resInfo.headers['etag'];
+	delete resInfo.headers['last-modifed'];
+	// resInfo.statusCode = 302;
+	resInfo.headers['test-cjx'] = 111;
+	// resInfo.bodyData = "test";
+	this.emit('beforeRes', resInfo);
+	// return resInfo;
 };
 
 /**
+ * 请求响应后
  * 该方法主要是请求响应后的处理操作，主要是可以查看请求数据，
  * 注意这时候请求已经结束了，无法在做其他的处理
- * @param resInfo
+ * @param result
  * 所有字段不可以修改,只可以查看
- *  * resInfo包含的信息
+ *  * result包含的信息
  *  {
  *  	statusCode: "响应状态码"
  *    headers: "请求头"
@@ -116,14 +124,15 @@ var beforeRes = function() {
  *	}
  * @returns {*}
  */
-var afterRes = function(resInfo) {
-	this.emit('afterRes', resInfo);
-	return resInfo;
+var afterRes = function(result) {
+	this.emit('afterRes', result);
+	return result;
 };
 
 export {
 	beforeReq,
-	afterRes
+	afterRes,
+	beforeRes
 };
 
 //=============注意看，请求出错的是的错误和bodyData

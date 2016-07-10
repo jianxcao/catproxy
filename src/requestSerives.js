@@ -53,9 +53,7 @@ let requestHandler = function(req, res) {
 		}
 	});
 	//响应信息
-	let resInfo = {
-		headers: {}
-	};
+	let resInfo = {};
 	Object.defineProperties(resInfo, {
 		res: {
 			writable: false,
