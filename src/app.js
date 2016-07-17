@@ -12,6 +12,7 @@ import {beforeReq, afterRes, beforeRes} from './evt';
 import EventEmitter from 'events';
 import {getCert} from './cert/cert.js';
 import {SNICallback} from './httpsProxySer';
+import ui from './web/app';
 //主类
 class CatProxy extends EventEmitter{
 	constructor(option) {
@@ -36,8 +37,9 @@ class CatProxy extends EventEmitter{
 		return Promise.resolve()
 		.then(this.createCache.bind(this))
 		.then(this.checkParam.bind(this))
-		.then(this.createServer.bind(this))
 		.then(this.checkEnv.bind(this))
+		.then(this.createServer.bind(this))
+		.then(this.uiInit.bind(this))
 		.then(null, this.errorHandle.bind(this));
 	}
 	//创建缓存，创建请求保存
@@ -47,6 +49,9 @@ class CatProxy extends EventEmitter{
 	}
 	//环境检测
 	checkEnv() {
+	}
+	uiInit() {
+		ui(this.option.uiPort);
 	}
 	//出错处理
 	errorHandle(err) {
