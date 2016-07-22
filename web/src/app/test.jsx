@@ -1,32 +1,19 @@
-import React from 'react';
+import React, {PropTypes} from 'react';
 import AppBar from 'material-ui/AppBar';
 
 
 export default class Test extends React.Component {
-	state = {
-		hello: [1, 2, 3, 4, 5]
-	}
-	componentDidMount() {
-	  let time =  setInterval(function() {
-	   	let hello = this.state.hello;
-	   	// if (hello.length) {
-	   	// 	hello = hello.slice(0, hello.length - 1);
-	   	// } else {
-	   	// 	clearTimeout(time);
-	   	// }
-	   	// console.log(hello);
-	   	hello.push(Math.floor(Math.random() * 100));
-	   	this.setState(this.state);
 
-	   }.bind(this), 1000)
+	componentDidMount() {
+		console.log("Test", this.props)
 	}
 	shouldComponentUpdate(nextProps, nextState) {
-	    return true;  
+			return true;  
+	}
+	static contextTypes = {
+		hosts: PropTypes.object.isRequired
 	}
 	render() {
-		return (<div>{this.state.hello.map((current)=> {
-		 	return <em>{current}</em>;
-		 })}{
-		}</div>)
+		return (<div></div>)
 	}
 }

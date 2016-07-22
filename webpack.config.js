@@ -23,8 +23,7 @@ const config = {
     new webpack.NoErrorsPlugin()
   ],
   module: {
-    loaders: [
-			{
+    loaders: [{
 				test: /(\.css)$/,
 				loaders: ['style-loader', 'css-loader']
 			},{
@@ -35,8 +34,11 @@ const config = {
         test: /(\.jsx|\.js)$/, // All .js files
         loaders: ['react-hot', 'babel-loader'], // react-hot is like browser sync and babel loads jsx and es6-7
         exclude: [nodeModulesPath],
-      }
-    ],
+      },{
+		  	test: /\.(eot|woff|woff2|ttf|svg|png|jpg)$/,
+		  	loader: 'url-loader?limit=30000&name=[name]-[hash].[ext]'
+			}
+    ]
   },
 };
 module.exports = config;

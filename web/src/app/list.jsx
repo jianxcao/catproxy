@@ -24,18 +24,14 @@ class ListView extends React.Component {
 	static defaultProps = {
 		hosts: {}
 	}
-	componentWillUpdate = function(nextProps, nextState) {
-		console.log('update');
-	}
 	renderList() {
 		var hosts = this.props.hosts;
 		var ch = [];
-		// console.log(hosts);
-		for(var key in hosts) {
 			ch.push(
 				<ListItem
-					primaryText= {key}
-					key={key}
+					primaryText= "test"
+					key={"test"}
+					leftIcon={<ContentInbox />}
 					leftIcon={<ContentInbox />}
 					initiallyOpen={true}
 					primaryTogglesNestedList={true}
@@ -52,9 +48,9 @@ class ListView extends React.Component {
 							disabled={true}
 						/>,
 					]}
-			/>
+				/>
 			)
-		}
+		
 		return ch;
 	}
 	render() {

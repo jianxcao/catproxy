@@ -3,6 +3,12 @@ import Immutable from 'Immutable';
 import {
     combineReducers
 } from 'redux-immutable';
+import actionType from "../action/action-type";
+let  {
+	FETCH_FAILURE,
+	FETCH_SUCC,
+	FETCH
+} = actionType;
 import { createStore, applyMiddleware, compose } from 'redux';
 /**
  * 记录所有被发起的 action 以及产生的新的 state。
@@ -53,15 +59,15 @@ const readyStatePromise = store => next => action => {
 	if (!action.promise) {
 		return next(action);
 	}
-	function makeAction(ready, data) {
-		let newAction = Object.assign({}, action, { ready }, data);
+	function makeAction(type, data) {
+		let newAction = Object.assign({}, action, { type }, data);
 		delete newAction.promise;
 		return newAction;
 	}
-	next(makeAction(false));
+	next(makeAction(FETCH));
 	return action.promise.then(
-		result => next(makeAction(true, { result })),
-		error => next(makeAction(true, { error }))
+		result => next(makeAction(FETCH_SUCC, { result })),
+		error => next(makeAction(FETCH_FAILURE, { error }))
 	);
 };
 
@@ -77,17 +83,18 @@ const thunk = store => next => action =>
 	typeof action === 'function' ?
 		action(store.dispatch, store.getState) :
 		next(action);
-const initialState = Immutable.Map();
+const initialState = new Immutable.fromJS({
+	hosts: [],
+	fetchData: {}
+});
 //组合所有reducers
 let toDo = combineReducers(reducers);
 //创建带有 调试和各种中间件的stroe
 let store = createStore(toDo, initialState, compose(
-	applyMiddleware(thunk, vanillaPromise, readyStatePromise, crashReporter, logger),
+	applyMiddleware(thunk, vanillaPromise, readyStatePromise, logger, crashReporter),
 	window.devToolsExtension ? window.devToolsExtension() : f => f
 ));
 
-//for test Immutalbe
-window.Immutable = Immutable;
-window.store = store;
+
 
 export default store;
