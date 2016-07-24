@@ -1,6 +1,6 @@
 import React from 'react';
 import TextField from 'material-ui/TextField';
-
+//可编辑字段
 let style = {
 	display: 'inline-block',
 	width: "66%",

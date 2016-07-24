@@ -2,7 +2,7 @@ import {ListItem} from 'material-ui/List';
 import React from 'react';
 import IconButton from 'material-ui/IconButton';
 import EditField from './editField';
-
+//菜单列表
 const getIcon = (props = {}, className, style) => {
 	let defStyle ={
 		padding: "0px",
@@ -42,7 +42,9 @@ export default class MyListItem extends React.Component {
 		changeGroupName: React.PropTypes.func,
 		changeBranchName: React.PropTypes.func,
 		delBranch: React.PropTypes.func,
-		delGroup: React.PropTypes.func
+		delGroup: React.PropTypes.func,
+		toggleGroupDis: React.PropTypes.func,
+		toggleBranchDis: React.PropTypes.func
 	}
 
 	static defaultProps = {
@@ -65,7 +67,7 @@ export default class MyListItem extends React.Component {
 	handleDel = () => {
 		let {groupId, branchId} = this.props;
 		let {delBranch, delGroup} = this.context;
-		if (branchId !== undefined) {
+		if (branchId >= 0 && branchId !== null) {
 			delBranch(groupId, branchId);
 		} else {
 			delGroup(groupId);
@@ -74,9 +76,15 @@ export default class MyListItem extends React.Component {
 
 	//禁止使用事件
 	handleDis = () => {
-		let {groupId, branchId, primaryText} = this.props;
-		let {delBranch, delGroup} = this.context;
+		let {groupId, branchId} = this.props;
+		let {toggleGroupDis, toggleBranchDis} = this.context;
+		if (branchId >= 0 && branchId !== null) {
+			toggleBranchDis(groupId, branchId);
+		} else {
+			toggleGroupDis(groupId);
+		}
 	}
+	
 	//获取文本内容
 	getPrimaryContent = ()=> {
 		let isDisplay = this.state.hoverList ? "inline-block" : "none";

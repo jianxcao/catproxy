@@ -13,5 +13,6 @@ export default keyMirror({
 	DEL_BRANCH: null,
 	TOGGLE_BRANCH_DIS: null,
 	TOGGLE_GROUP_DIS: null,
-	DRAWERSTATUS: null
+	DRAWERSTATUS: null,
+	DISABLE_ALL: null
 });

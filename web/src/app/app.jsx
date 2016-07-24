@@ -18,10 +18,11 @@ import * as actions from './action/actions';
 
 store.dispatch(actions.fetchData('http://test.html'))
 .then(function(data) {
+	console.log(data);
 	store.dispatch(actions.resetHosts(data.result.hosts))
 	store.dispatch(actions.addGroup("cjx"));
 	store.dispatch(actions.changeGroupName(0, "www"));
-	store.dispatch(actions.addBranch(0, "test"));
+	store.dispatch(actions.addBranch(0, null, "test"));
 	store.dispatch(actions.changeBranchName(0, 0, "bbb"));
 });
 

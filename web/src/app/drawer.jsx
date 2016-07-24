@@ -7,9 +7,7 @@ import { Provider,connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 import {
 	drawerStatus,
-	addBranch,
 	delBranch,
-	addGroup,
 	delGroup,
 	changeGroupName,
 	changeBranchName,
@@ -51,11 +49,7 @@ class LeftDrawer extends React.Component {
 	}
 
 	static childContextTypes = {
-		changeGroupName: React.PropTypes.func,
-		changeBranchName: React.PropTypes.func,
-		addBranch: React.PropTypes.func,
 		delBranch: React.PropTypes.func,
-		addGroup: React.PropTypes.func,
 		delGroup: React.PropTypes.func,
 		changeGroupName: React.PropTypes.func,
 		changeBranchName: React.PropTypes.func,
@@ -65,20 +59,16 @@ class LeftDrawer extends React.Component {
 
 	getChildContext() {
 		let {
-			addBranch,
-			delBranch,
-			addGroup,
 			delGroup,
+			delBranch,
 			changeGroupName,
 			changeBranchName,
 			toggleGroupDis,
 			toggleBranchDis
 		} = this.props;
 		return {
-			addBranch,
-			delBranch,
-			addGroup,
 			delGroup,
+			delBranch,
 			changeGroupName,
 			changeBranchName,
 			toggleGroupDis,
@@ -101,7 +91,10 @@ class LeftDrawer extends React.Component {
 					primaryText: current.get('name'),
 					key,
 					groupId: groupId,
-					branchId: key
+					branchId: key,
+					innerDivStyle: {
+						color: current.get('disable') ? "#999999" : "#333333"
+					}
 				}
 				result.push(<ListItem {...props}/>)
 			}
@@ -119,6 +112,9 @@ class LeftDrawer extends React.Component {
 					primaryText: current.get('name'),
 					key,
 					groupId: key,
+					innerDivStyle: {
+						color: current.get('disable') ? "#999999" : "#333333"
+					},
 					nestedItems: this.renderBranch(current.get('branch'), key)
 				}
 				listItem.push(<ListItem {...props}></ListItem>)
@@ -147,9 +143,7 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
 	return {
 		changeDrawerStatus: bindActionCreators(drawerStatus, dispatch),
-		addBranch: bindActionCreators(addBranch, dispatch),
 		delBranch: bindActionCreators(delBranch, dispatch),
-		addGroup: bindActionCreators(addGroup, dispatch),
 		delGroup: bindActionCreators(delGroup, dispatch),
 		changeGroupName: bindActionCreators(changeGroupName, dispatch),
 		changeBranchName: bindActionCreators(changeBranchName, dispatch),

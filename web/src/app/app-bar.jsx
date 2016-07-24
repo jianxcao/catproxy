@@ -12,10 +12,6 @@ import {drawerStatus} from './action/actions';
 class Header extends React.Component {
 	constructor(props) {
 		super(props)
-		this.state = {
-			test: 1,
-			test1: 2
-		}
 	}
 	handleToggle = () => {
 		let {drawerStatus, changeDrawerStatus} = this.props;

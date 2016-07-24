@@ -12,10 +12,17 @@ let  {
 	CHANGE_BRANCH_NAME,
 	TOGGLE_BRANCH_DIS,
 	TOGGLE_GROUP_DIS,
-	DRAWERSTATUS
+	DRAWERSTATUS,
+	DISABLE_ALL
 } = actionType;
 
 // ------分支控制相关开始-----//
+export let disableAll = () => {
+	return {
+		type: DISABLE_ALL
+	};
+};
+
 export let resetHosts = (hosts) => {
 	return {
 		type: RESET_HOSTS,
@@ -23,10 +30,11 @@ export let resetHosts = (hosts) => {
 	};
 };
 
-export let addBranch = (groupId, name) =>{
+export let addBranch = (groupId, groupName, name) =>{
 	return {
 		type: ADD_BRANCH,
 		groupId,
+		groupName,
 		name
 	};
 };
@@ -72,26 +80,26 @@ export let changeBranchName = (groupId, id, name) => {
 
 export let toggleGroupDis = (id) => {
 	return {
-		type: TOGGLE_BRANCH_DIS,
+		type: TOGGLE_GROUP_DIS,
 		id
 	};
 };
 
 export let toggleBranchDis = (groupId, id) => {
 	return {
-		type: TOGGLE_GROUP_DIS,
+		type: TOGGLE_BRANCH_DIS,
 		groupId,
 		id
 	};
 };
 
-export let fetchSucc = ()=> {
+export let fetchSucc = () => {
 	return {
 		type: FETCH_SUCC
 	};
 };
 
-export let fetchFail = ()=> {
+export let fetchFail = () => {
 	return {
 		type: FETCH_FAILURE
 	};
@@ -117,6 +125,7 @@ export let fetchData = (fetchUrl) => {
 						}],
 					}, {
 						name: "guobao",
+						disable: true,
 						branch: [],
 					}]
 				});
