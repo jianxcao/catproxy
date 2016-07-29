@@ -15,7 +15,7 @@ class Header extends React.Component {
 	}
 	handleToggle = () => {
 		let {drawerStatus, changeDrawerStatus} = this.props;
-		changeDrawerStatus(drawerStatus);
+		changeDrawerStatus(!drawerStatus);
 	}
 	render() {
 		return (<AppBar

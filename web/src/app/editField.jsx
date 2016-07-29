@@ -18,8 +18,8 @@ export default class EditField extends React.Component {
 		}
 	}
 	static propTypes = {
-	    valueChange: React.PropTypes.func,
-	    val: React.PropTypes.string
+			valueChange: React.PropTypes.func,
+			val: React.PropTypes.string
 	}
 	static defaultProps = {
 		val: ""

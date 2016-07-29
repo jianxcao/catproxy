@@ -1,5 +1,6 @@
 import Immutable, {OrderedMap, Map, List} from 'Immutable';
 import actionType from "../action/action-type";
+import {rule, syncDis} from "./rule";
 let  {
 	FETCH_FAILURE,
 	FETCH_SUCC,
@@ -14,13 +15,15 @@ let  {
 	TOGGLE_BRANCH_DIS,
 	TOGGLE_GROUP_DIS,
 	DRAWERSTATUS,
-	DISABLE_ALL
+	DISABLE_ALL,
+	TOGGLE_FLOD
 } = actionType;
 let group = (state = new List(), action = {}) => {
 	switch (action.type) {
 		case ADD_GROUP:
 			return state.push(new OrderedMap({
 				disable: false,
+				isOpen: true,
 				name: action.name,
 				branch: new List()
 			}));
@@ -30,10 +33,11 @@ let group = (state = new List(), action = {}) => {
 			return state.updateIn([action.id, "name"], ()=> action.name);
 		case TOGGLE_GROUP_DIS:
 			let dis;
-			state = state.updateIn([action.id, "disable"], (val)=> {
-				return (dis = !val);
-			});
-			return state.updateIn([action.id, "branch"], current => current.map(current => current.set('disable', dis)));
+			state = state.updateIn([action.id, "disable"], val => dis = !val);
+			return state.updateIn([action.id, "branch"], branch => branch.map(branch => {
+				return branch.set('disable', dis)
+				.update('rules', rules=> rules.map(rule => rule.set('disable', dis)));
+			}));
 		default:
 			return state;
 	}
@@ -43,38 +47,40 @@ let branch = (state = new List(), action = {}) => {
 		case ADD_BRANCH:
 			//能找到分组
 			if (action.groupId >= 0 && action.groupId !== null) {
-				return state.updateIn([action.groupId, 'branch'], 
+				state = state.updateIn([action.groupId, 'branch'], 
 					value=> value.push(new OrderedMap({
 						disable: false,
 						name: action.name,
-						ruels: new List()
+						rules: new List()
 					})));
 			} else {//找不到分组新增一个分组
-				return state.push(new OrderedMap({
+				state = state.push(new OrderedMap({
 					disable: false,
 					name: action.groupName,
 					branch: Immutable.fromJS([{
 						disable: false,
 						name: action.name,
-						ruels: []
+						rules: []
 					}])
 				}));
 			}
-			break;
+			return syncDis(state, action.groupId);
 		case DEL_BRANCH:
-			return state.updateIn([action.groupId, 'branch'], 
+			state =  state.updateIn([action.groupId, 'branch'], 
 				value=> value.delete(action.id));
+			return syncDis(state, action.groupId);
 		case CHANGE_BRANCH_NAME:
 			return state.updateIn(
 				[action.groupId, "branch", action.id, "name"], 
 				()=> action.name);
 		case TOGGLE_BRANCH_DIS:
-			 state = state.updateIn(
-				[action.groupId, "branch", action.id, "disable"], 
-				(val)=> !val);
-			 let status = state.getIn([action.groupId, "branch"])
-			 .every(current => current.get('disable') === true);
-			 return state.updateIn([action.groupId, "disable"], () => status);
+			 	state = state.updateIn([action.groupId, "branch", action.id], 
+					branch => {
+						let status = !branch.get('disable');
+						return branch.set('disable', status)
+						.update('rules', rules => rules.map(rule => rule.set('disable', status)));
+					});
+			 		return syncDis(state, action.groupId);
 		default:
 			return state;
 	}
@@ -92,21 +98,38 @@ let disableAll = (state = new List(), action = {}) => {
 		case DISABLE_ALL:
 			return state.map(groups => {
 				return groups.set('disable', true)
-				.update("branch", current => current.map(current => current.set('disable', true)));
+				.update("branch", branch => branch.map(branch => {
+					return branch.set('disable', true)
+					.update('rules', rules=>rules.map(rule => rule.set('disable', true)));
+				}));
 			});
 		default:
 			return state;
 	}
 };
+
+let toggleFlod = (state = new List(), action = {}) => {
+	switch (action.type) {
+		case TOGGLE_FLOD:
+			return state.updateIn([action.groupId, "isOpen"], isOpen => !isOpen);
+		default:
+			return state;
+	}
+};
+
 export let hosts = (state = new List(), action = {}) => {
 	if (/.+(?:BRANCH).*/.test(action.type)) {
 		return branch(state, action);
 	} else if (/.+(?:GROUP).*/.test(action.type)) {
 		return group(state, action);
+	} else if (/.+(?:RULE).*/.test(action.type)) {
+		return rule(state, action);
 	} else if (action.type === RESET_HOSTS) {
 		return restData(state, action);
 	} else if (action.type === DISABLE_ALL) {
 		return disableAll(state, action);
+	} else if (action.type === TOGGLE_FLOD) {
+		return toggleFlod(state, action);
 	} else {
 		return state;
 	}
@@ -125,16 +148,16 @@ export let fetchData = (state = new Map(), action = {}) => {
 	}
 };
 
-export let drawerStatus = (state = true, action = {}) => {
+export let drawerStatus = (state = false, action = {}) => {
 	switch (action.type) {
 		case DRAWERSTATUS:
-			return !state;
+			return !!action.status;
 		default:
 			return state;
 	}
 };
+
 //需要的数据结构
-//合理的方式是把 组和host拆成2个数据结构，通过id去构造二者之间的关系
 // [{
 // 		name: "caipiao",
 // 		branch: [{

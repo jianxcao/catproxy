@@ -3,7 +3,7 @@
 //默认类型为http
 export const DEFAULT_TYPE = 'http';
 //默认代理端口为 8888
-export const DEFAULT_PORT = 8888;
+export const DEFAULT_PORT = 8800;
 export const DEFAULT_UI_PORT = 8001;
 //https服务器启动时候需要的证书
 export const  DEFAULT_HOST = "localhost";

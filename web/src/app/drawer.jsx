@@ -12,17 +12,20 @@ import {
 	changeGroupName,
 	changeBranchName,
 	toggleGroupDis,
-	toggleBranchDis
+	toggleBranchDis,
+	toggleFlod
 } from './action/actions';
 import {List} from 'material-ui/List';
 import ListItem from './listItem';
 
+const minWinWidth = 1000;
+
 let getListItemStyles = () => {
 	return {
-			innerDiv: {
-				display: "inline-block",
-				position: 'relative'
-			}
+		innerDiv: {
+			display: "inline-block",
+			position: 'relative'
+		}
 	}
 };
 
@@ -47,7 +50,6 @@ class LeftDrawer extends React.Component {
 	static contextTypes = {
 		muiTheme: PropTypes.object.isRequired
 	}
-
 	static childContextTypes = {
 		delBranch: React.PropTypes.func,
 		delGroup: React.PropTypes.func,
@@ -55,6 +57,18 @@ class LeftDrawer extends React.Component {
 		changeBranchName: React.PropTypes.func,
 		toggleGroupDis: React.PropTypes.func,
 		toggleBranchDis: React.PropTypes.func
+	}
+	componentDidMount() {
+		let {changeDrawerStatus} = this.props;
+		let timer = null;
+		changeDrawerStatus(!(document.documentElement.clientWidth < minWinWidth));
+		window.addEventListener("resize", (evt) => {
+			window.clearTimeout(timer);
+			timer = window.setTimeout(()=> {
+				let status = !(document.documentElement.clientWidth < minWinWidth);
+				changeDrawerStatus(status);
+			}, 300);
+		}, false);
 	}
 
 	getChildContext() {
@@ -75,10 +89,17 @@ class LeftDrawer extends React.Component {
 			toggleBranchDis
 		}
 	}
+
 	//切换菜单显示隐藏
 	handleToggleDrawer = () => {
 		let {drawerStatus, changeDrawerStatus} = this.props;
-		changeDrawerStatus(drawerStatus);
+		changeDrawerStatus(!drawerStatus);
+	}
+	//组折叠切换
+	handleToggleFlod = (evt) => {
+		let {toggleFlod} = this.props;
+		console.log(evt);
+		// toggleFlod();
 	}
 
 	//渲染分支
@@ -101,6 +122,7 @@ class LeftDrawer extends React.Component {
 		}
 		return result;
 	}
+
 	//渲染列表
 	renderList() {
 		var hosts = this.props.hosts;
@@ -115,6 +137,11 @@ class LeftDrawer extends React.Component {
 					innerDivStyle: {
 						color: current.get('disable') ? "#999999" : "#333333"
 					},
+					onNestedListToggle: ()=> {
+						let {toggleFlod} = this.props;
+						toggleFlod(key);
+					},
+					initiallyOpen: current.get('isOpen'),
 					nestedItems: this.renderBranch(current.get('branch'), key)
 				}
 				listItem.push(<ListItem {...props}></ListItem>)
@@ -134,12 +161,14 @@ class LeftDrawer extends React.Component {
 		);
 	}
 }
+
 function mapStateToProps(state) {
 	return {
 		drawerStatus: state.get('drawerStatus'),
 		hosts: state.get('hosts')
 	}
 }
+
 function mapDispatchToProps(dispatch) {
 	return {
 		changeDrawerStatus: bindActionCreators(drawerStatus, dispatch),
@@ -148,7 +177,9 @@ function mapDispatchToProps(dispatch) {
 		changeGroupName: bindActionCreators(changeGroupName, dispatch),
 		changeBranchName: bindActionCreators(changeBranchName, dispatch),
 		toggleGroupDis: bindActionCreators(toggleGroupDis, dispatch),
-		toggleBranchDis: bindActionCreators(toggleBranchDis, dispatch)
+		toggleBranchDis: bindActionCreators(toggleBranchDis, dispatch),
+		toggleFlod: bindActionCreators(toggleFlod, dispatch)
 	};
 }
+
 export default connect(mapStateToProps, mapDispatchToProps)(LeftDrawer);

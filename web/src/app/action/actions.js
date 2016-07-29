@@ -13,7 +13,12 @@ let  {
 	TOGGLE_BRANCH_DIS,
 	TOGGLE_GROUP_DIS,
 	DRAWERSTATUS,
-	DISABLE_ALL
+	DISABLE_ALL,
+	ADD_RULE,
+	DEL_RULE,
+	TOGGLE_RULE_DIS,
+	UPDATE_RULE,
+	TOGGLE_FLOD
 } = actionType;
 
 // ------分支控制相关开始-----//
@@ -111,16 +116,18 @@ export let fetchData = (fetchUrl) => {
 	return {
 		type: FETCH,
 		fetchUrl,
-		promise: new Promise(function(resolve, reject) {
+		promise: new Promise(function(resolve) {
 			window.setTimeout(() => {
 				resolve({
 					hosts: [{
 						name: "caipiao",
+						isOpen: true,
 						branch: [{
 							name: "test1",
 							rules: [{
+								type: "host",
 								test: /test/,
-								exec: ""
+								exec: "http://caipiao.163.com/*"
 							}]
 						}],
 					}, {
@@ -135,8 +142,61 @@ export let fetchData = (fetchUrl) => {
 };
 
 //切换左侧列表的显示状态
-export let drawerStatus = () => {
+export let drawerStatus = (status) => {
 	return {
-		type: DRAWERSTATUS
+		type: DRAWERSTATUS,
+		status
+	};
+};
+
+
+//规则相关 -----------------------
+//新增规则
+export let addRule = (groupId, branchId, rule) => {
+	return {
+		type: ADD_RULE,
+		groupId,
+		branchId,
+		rule
+	};
+};
+
+//删除规则
+export let delRule = (groupId, branchId, ruleId) => {
+	return {
+		type: DEL_RULE,
+		groupId,
+		branchId,
+		ruleId
+	};
+};
+
+//禁止使用规则
+export let toggleRuleDis = (groupId, branchId, ruleId) => {
+	return {
+		type: TOGGLE_RULE_DIS,
+		groupId,
+		branchId,
+		ruleId
+	};
+};
+
+//更新规则
+export let updateRule = (groupId, branchId, ruleId, rule) => {
+	return {
+		type: UPDATE_RULE,
+		groupId,
+		branchId,
+		ruleId,
+		rule
+	};
+};
+
+//切换 折叠
+//
+export let toggleFlod = (groupId) => {
+	return {
+		type: TOGGLE_FLOD,
+		groupId
 	};
 };

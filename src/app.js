@@ -85,7 +85,7 @@ class CatProxy extends EventEmitter{
 				log.info('proxy server start from ' + 'http://127.0.0.1:' + opt.port);
 			});			
 		}
-		server.on('error', err => log.err(err));
+		server.on('error', err => log.error(err));
 		this.server = server;
 	}
 }

@@ -1,4 +1,5 @@
 import * as reducers from '../reducers/index';
+import * as rule from '../reducers/rule';
 import Immutable from 'Immutable';
 import {
     combineReducers

@@ -26,7 +26,7 @@ const getIcon = (props = {}, className, style) => {
 			iconClassName={"basefont " + className}
 		/>
 	);
-} 
+};
 export default class MyListItem extends React.Component {
 	constructor(props) {
 		super(props);
@@ -44,7 +44,8 @@ export default class MyListItem extends React.Component {
 		delBranch: React.PropTypes.func,
 		delGroup: React.PropTypes.func,
 		toggleGroupDis: React.PropTypes.func,
-		toggleBranchDis: React.PropTypes.func
+		toggleBranchDis: React.PropTypes.func,
+		changeBranch: React.PropTypes.func
 	}
 
 	static defaultProps = {
@@ -64,7 +65,9 @@ export default class MyListItem extends React.Component {
 		}
 	}
 	//删除事件
-	handleDel = () => {
+	handleDel = (e) => {
+		e.stopPropagation();
+		e.preventDefault();
 		let {groupId, branchId} = this.props;
 		let {delBranch, delGroup} = this.context;
 		if (branchId >= 0 && branchId !== null) {
@@ -75,7 +78,9 @@ export default class MyListItem extends React.Component {
 	}
 
 	//禁止使用事件
-	handleDis = () => {
+	handleDis = (e) => {
+		e.stopPropagation();
+		e.preventDefault();
 		let {groupId, branchId} = this.props;
 		let {toggleGroupDis, toggleBranchDis} = this.context;
 		if (branchId >= 0 && branchId !== null) {
@@ -104,6 +109,7 @@ export default class MyListItem extends React.Component {
 			}), 
 			<EditField val={this.props.primaryText} key={2} valChange={this.changeName.bind(this)}/>];
 	}
+
 	getInnerDivStyle = () => {
 		let innerDivStyle = this.props.innerDivStyle || {};
 		return Object.assign({}, 	{
@@ -122,12 +128,23 @@ export default class MyListItem extends React.Component {
 			hoverList: false
 		});
 	}
+	//改变当前指定的分组分支
+	handleChangeBranch = () => {
+		if (this.context.changeBranch) {
+			let {groupId, branchId} = this.props;
+			if (branchId !== null && branchId >= 0) {
+				this.context.changeBranch(groupId, branchId);
+			}
+		}
+	}
 	//所有属性雷同 material-ui/List下的 ListItem的组件
 	render() {
 			var myProps = Object.assign({}, this.props);
 			delete myProps.groupId;
 			delete myProps.branchId;
-			return (<ListItem {...myProps} innerDivStyle ={this.getInnerDivStyle()} onMouseOver={this.handleMouseOver} onMouseOut={this.handleMouseOut} primaryText={this.getPrimaryContent()}/>
+			delete myProps.changeBranch;
+			return (<ListItem {...myProps} innerDivStyle ={this.getInnerDivStyle()} onMouseOver={this.handleMouseOver} onMouseOut={this.handleMouseOut} onClick={this.handleChangeBranch} primaryText={this.getPrimaryContent()}/>
 		);
 	}
 }
+					 
