@@ -137,13 +137,14 @@ export default class MyListItem extends React.Component {
 			}
 		}
 	}
+	
 	//所有属性雷同 material-ui/List下的 ListItem的组件
 	render() {
 			var myProps = Object.assign({}, this.props);
 			delete myProps.groupId;
 			delete myProps.branchId;
 			delete myProps.changeBranch;
-			return (<ListItem {...myProps} innerDivStyle ={this.getInnerDivStyle()} onMouseOver={this.handleMouseOver} onMouseOut={this.handleMouseOut} onClick={this.handleChangeBranch} primaryText={this.getPrimaryContent()}/>
+			return (<ListItem {...myProps} draggable="true"  innerDivStyle ={this.getInnerDivStyle()} onMouseOver={this.handleMouseOver} onMouseOut={this.handleMouseOut} onClick={this.handleChangeBranch} primaryText={this.getPrimaryContent()}/>
 		);
 	}
 }

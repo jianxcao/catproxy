@@ -5,6 +5,8 @@ import Subheader from 'material-ui/Subheader';
 import typography from 'material-ui/styles/typography';
 import { Provider,connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
+import dragCon from './dragConnect';
+
 import {
 	drawerStatus,
 	delBranch,
@@ -144,6 +146,8 @@ class LeftDrawer extends React.Component {
 					initiallyOpen: current.get('isOpen'),
 					nestedItems: this.renderBranch(current.get('branch'), key)
 				}
+				//初始化
+				props = Object.assign({}, props, dragCon());
 				listItem.push(<ListItem {...props}></ListItem>)
 			}
 		}
