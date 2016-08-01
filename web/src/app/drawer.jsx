@@ -15,7 +15,9 @@ import {
 	changeBranchName,
 	toggleGroupDis,
 	toggleBranchDis,
-	toggleFlod
+	toggleFlod,
+	switchBranch,
+	switchGroup
 } from './action/actions';
 import {List} from 'material-ui/List';
 import ListItem from './listItem';
@@ -97,28 +99,46 @@ class LeftDrawer extends React.Component {
 		let {drawerStatus, changeDrawerStatus} = this.props;
 		changeDrawerStatus(!drawerStatus);
 	}
-	//组折叠切换
-	handleToggleFlod = (evt) => {
-		let {toggleFlod} = this.props;
-		console.log(evt);
-		// toggleFlod();
+
+	handleExchangePos = (dragEle, dropEle) => {
+		let sourceGroupId = dragEle.getAttribute('data-group-id');
+		let sourceBranchId = dragEle.getAttribute('data-branch-id');
+		let groupId = dropEle.getAttribute('data-group-id');
+		let branchId = dropEle.getAttribute('data-branch-id');
+		let {switchBranch, switchGroup} = this.props;
+		sourceGroupId = sourceGroupId ? +sourceGroupId : undefined;
+		sourceBranchId = sourceBranchId ? +sourceBranchId : undefined;
+		groupId = groupId ? +groupId : undefined;
+		branchId = branchId ? +branchId : undefined;
+		if (!(groupId >= 0 && sourceGroupId >= 0)) {
+			return;
+		}
+		if (branchId >= 0 && sourceBranchId >= 0) {
+			switchBranch(groupId, sourceBranchId, branchId);
+		} else {
+			switchGroup(sourceGroupId, groupId);
+		}
 	}
 
 	//渲染分支
 	renderBranch(list, groupId) {
 		let result = [];
 		if (list && list.size > 0) {
+			let dragProps = dragCon(this.handleExchangePos.bind(this));
 			for(let key = 0, size = list.size; key < size; key ++) {
 				let current = list.get(key);
 				let props = {
 					primaryText: current.get('name'),
 					key,
+					['data-group-id']: groupId,
 					groupId: groupId,
 					branchId: key,
+					['data-branch-id']: key,
 					innerDivStyle: {
 						color: current.get('disable') ? "#999999" : "#333333"
 					}
 				}
+				props = Object.assign({}, props, dragProps);
 				result.push(<ListItem {...props}/>)
 			}
 		}
@@ -130,12 +150,14 @@ class LeftDrawer extends React.Component {
 		var hosts = this.props.hosts;
 		var listItem = [];
 		if (hosts) {
+			let dragProps = dragCon(this.handleExchangePos.bind(this));
 			for(let key = 0, size = hosts.size; key < size; key++) {
 				let current = hosts.get(key);
 				let props = {
 					primaryText: current.get('name'),
 					key,
 					groupId: key,
+					['data-group-id']: key,
 					innerDivStyle: {
 						color: current.get('disable') ? "#999999" : "#333333"
 					},
@@ -147,7 +169,7 @@ class LeftDrawer extends React.Component {
 					nestedItems: this.renderBranch(current.get('branch'), key)
 				}
 				//初始化
-				props = Object.assign({}, props, dragCon());
+				props = Object.assign({}, props, dragProps);
 				listItem.push(<ListItem {...props}></ListItem>)
 			}
 		}
@@ -182,7 +204,9 @@ function mapDispatchToProps(dispatch) {
 		changeBranchName: bindActionCreators(changeBranchName, dispatch),
 		toggleGroupDis: bindActionCreators(toggleGroupDis, dispatch),
 		toggleBranchDis: bindActionCreators(toggleBranchDis, dispatch),
-		toggleFlod: bindActionCreators(toggleFlod, dispatch)
+		toggleFlod: bindActionCreators(toggleFlod, dispatch),
+		switchBranch: bindActionCreators(switchBranch, dispatch),
+		switchGroup: bindActionCreators(switchGroup, dispatch)
 	};
 }
 

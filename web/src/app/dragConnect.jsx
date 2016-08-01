@@ -1,19 +1,35 @@
 /**
  * 做一个连接器用来控制下面所有的节点可以拖动
 */
-
-export default () => {
-		//拖拽相关
+var dragEle = null;
+let guid = 10101;
+let getGuid = () => {
+	return guid++;
+}
+export default (callback) => {
+	let currentId = getGuid();
+	//拖拽相关
 	return {
-		["data-drag-id"]: +new Date(),
+		["data-drag-id"]: currentId,
+		draggable: true,
 		onDragStart (ev) {
+			let target = ev.target;
 			ev.dataTransfer.effectAllowed = "move";
-			ev.dataTransfer.setData("Text", ev.target.getAttribute('data-drag-id'));
+			if (ev.dataTransfer.setDragImage) {
+				ev.dataTransfer.setDragImage(target, 0, 0);
+			}
+			dragEle = target;
+			ev.dataTransfer.setData("Text", target.getAttribute('data-drag-id'));
 			return true;
 		},
 
 		onDragEnd (ev){
-			ev.dataTransfer.clearData("Text");
+			try {
+				ev.dataTransfer.clearData("Text");
+				dragEle = null;
+			} catch(e) {
+
+			}
 			return false;
 		},
 
@@ -44,7 +60,9 @@ export default () => {
 			}
 			//父节点 相同即可以拖动
 			if (isHaveSameParent) {
-				console.log(ev, this);
+				if (callback) {
+					callback(dragEle, target);
+				}
 			}
 		}
 	}

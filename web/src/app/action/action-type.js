@@ -19,5 +19,8 @@ export default keyMirror({
 	DEL_RULE: null,
 	TOGGLE_RULE_DIS: null,
 	UPDATE_RULE: null,
-	TOGGLE_FLOD: null
+	TOGGLE_FLOD: null,
+	SWITCH_BRANCH: null,
+	SWITCH_GROUP: null,
+	SWITCH_RULE: null
 });

@@ -125,8 +125,17 @@ export default class EditRule extends React.Component{
 		let subStyle = Object.assign({}, subheaderStyle, {
 			backgroundColor: rule.get('disable') ? "#BDBDBD" : "#E0F2F1"
 		});
+
+		let props = this.props;
+		let def = ['rule', 'ruleId', 'delRule', 'disRule', 'updateRule'];
+		let newProps = {};
+		for(let key in props) {
+			if (def.indexOf(key) < 0) {
+				newProps[key] = props[key];
+			}
+		}
 		return (
-		<Paper zDepth={1} style={paperStyle}>
+		<Paper zDepth={1} style={paperStyle} {...newProps}>
 			<Subheader inset={true} style={subStyle}>规则{this.props.ruleId + 1}</Subheader>
 			<SelectField value={rule.get('type')} style={fieldStyle} onChange={this.handleTypeChange.bind(this)}>{menuRulesTypeList}</SelectField>
 			<TextField  name="test" onChange={this.handleChange.bind(this)} style={fieldStyle} underlineShow={true} fullWidth={true}  value={rule.get('test')} hintText="请输入源地址" />

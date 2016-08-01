@@ -18,7 +18,10 @@ let  {
 	DEL_RULE,
 	TOGGLE_RULE_DIS,
 	UPDATE_RULE,
-	TOGGLE_FLOD
+	TOGGLE_FLOD,
+	SWITCH_BRANCH,
+	SWITCH_GROUP,
+	SWITCH_RULE
 } = actionType;
 
 // ------分支控制相关开始-----//
@@ -198,5 +201,35 @@ export let toggleFlod = (groupId) => {
 	return {
 		type: TOGGLE_FLOD,
 		groupId
+	};
+};
+
+//换组或者 分支的顺序
+export let switchBranch = (groupId, sourceBranchId, branchId) => {
+	return {
+		type: SWITCH_BRANCH,
+		groupId,
+		sourceBranchId,
+		branchId
+	};
+};
+
+//只能是同一个分组下的顺序
+export let switchGroup = (sourceGroupId, groupId) => {
+	return {
+		type: SWITCH_GROUP,
+		groupId,
+		sourceGroupId
+	};
+};
+
+//切换规则
+export let switchRule = (groupId, branchId, sourceId, id) => {
+	return {
+		type: SWITCH_RULE,
+		groupId,
+		branchId,
+		sourceId,
+		id
 	};
 };

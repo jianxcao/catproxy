@@ -6,11 +6,13 @@ import {bindActionCreators} from 'redux';
 import Immutable,{Map, List} from 'Immutable';
 import EditRule from "./editRule";
 import RaisedButton from 'material-ui/RaisedButton';
+import dragCon from './dragConnect';
 import {
 	addRule,
 	delRule,
 	toggleRuleDis,
-	updateRule
+	updateRule,
+	switchRule
 } from './action/actions';
 
 const paperStyle = {
@@ -53,18 +55,31 @@ class EditRules extends React.Component{
 		this.props.toggleRuleDis(groupId, branchId, ruleId);
 	}
 
+	//更新某个规则
 	updateRule(ruleId, rule) {
 		let {groupId, branchId} = this.props;
 		this.props.updateRule(groupId, branchId, ruleId, rule);
 	}
 
+	switchRule(dragEle, dropEle) {
+		let {groupId, branchId} = this.props;
+		let sourceId = dragEle.getAttribute("data-id");
+		let id = dropEle.getAttribute("data-id");
+		if (sourceId != null && id != null) {
+			sourceId = + sourceId;
+			id = + id;
+			this.props.switchRule(groupId, branchId, sourceId, id);
+		}
+	}
+
 	render() {
 		let rules = this.props.rules;
+		let switchProps = dragCon(this.switchRule.bind(this));
 		let editRules = rules.map((current, index) => {
-			return <EditRule rule={current} key={index} ruleId={index} 
+			return <EditRule rule={current} key={index} ruleId={index} data-id = {index} 
 			delRule={this.delRule.bind(this)}
 			disRule={this.disRule.bind(this)}
-			updateRule={this.updateRule.bind(this)}/>
+			updateRule={this.updateRule.bind(this)} {...switchProps} />
 		});
 
 		return (
@@ -91,7 +106,8 @@ function mapDispatchToProps(dispatch) {
 		addRule: bindActionCreators(addRule, dispatch),
 		delRule: bindActionCreators(delRule, dispatch),
 		toggleRuleDis: bindActionCreators(toggleRuleDis, dispatch),
-		updateRule: bindActionCreators(updateRule, dispatch)
+		updateRule: bindActionCreators(updateRule, dispatch),
+		switchRule: bindActionCreators(switchRule, dispatch)
 	};
 }
 export default connect(mapStateToProps, mapDispatchToProps)(EditRules);

@@ -16,8 +16,11 @@ let  {
 	TOGGLE_GROUP_DIS,
 	DRAWERSTATUS,
 	DISABLE_ALL,
-	TOGGLE_FLOD
+	TOGGLE_FLOD,
+	SWITCH_BRANCH,
+	SWITCH_GROUP
 } = actionType;
+
 let group = (state = new List(), action = {}) => {
 	switch (action.type) {
 		case ADD_GROUP:
@@ -38,10 +41,14 @@ let group = (state = new List(), action = {}) => {
 				return branch.set('disable', dis)
 				.update('rules', rules=> rules.map(rule => rule.set('disable', dis)));
 			}));
+		case SWITCH_GROUP:
+				let old = state.get(action.sourceGroupId);
+				return state.set(action.sourceGroupId, state.get(action.groupId)).set(action.groupId, old);
 		default:
 			return state;
 	}
 };
+
 let branch = (state = new List(), action = {}) => {
 	switch (action.type) {
 		case ADD_BRANCH:
@@ -74,17 +81,23 @@ let branch = (state = new List(), action = {}) => {
 				[action.groupId, "branch", action.id, "name"], 
 				()=> action.name);
 		case TOGGLE_BRANCH_DIS:
-			 	state = state.updateIn([action.groupId, "branch", action.id], 
-					branch => {
-						let status = !branch.get('disable');
-						return branch.set('disable', status)
-						.update('rules', rules => rules.map(rule => rule.set('disable', status)));
-					});
-			 		return syncDis(state, action.groupId);
+			state = state.updateIn([action.groupId, "branch", action.id], 
+				branch => {
+					let status = !branch.get('disable');
+					return branch.set('disable', status)
+					.update('rules', rules => rules.map(rule => rule.set('disable', status)));
+				});
+		 		return syncDis(state, action.groupId);
+		case SWITCH_BRANCH:
+			return state.updateIn([action.groupId, "branch"], branchs => {
+				let old = branchs.get(action.sourceBranchId);
+				return branchs.set(action.sourceBranchId, branchs.get(action.branchId)).set(action.branchId, old);
+			});
 		default:
 			return state;
 	}
 };
+
 let restData = (state = new List(), action = {})=> {
 	switch (action.type) {
 		case RESET_HOSTS:
@@ -93,6 +106,7 @@ let restData = (state = new List(), action = {})=> {
 			return state;
 	}
 };
+
 let disableAll = (state = new List(), action = {}) => {
 	switch (action.type) {
 		case DISABLE_ALL:

@@ -5,6 +5,7 @@ let  {
 	DEL_RULE,
 	TOGGLE_RULE_DIS,
 	UPDATE_RULE,
+	SWITCH_RULE
 } = actionType;
 
 const methodMap = {
@@ -49,6 +50,15 @@ const methodMap = {
 		} else {
 			return state;
 		}
+	},
+
+	SWITCH_RULE: (state, action) => {
+		return state.updateIn(
+			[action.groupId, "branch", action.branchId, "rules"], 
+			rules => {
+				let old = rules.get(action.sourceId);
+				return rules.set(action.sourceId, rules.get(action.id)).set(action.id, old);
+			});
 	}
 }
 
