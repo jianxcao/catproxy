@@ -41,6 +41,7 @@
     "gulp-babel": "^6.1.2",
     "gulp-webpack": "^1.5.0",
     "immutable": "^3.8.1",
+    "keymaster": "^1.6.2",
     "keymirror": "^0.1.1",
     "less": "^2.7.1",
     "less-loader": "^2.2.3",
