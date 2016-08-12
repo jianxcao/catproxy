@@ -30,6 +30,11 @@ export default class SubHeader extends React.Component {
 			openDialog: false
 		}
 	}
+	componentDidMount() {
+		document.body.addEventListener('keyup' (evt) => {
+			
+		}, false);
+	}
 
 	static propTypes = {
 	  hosts: PropTypes.object.isRequired
