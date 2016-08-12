@@ -1,13 +1,12 @@
 import React, {PropTypes} from 'react';
 import {render} from 'react-dom';
 import ReactDom from 'react-dom';
-import * as shim from './shim';
-import { Provider,connect } from 'react-redux'
+import {Provider,connect } from 'react-redux'
 import injectTapEventPlugin from 'react-tap-event-plugin';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import baseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
-
+import polyfill from './polyfill'
 import LayOut from './layout';
 // import Test from './test';
 import style from './app.less';
@@ -15,15 +14,7 @@ import style from './app.less';
 
 import store from './store/store';
 import * as actions from './action/actions';
-
-store.dispatch(actions.fetchData('http://test.html'))
-.then(function(data) {
-	store.dispatch(actions.resetHosts(data.result.hosts))
-	store.dispatch(actions.addGroup("cjx"));
-	store.dispatch(actions.changeGroupName(0, "www"));
-	store.dispatch(actions.addBranch(0, null, "test"));
-	store.dispatch(actions.changeBranchName(0, 0, "bbb"));
-});
+import DialogProvider from './dialogProvider';
 
 window.actions = actions;
 window.store = store;
@@ -38,7 +29,12 @@ class App extends React.Component {
 		super(props);
 	}
 	componentDidMount() {
-		
+		store.dispatch(actions.fetchRule())
+		.then((action) => {
+			if (action.type === 'FETCH_SUCC') {
+				store.dispatch(actions.resetHosts(action.result.result.hosts))
+			}
+		});
 	}
 	getChildContext() {
 		return {
@@ -50,16 +46,16 @@ class App extends React.Component {
 	};
 
 	render() {
-		return (
-			<LayOut></LayOut>
-		)
+		return (<LayOut/>)
 	};
 }
 
 ReactDom.render(
 	<MuiThemeProvider>
 		<Provider store={store}>
-			<App/>
+			<DialogProvider>
+				<App/>
+			</DialogProvider>
 		</Provider>
 	</MuiThemeProvider>, 
 document.getElementById('g-wrap'))

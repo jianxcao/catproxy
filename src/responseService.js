@@ -6,7 +6,7 @@ import zlib from 'zlib';
 import {Buffer} from 'buffer';
 import fs from 'fs';
 import merge from 'merge';
-import {STATUS, LIMIT_SIZE} from './defCon';
+import {STATUS, LIMIT_SIZE} from './config/defCon';
 import Promise from 'promise';
 
 //解压数据

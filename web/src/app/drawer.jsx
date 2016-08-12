@@ -17,7 +17,8 @@ import {
 	toggleBranchDis,
 	toggleFlod,
 	switchBranch,
-	switchGroup
+	switchGroup,
+	updateSelectRule
 } from './action/actions';
 import {List} from 'material-ui/List';
 import ListItem from './listItem';
@@ -60,7 +61,8 @@ class LeftDrawer extends React.Component {
 		changeGroupName: React.PropTypes.func,
 		changeBranchName: React.PropTypes.func,
 		toggleGroupDis: React.PropTypes.func,
-		toggleBranchDis: React.PropTypes.func
+		toggleBranchDis: React.PropTypes.func,
+		updateSelectRule: React.PropTypes.func
 	}
 	componentDidMount() {
 		let {changeDrawerStatus} = this.props;
@@ -82,7 +84,8 @@ class LeftDrawer extends React.Component {
 			changeGroupName,
 			changeBranchName,
 			toggleGroupDis,
-			toggleBranchDis
+			toggleBranchDis,
+			updateSelectRule
 		} = this.props;
 		return {
 			delGroup,
@@ -90,7 +93,8 @@ class LeftDrawer extends React.Component {
 			changeGroupName,
 			changeBranchName,
 			toggleGroupDis,
-			toggleBranchDis
+			toggleBranchDis,
+			updateSelectRule
 		}
 	}
 
@@ -122,6 +126,9 @@ class LeftDrawer extends React.Component {
 
 	//渲染分支
 	renderBranch(list, groupId) {
+		let selectRule = this.props.selectRule;
+		let selectBranchId = selectRule.get('branchId');
+		let selectGroupId = selectRule.get('groupId');
 		let result = [];
 		if (list && list.size > 0) {
 			let dragProps = dragCon(this.handleExchangePos.bind(this));
@@ -134,8 +141,11 @@ class LeftDrawer extends React.Component {
 					groupId: groupId,
 					branchId: key,
 					['data-branch-id']: key,
+					style: {
+						backgroundColor: selectBranchId == key && selectGroupId === groupId ? '#90CAF9' : "transparent"
+					},
 					innerDivStyle: {
-						color: current.get('disable') ? "#999999" : "#333333"
+						color: current.get('disable') ? "#999999" : "#333333",
 					}
 				}
 				props = Object.assign({}, props, dragProps);
@@ -191,7 +201,8 @@ class LeftDrawer extends React.Component {
 function mapStateToProps(state) {
 	return {
 		drawerStatus: state.get('drawerStatus'),
-		hosts: state.get('hosts')
+		hosts: state.get('hosts'),
+		selectRule: state.get('selectRule')
 	}
 }
 
@@ -206,7 +217,8 @@ function mapDispatchToProps(dispatch) {
 		toggleBranchDis: bindActionCreators(toggleBranchDis, dispatch),
 		toggleFlod: bindActionCreators(toggleFlod, dispatch),
 		switchBranch: bindActionCreators(switchBranch, dispatch),
-		switchGroup: bindActionCreators(switchGroup, dispatch)
+		switchGroup: bindActionCreators(switchGroup, dispatch),
+		updateSelectRule: bindActionCreators(updateSelectRule, dispatch)
 	};
 }
 

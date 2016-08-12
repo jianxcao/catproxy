@@ -26,8 +26,6 @@ export default class Main extends React.Component {
 	}
 
 	static propTypes = {
-	  groupId: PropTypes.number,
-		branchId: PropTypes.number
 	}
 
 	render() {
@@ -37,12 +35,12 @@ export default class Main extends React.Component {
 			outPaperStyle.paddingLeft = 0;
 		}
 		return (
-		<Paper style={outPaperStyle} zDepth={0} >
-			<Paper style={innerPaperStyle} zDepth={0}>
-				<SubHeader/>
-				<EditRules groupId={this.props.groupId} branchId={this.props.branchId}/>
+			<Paper style={outPaperStyle} zDepth={0} >
+				<Paper style={innerPaperStyle} zDepth={0}>
+					<SubHeader/>
+					<EditRules/>
+				</Paper>
 			</Paper>
-		</Paper>
 		)
 	}
 }

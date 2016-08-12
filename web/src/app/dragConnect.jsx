@@ -59,7 +59,7 @@ export default (callback) => {
 				}
 			}
 			//父节点 相同即可以拖动
-			if (isHaveSameParent) {
+			if (isHaveSameParent && dragEle !== target) {
 				if (callback) {
 					callback(dragEle, target);
 				}

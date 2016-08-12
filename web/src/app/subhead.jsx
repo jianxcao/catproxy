@@ -9,6 +9,7 @@ import TextField from 'material-ui/TextField';
 import { Provider,connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 import Immutable, {OrderedMap, Map, List} from 'Immutable';
+import sendMsg from './ws/sendMsg'
 import {
 	addBranch,
 	addGroup,
@@ -34,10 +35,16 @@ export default class SubHeader extends React.Component {
 	  hosts: PropTypes.object.isRequired
 	}
 
+	static contextTypes = {
+		dialog: PropTypes.func.isRequired,
+		toast: PropTypes.func.isRequired
+	}
+
 	static defaultProps = {
 		hosts: new Map()
 	}
 
+	//对话框相关事件
 	handleCloseDialog() {
 		this.setState({
 			openDialog: false
@@ -71,12 +78,7 @@ export default class SubHeader extends React.Component {
 		}));
 	}
 
-	handleDisAll() {
-		console.log('in therererer');
-		this.props.disableAll();
-	}
-
-	handleSave() {
+	handleAddBranch() {
 		let {groupName, branchName, groupId} = this.state;
 		let {addGroup, addBranch} = this.props;
 		if (groupName && branchName) {
@@ -86,8 +88,33 @@ export default class SubHeader extends React.Component {
 				openDialog: false
 			});
 		} else {
-			alert('分支名称和分组名称是必须得');
+			this.context.dialog({
+				msg: '分支名称和分组名称是必须得',
+				layout: -1,
+				btn: ["*确定"]
+			});
 		}
+	}
+
+	handleEnterKeyAddBranch(evt) {
+		let {groupName, branchName} = this.state;
+		if (groupName && branchName && evt.keyCode === 13) {
+			this.handleAddBranch();
+		}
+	}
+
+	//对话框相关事件结束
+	
+	//禁止全部
+	handleDisAll() {
+		this.props.disableAll();
+	}
+	//保存hosts
+	handleSaveHosts() {
+		var com = this;
+		sendMsg.updateRule(this.props.hosts.toJS())
+		.then(message => com.context.toast(message.result), 
+			message => com.context.toast(message.result))
 	}
 
 	shouldComponentUpdate(nextProps, nextState) {
@@ -115,7 +142,7 @@ export default class SubHeader extends React.Component {
 				label="保存"
 				primary={true}
 				keyboardFocused={true}
-				onTouchTap={this.handleSave.bind(this)}
+				onTouchTap={this.handleAddBranch.bind(this)} 
 			/>
 		];
 		let source = this.groups = this.props.hosts.map((current, index) => {
@@ -146,6 +173,7 @@ export default class SubHeader extends React.Component {
 					ref="branchEel"
 					floatingLabelText="规则名称"
 					type="text"
+					onKeyUp = {this.handleEnterKeyAddBranch.bind(this)}
 					onChange={this.handleChangeBranch.bind(this)}
 				/>
 		</Dialog>);
@@ -161,7 +189,7 @@ export default class SubHeader extends React.Component {
 						<RaisedButton label="禁用全部" primary={true} onClick={this.handleDisAll.bind(this)}/>
 					</ToolbarGroup>
 					<ToolbarGroup>
-						<RaisedButton label="保存" primary={true} />
+						<RaisedButton label="保存" primary={true} onClick={this.handleSaveHosts.bind(this)}/>
 					</ToolbarGroup>
 				</Toolbar>
 				{this.renderDialog()}

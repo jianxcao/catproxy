@@ -1,6 +1,6 @@
 import * as reducers from '../reducers/index';
-import * as rule from '../reducers/rule';
 import Immutable from 'Immutable';
+import sendMsg from '../ws/sendMsg';
 import {
     combineReducers
 } from 'redux-immutable';
@@ -23,6 +23,34 @@ const logger = store => next => action => {
 	console.groupEnd(action.type);
 	return result;
 };
+
+/**
+ * 向服务器同步用户的部分操作
+ * 
+ */
+const syncStateToSer = store => next => action => {
+	let state = store.getState();
+	let result = next(action);
+	let nextState = store.getState();
+	let test = {
+		// ADD_BRANCH: 1,
+		// SWITCH_BRANCH: 1,
+		// SWITCH_GROUP: 1,
+		// CHANGE_GROUP_NAME: 1,
+		// CHANGE_BRANCH_NAME: 1,
+		// TOGGLE_BRANCH_DIS: 1,
+		// TOGGLE_GROUP_DIS: 1,
+		// TOGGLE_RULE_DIS: 1,
+		TOGGLE_FLOD: 1
+	};
+	if (test[action.type]) {
+		if (!state.get('hosts').equals(nextState.get('hosts'))) {
+			sendMsg.updateRule(nextState.get('hosts').toJS());
+		}
+	}
+	return result;
+};
+
 
 /**
  * 在 state 更新完成和 listener 被通知之后发送崩溃报告。
@@ -86,17 +114,21 @@ const thunk = store => next => action =>
 		action(store.dispatch, store.getState) :
 		next(action);
 const initialState = new Immutable.fromJS({
+	//所有规则
 	hosts: [],
-	fetchData: {}
+	//首次获取数据所用
+	fetchRule: {},
+	//当前菜单打开状态
+	drawerStatus: true,
+	//当前选中的规则
+	selectRule: {}
 });
 //组合所有reducers
 let toDo = combineReducers(reducers);
 //创建带有 调试和各种中间件的stroe
 let store = createStore(toDo, initialState, compose(
-	applyMiddleware(thunk, vanillaPromise, readyStatePromise, logger, crashReporter),
+	applyMiddleware(thunk, vanillaPromise, readyStatePromise, logger, syncStateToSer, crashReporter),
 	window.devToolsExtension ? window.devToolsExtension() : f => f
 ));
-
-
 
 export default store;

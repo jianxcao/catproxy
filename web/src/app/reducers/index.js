@@ -18,7 +18,8 @@ let  {
 	DISABLE_ALL,
 	TOGGLE_FLOD,
 	SWITCH_BRANCH,
-	SWITCH_GROUP
+	SWITCH_GROUP,
+	UPDATE_CURRENT_RULE
 } = actionType;
 
 let group = (state = new List(), action = {}) => {
@@ -60,6 +61,7 @@ let branch = (state = new List(), action = {}) => {
 						name: action.name,
 						rules: new List()
 					})));
+				return syncDis(state, action.groupId);
 			} else {//找不到分组新增一个分组
 				state = state.push(new OrderedMap({
 					disable: false,
@@ -70,8 +72,8 @@ let branch = (state = new List(), action = {}) => {
 						rules: []
 					}])
 				}));
+				return state;
 			}
-			return syncDis(state, action.groupId);
 		case DEL_BRANCH:
 			state =  state.updateIn([action.groupId, 'branch'], 
 				value=> value.delete(action.id));
@@ -101,7 +103,8 @@ let branch = (state = new List(), action = {}) => {
 let restData = (state = new List(), action = {})=> {
 	switch (action.type) {
 		case RESET_HOSTS:
-			return Immutable.fromJS(action.hosts);
+			let newState = Immutable.fromJS(action.hosts);
+			return newState.equals(state) ? state : newState;
 		default:
 			return state;
 	}
@@ -149,14 +152,14 @@ export let hosts = (state = new List(), action = {}) => {
 	}
 };
 
-export let fetchData = (state = new Map(), action = {}) => {
+export let fetchRule = (state = new Map(), action = {}) => {
 	switch (action.type) {
 		case FETCH:
 			return state;
 		case FETCH_SUCC:
-			return state.set("status", "SUCC");
+			return state.set("type", "SUCC").set('data', action.result);
 		case FETCH_FAILURE:
-			return state.set("status", "FAIL");
+			return state.set("type", "FAIL").set('data', action.error);
 		default:
 			return state;
 	}
@@ -166,6 +169,15 @@ export let drawerStatus = (state = false, action = {}) => {
 	switch (action.type) {
 		case DRAWERSTATUS:
 			return !!action.status;
+		default:
+			return state;
+	}
+};
+
+export let selectRule = (state = new Map(), action = {}) => {
+	switch (action.type) {
+		case UPDATE_CURRENT_RULE:
+			return state.set('groupId', action.groupId).set('branchId', action.branchId);
 		default:
 			return state;
 	}

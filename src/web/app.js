@@ -5,6 +5,10 @@ import err500 from './500';
 import err404 from './404';
 import path from 'path';
 import bodyParser from 'body-parser';
+import http from 'http';
+import wServer from '../ws/ws';
+
+var server = http.createServer();
 var uiApp = express();
 uiApp.engine('.ejs', require('ejs').__express);
 uiApp.set('views', path.join( __dirname, '../../web/build'));
@@ -16,9 +20,15 @@ uiApp.use(bodyParser.urlencoded({ extended: true })); // for parsing application
 uiApp.use(["/", "/index.html"], main());
 uiApp.use(err404);
 uiApp.use(err500);
+server.on('request', uiApp);
+
+var wsConnect = () => {
+	wServer(server);
+};
 
 export default (port) => {
- uiApp.listen(port, function() {
- 	log.info('ui server start up:  http://127.0.0.1:' + port);
- });
+	wsConnect();
+	server.listen(port, function() {
+		log.info('ui server start up:  http://127.0.0.1:' + port);
+	});
 };

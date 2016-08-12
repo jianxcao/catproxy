@@ -25,16 +25,14 @@ const paperStyle = {
 const rulesKeys = {
 	host: "host",
 	localFile: "本地文件",
-	LocalDir: "本地目录",
-	remoteFile: "远程文件",
-	remoteDir: "远程目录"
+	localDir: "本地目录",
+	remoteFile: "远程文件"
 }
 const targetTips = {
 	host: "请输入目标host或ip",
 	localFile: "请输入目标文件绝对路径",
-	LocalDir: "请输入目标目录绝对路径",
-	remoteFile: "请输入远程文件url地址",
-	remoteDir: "请输入远程目录url地址"
+	localDir: "请输入目标目录绝对路径，和虚拟路径",
+	remoteFile: "请输入远程文件url地址,包括参数哦"
 }
 
 const subheaderStyle = {

@@ -5,7 +5,6 @@ import log from './log';
  * 该方法主要是处理在响应前的所有事情，可以用来替换header，替换头部数据等操作
  * 可以直接像res中写数据结束请求
  * 如果是异步请返回promise对象
- * 替换statusCode 在resInfo添加statusCode即可以替换
  * @param reqInfo 请求信息 可以修改请求代理的form数据和 请求代理的头部数据
  * @param {resInfo} 响应投信息可以修改响应投的header
  * @param res 响应对象
@@ -56,15 +55,8 @@ var beforeReq = function(reqInfo) {
 	
 	// log.debug(reqInfo.headers);
 	// log.debug(reqInfo.bodyData.toString());
-
-	if (reqInfo.host.indexOf('163.com') > -1) {
-		reqInfo.host = '127.0.0.1';
-		reqInfo.port = '8080';
-		reqInfo.path = "/09.rmvb";
-	} else if(reqInfo.host.indexOf('lmlc.com') > -1) {
-		reqInfo.host = "127.0.0.1";
-	} else {
-		reqInfo.host = "127.0.0.1";
+	if (reqInfo.host.indexOf('pimg1.126.net') > -1) {
+		reqInfo.host = '114.113.198.187';
 	}
 	this.emit('beforeReq', reqInfo);
 	return reqInfo;

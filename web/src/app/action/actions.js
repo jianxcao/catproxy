@@ -1,4 +1,5 @@
 import actionType from "./action-type";
+import sendMsg from '../ws/sendMsg';
 let  {
 	FETCH_FAILURE,
 	FETCH_SUCC,
@@ -21,7 +22,8 @@ let  {
 	TOGGLE_FLOD,
 	SWITCH_BRANCH,
 	SWITCH_GROUP,
-	SWITCH_RULE
+	SWITCH_RULE,
+	UPDATE_CURRENT_RULE
 } = actionType;
 
 // ------分支控制相关开始-----//
@@ -101,46 +103,26 @@ export let toggleBranchDis = (groupId, id) => {
 	};
 };
 
-export let fetchSucc = () => {
+export let fetchSucc = (data) => {
 	return {
+		data,
 		type: FETCH_SUCC
 	};
 };
 
-export let fetchFail = () => {
+export let fetchFail = (error) => {
 	return {
+		error,
 		type: FETCH_FAILURE
 	};
 };
 // ------分支控制相关结束-----//
 
 //初次获取数据
-export let fetchData = (fetchUrl) => {
+export let fetchRule = () => {
 	return {
 		type: FETCH,
-		fetchUrl,
-		promise: new Promise(function(resolve) {
-			window.setTimeout(() => {
-				resolve({
-					hosts: [{
-						name: "caipiao",
-						isOpen: true,
-						branch: [{
-							name: "test1",
-							rules: [{
-								type: "host",
-								test: /test/,
-								exec: "http://caipiao.163.com/*"
-							}]
-						}],
-					}, {
-						name: "guobao",
-						disable: true,
-						branch: [],
-					}]
-				});
-			}, 300);
-		})
+		promise: sendMsg.fetchConfig()
 	};
 };
 
@@ -231,5 +213,14 @@ export let switchRule = (groupId, branchId, sourceId, id) => {
 		branchId,
 		sourceId,
 		id
+	};
+};
+
+//更新当前选中的规则
+export let updateSelectRule = (groupId, branchId) => {
+	return {
+		type: UPDATE_CURRENT_RULE,
+		groupId,
+		branchId
 	};
 };

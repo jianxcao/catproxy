@@ -24,14 +24,6 @@ class EditRules extends React.Component{
 	constructor(props) {
 		super(props);
 	}
-	static propTypes = {
-		groupId: React.PropTypes.number,
-		branchId: React.PropTypes.number
-	}
-	static defaultProps = {
-		groupId: 0,
-		branchId: 0
-	}
 	//新建一个规则
 	newRule() {
 		let {groupId, branchId} = this.props;
@@ -73,31 +65,47 @@ class EditRules extends React.Component{
 	}
 
 	render() {
-		let rules = this.props.rules;
-		let switchProps = dragCon(this.switchRule.bind(this));
-		let editRules = rules.map((current, index) => {
-			return <EditRule rule={current} key={index} ruleId={index} data-id = {index} 
-			delRule={this.delRule.bind(this)}
-			disRule={this.disRule.bind(this)}
-			updateRule={this.updateRule.bind(this)} {...switchProps} />
-		});
-
-		return (
-			<Paper zDepth={0}>
-				<Paper zDepth={0} style={paperStyle}>
-					<RaisedButton label="新建规则" primary={true} onClick={this.newRule.bind(this)}/>
+		let {groupId, branchId} = this.props;
+		if (groupId !== null && branchId !== null && groupId >= 0 && branchId >=0) {
+				let rules = this.props.rules;
+				let switchProps = dragCon(this.switchRule.bind(this));
+				let editRules = rules.map((current, index) => {
+					return <EditRule rule={current} key={index} ruleId={index} data-id = {index} 
+					delRule={this.delRule.bind(this)}
+					disRule={this.disRule.bind(this)}
+					updateRule={this.updateRule.bind(this)} {...switchProps} />
+				});
+				return (
+					<Paper zDepth={0}>
+						<Paper zDepth={0} style={paperStyle}>
+							<RaisedButton label="新建规则" primary={true} onClick={this.newRule.bind(this)}/>
+						</Paper>
+						{editRules}
+					</Paper>
+				);
+		} else {
+			return (
+				<Paper zDepth={0}>
+					<Paper zDepth={0} style={paperStyle}></Paper>
 				</Paper>
-				{editRules}
-			</Paper>
-		);
+			);
+		}
 	}
 }
 
 function mapStateToProps(state, owerProps) {
-	let {groupId, branchId} = owerProps;
-	let rules = state.getIn(['hosts', groupId, "branch", branchId, "rules"]) || new List();
+	let {groupId, branchId} = state.get('selectRule').toJS();
+	let rules = state.getIn(['hosts', groupId, "branch", branchId, "rules"]);
+	//没找到对应的规则
+	if (!rules) {
+		rules = new List();
+		groupId = null;
+		branchId = null;
+	}
 	return {
-		rules
+		rules,
+		groupId,
+		branchId
 	};
 }
 

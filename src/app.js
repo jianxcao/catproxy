@@ -1,7 +1,7 @@
 "use strict";
 import http from 'http';
 import https from 'https';
-import defCon from './defCon';
+import defCon from './config/defCon';
 import merge from 'merge';
 import Promise from 'promise';
 import log from './log';
@@ -13,6 +13,7 @@ import EventEmitter from 'events';
 import {getCert} from './cert/cert.js';
 import {SNICallback} from './httpsProxySer';
 import ui from './web/app';
+//process.env.NODE_ENV
 //主类
 class CatProxy extends EventEmitter{
 	constructor(option) {

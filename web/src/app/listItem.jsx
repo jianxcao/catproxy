@@ -45,7 +45,7 @@ export default class MyListItem extends React.Component {
 		delGroup: React.PropTypes.func,
 		toggleGroupDis: React.PropTypes.func,
 		toggleBranchDis: React.PropTypes.func,
-		changeBranch: React.PropTypes.func
+		updateSelectRule: React.PropTypes.func
 	}
 
 	static defaultProps = {
@@ -129,11 +129,11 @@ export default class MyListItem extends React.Component {
 		});
 	}
 	//改变当前指定的分组分支
-	handleChangeBranch = () => {
-		if (this.context.changeBranch) {
+	handleUpdateSelectRule = () => {
+		if (this.context.updateSelectRule) {
 			let {groupId, branchId} = this.props;
 			if (branchId !== null && branchId >= 0) {
-				this.context.changeBranch(groupId, branchId);
+				this.context.updateSelectRule(groupId, branchId);
 			}
 		}
 	}
@@ -144,7 +144,7 @@ export default class MyListItem extends React.Component {
 			delete myProps.groupId;
 			delete myProps.branchId;
 			delete myProps.changeBranch;
-			return (<ListItem {...myProps}  innerDivStyle ={this.getInnerDivStyle()} onMouseOver={this.handleMouseOver} onMouseOut={this.handleMouseOut} onClick={this.handleChangeBranch} primaryText={this.getPrimaryContent()}/>
+			return (<ListItem {...myProps}  innerDivStyle ={this.getInnerDivStyle()} onMouseOver={this.handleMouseOver} onMouseOut={this.handleMouseOut} onClick={this.handleUpdateSelectRule} primaryText={this.getPrimaryContent()}/>
 		);
 	}
 }
