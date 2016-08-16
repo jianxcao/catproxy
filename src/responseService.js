@@ -8,7 +8,9 @@ import fs from 'fs';
 import merge from 'merge';
 import {STATUS, LIMIT_SIZE} from './config/defCon';
 import Promise from 'promise';
-
+import changeHost from './changeHost';
+import ip from 'ip';
+import {localIps} from './getLocalIps';
 //解压数据
 let decodeCompress = function(bodyData, encode) {
 	return new Promise(function(resolve, reject) {
@@ -50,9 +52,10 @@ let triggerBeforeRes = (resInfo, com) => {
 		//不压缩
 		delete headers['content-encoding'];
 		resInfo.bodyData = bodyData;
-		let result;
+		let result, info = merge({}, resInfo);
+		delete info.res;
 		try{
-			result = com.beforeRes(resInfo);
+			result = com.beforeRes(info);
 		} catch(e) {
 			log.error('调用beforeRes出错', e.message);
 		}
@@ -60,10 +63,10 @@ let triggerBeforeRes = (resInfo, com) => {
 		if (result) {
 			//返回的是一个promise
 			if(result.then) {
-				return result.then(result => result || resInfo, () => resInfo);
+				return result.then(result => merge(resInfo, result), () => resInfo);
 			//返回的是一个resInfo
-			} else if (result.res) {
-				resInfo = result;
+			} else {
+				resInfo = merge(resInfo, result);
 			}
 		}
 		return  Promise.resolve(resInfo);
@@ -84,7 +87,7 @@ let getUrl = ({port, path: pathname, protocol, hostname})=> {
 		pathname = pathname || "";
 		return `${protocol}://${hostname}${port}${pathname}`;
 	}
-} ;
+};
 //处理本地数据
 export let local = function(reqInfo, resInfo, fileAbsPath) {
 	var com = this;
@@ -142,7 +145,34 @@ export let remote = function(reqInfo, resInfo) {
 			log.verbose('send proxy', options.hostname, /https/.test(reqInfo.protocol) ? 'https' : 'http');
 			return options;
 	})
+	.then(options => {
+		//取当前启动的port
+		let {port} = com.option;
+		let isServerPort = +port === +options.port;
+		return changeHost(options.hostname, isServerPort)
+		.then(address => {
+			//如果还是死循环，则跳出
+			if (isServerPort && localIps.some(current => ip.isEqual(current, address))) {
+				return Promise.reject('Dead circulation');
+			}
+			return merge(options, {
+				hostname: address
+			});
+		})
+		.then(null, err => {
+			let {res} = resInfo;
+			triggerBeforeRes(merge({}, resInfo, {bodyDataErr: err, headers: {}}), com)
+			.then(({statusCode, headers}) => {
+					res.writeHead(statusCode || 500, headers);
+					res.write(err);
+					res.end();
+			});
+		});
+	})
 	.then((options) => {
+		if (!options) {
+			return;
+		}
 		let proxyReq = (/https/.test(reqInfo.protocol) ? https : http)
 		.request(options, function(proxyRes) {
 			log.verbose('received request from: ' + reqInfo.originalFullUrl);
@@ -338,14 +368,17 @@ export default function(reqInfo, resInfo){
 			return {reqInfo, resInfo};
 		})
 		.then(({reqInfo, resInfo}) => {
-			if (reqInfo.sendToFile) {
-				local.call(com, reqInfo, resInfo, reqInfo.sendToFile);
+			// 如果在事件里面已经结束了请求，那就结束了
+			if (resInfo.res.finished) {
+				//用户做了转发处理，这个时候不知道内容是什么
+				resInfo.res.emit('resBodyDataReady', null, null);
 			} else {
-				remote.call(com, reqInfo, resInfo);
+				if (reqInfo.sendToFile) {
+					local.call(com, reqInfo, resInfo, reqInfo.sendToFile);
+				} else {
+					remote.call(com, reqInfo, resInfo);
+				}
 			}
-			// //如果在事件里面已经结束了请求，那就结束了
-			// if (!resInfo.res.finished) {
-			// }
 		});
 	});
 }

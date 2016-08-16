@@ -10,12 +10,15 @@ import { Provider,connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 import Immutable, {OrderedMap, Map, List} from 'Immutable';
 import sendMsg from './ws/sendMsg'
+import key from 'keymaster';
+import store from './store/store';
+
 import {
 	addBranch,
 	addGroup,
 	disableAll
 } from './action/actions';
-
+var previousHosts = null;
 const toobarStyle ={
 	paddingLeft: 20
 }
@@ -31,9 +34,10 @@ export default class SubHeader extends React.Component {
 		}
 	}
 	componentDidMount() {
-		document.body.addEventListener('keyup' (evt) => {
-			
-		}, false);
+		key('⌘+s, ctrl+s', (evt) =>{
+			this.handleSaveHosts();
+			return false;
+		});		
 	}
 
 	static propTypes = {
@@ -117,9 +121,16 @@ export default class SubHeader extends React.Component {
 	//保存hosts
 	handleSaveHosts() {
 		var com = this;
+		var hosts = this.props.hosts;
+		if (previousHosts && previousHosts.equals(hosts)) {
+			return;
+		}
 		sendMsg.updateRule(this.props.hosts.toJS())
-		.then(message => com.context.toast(message.result), 
-			message => com.context.toast(message.result))
+		.then(message => {
+			com.context.toast(message.result);
+			previousHosts = hosts;
+		}, 
+		message => com.context.toast(message.result))
 	}
 
 	shouldComponentUpdate(nextProps, nextState) {

@@ -31,7 +31,7 @@ const rulesKeys = {
 const targetTips = {
 	host: "请输入目标host或ip",
 	localFile: "请输入目标文件绝对路径",
-	localDir: "请输入目标目录绝对路径，和虚拟路径",
+	localDir: "请输入目标目录绝对路径",
 	remoteFile: "请输入远程文件url地址,包括参数哦"
 }
 
@@ -84,6 +84,7 @@ export default class EditRule extends React.Component{
 			[name]: val
 		});
 	}
+	//修改类型
 	handleTypeChange(evt, index, selectVal) {
 		let {ruleId, updateRule} = this.props;
 		updateRule(ruleId, {
@@ -125,20 +126,27 @@ export default class EditRule extends React.Component{
 		});
 
 		let props = this.props;
-		let def = ['rule', 'ruleId', 'delRule', 'disRule', 'updateRule'];
+		let def = ['rule', 'ruleId', 'delRule', 'disRule', 'updateRule', 'switchProps'];
 		let newProps = {};
+		
 		for(let key in props) {
 			if (def.indexOf(key) < 0) {
 				newProps[key] = props[key];
 			}
 		}
+		let virtualPath = null;
+		if (rule.get('type') === 'localDir') {
+			virtualPath = <TextField name="virtualPath" onChange={this.handleChange.bind(this)} style={fieldStyle} underlineShow={true} fullWidth={true}  value={rule.get('virtualPath')} hintText="请输入虚拟部分路径" />
+		}
 		return (
-		<Paper zDepth={1} style={paperStyle} {...newProps}>
-			<Subheader inset={true} style={subStyle}>规则{this.props.ruleId + 1}</Subheader>
-			<SelectField value={rule.get('type')} style={fieldStyle} onChange={this.handleTypeChange.bind(this)}>{menuRulesTypeList}</SelectField>
-			<TextField  name="test" onChange={this.handleChange.bind(this)} style={fieldStyle} underlineShow={true} fullWidth={true}  value={rule.get('test')} hintText="请输入源地址" />
-			<TextField name="exec" onChange={this.handleChange.bind(this)} style={fieldStyle} underlineShow={true} fullWidth={true}  value={rule.get('exec')} hintText={targetTips[rule.get('type')]} />
-			<div style={divStyle}>{this.renderIcon()}</div>
-		</Paper>);
+			<Paper zDepth={1} style={paperStyle} {...newProps}>
+				<Subheader inset={true} style={subStyle} {...this.props.switchProps} data-id={this.props.ruleId}>规则{this.props.ruleId + 1} </Subheader>
+				<SelectField value={rule.get('type')} style={fieldStyle} onChange={this.handleTypeChange.bind(this)}>{menuRulesTypeList}</SelectField>
+				<TextField  name="test" onChange={this.handleChange.bind(this)} style={fieldStyle} underlineShow={true} fullWidth={true}  value={rule.get('test')} hintText="请输入源地址" />
+				<TextField name="exec" onChange={this.handleChange.bind(this)} style={fieldStyle} underlineShow={true} fullWidth={true}  value={rule.get('exec')} hintText={targetTips[rule.get('type')]} />
+				{virtualPath}
+				<div style={divStyle}>{this.renderIcon()}</div>
+			</Paper>
+		);
 	}
 }

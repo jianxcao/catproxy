@@ -6,17 +6,24 @@ let guid = 10101;
 let getGuid = () => {
 	return guid++;
 }
-export default (callback) => {
+export default (callback, getDragImage, props) => {
 	let currentId = getGuid();
 	//拖拽相关
 	return {
+		...props,
 		["data-drag-id"]: currentId,
 		draggable: true,
 		onDragStart (ev) {
 			let target = ev.target;
+			let dragImgEle;
 			ev.dataTransfer.effectAllowed = "move";
 			if (ev.dataTransfer.setDragImage) {
-				ev.dataTransfer.setDragImage(target, 0, 0);
+				if (typeof getDragImage === 'function') {
+					dragImgEle = getDragImage(target);
+				}
+				if (dragImgEle) {
+					ev.dataTransfer.setDragImage(dragImgEle, 0, 0);
+				}
 			}
 			dragEle = target;
 			ev.dataTransfer.setData("Text", target.getAttribute('data-drag-id'));

@@ -1,5 +1,6 @@
 //事件触发中心
 import log from './log';
+import {parseRule} from './config/rule';
 /**
  * 代理请求发出前
  * 该方法主要是处理在响应前的所有事情，可以用来替换header，替换头部数据等操作
@@ -55,11 +56,15 @@ var beforeReq = function(reqInfo) {
 	
 	// log.debug(reqInfo.headers);
 	// log.debug(reqInfo.bodyData.toString());
-	if (reqInfo.host.indexOf('pimg1.126.net') > -1) {
-		reqInfo.host = '114.113.198.187';
-	}
-	this.emit('beforeReq', reqInfo);
-	return reqInfo;
+	// if (reqInfo.host.indexOf('pimg1.126.net') > -1) {
+	// 	reqInfo.host = '114.113.198.187';
+	// }
+	return parseRule(reqInfo)
+	.then(result => result || reqInfo)
+	.then(reqInfo => {
+		this.emit('beforeReq', reqInfo);
+		return reqInfo;
+	});
 };
 
 /**
@@ -73,7 +78,6 @@ var beforeReq = function(reqInfo) {
  *		bodyData: "buffer 数据",
  *		bodyDataErr: "请求出错，目前如果是大文件会触发这个,这个时候bodyData为空，且不可以设置"
  *		//这个时候 reqInfo无效,bodyData无效
- *		res: res 不可以修改，可以调用 (可以直接自己调用法返回想返回的值，但是如果是异步的，请返回promise)
  *	}
  *	
  *   举例说明可以修改响应的地方/
@@ -82,14 +86,14 @@ var beforeReq = function(reqInfo) {
  */
 var beforeRes = function(resInfo) {
 	resInfo.headers['cache-control'] = "no-store";
-	resInfo.headers['expires'] = "0";
-	delete resInfo.headers['etag'];
+	resInfo.headers.expires = "0";
+	delete resInfo.headers.etag;
 	delete resInfo.headers['last-modifed'];
 	// resInfo.statusCode = 302;
-	resInfo.headers['test-cjx'] = 111;
+	// resInfo.headers['test-cjx'] = 111;
 	// resInfo.bodyData = "test";
 	this.emit('beforeRes', resInfo);
-	// return resInfo;
+	return resInfo;
 };
 
 /**

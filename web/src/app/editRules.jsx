@@ -20,6 +20,7 @@ const paperStyle = {
 	maxWidth: "800px",
 	margin: "20px auto"
 };
+
 class EditRules extends React.Component{
 	constructor(props) {
 		super(props);
@@ -68,12 +69,14 @@ class EditRules extends React.Component{
 		let {groupId, branchId} = this.props;
 		if (groupId !== null && branchId !== null && groupId >= 0 && branchId >=0) {
 				let rules = this.props.rules;
-				let switchProps = dragCon(this.switchRule.bind(this));
+				let switchProps = dragCon(this.switchRule.bind(this), (target)=> {
+					return target.parentElement;
+				});
 				let editRules = rules.map((current, index) => {
-					return <EditRule rule={current} key={index} ruleId={index} data-id = {index} 
+					return <EditRule rule={current} key={index} ruleId={index} 
 					delRule={this.delRule.bind(this)}
 					disRule={this.disRule.bind(this)}
-					updateRule={this.updateRule.bind(this)} {...switchProps} />
+					updateRule={this.updateRule.bind(this)} switchProps = {switchProps}/>
 				});
 				return (
 					<Paper zDepth={0}>

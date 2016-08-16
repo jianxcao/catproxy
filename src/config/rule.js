@@ -6,6 +6,8 @@ import log from '../log';
 import path from 'path';
 import Promise from 'promise';
 import URL from 'url';
+import dns from 'dns';
+
 let parseOneRule, parseBranch, parseOneBranch, execParse, standardUrl;
 let isStringReg = /^\/.+\/$/;
 let isStartHttp = /^http(s)?:\/\//;
@@ -26,7 +28,7 @@ let checkRules = (branch) => {
 		}
 		let newRule = [];
 		for (let rule of rules) {
-			if (rule.type && ruleType[rule.type] && rule.exec && rule.test) {
+			if (rule.type && ruleType[rule.type] && rule.test) {
 				rule.type = rule.type.trim();
 				rule.exec = rule.exec.trim();
 				rule.test = rule.test.trim();
@@ -85,7 +87,6 @@ let checkBranch = (branchs) => {
  * @return {[type]}       如果是就返回true，其他都不是
  */
 export let checkHosts = (hosts) => {
-	console.log(JSON.stringify(hosts));
 	if (hosts && hosts.length >= 0 && typeof hosts === 'object') {
 		//空数组是合法的
 		if (hosts.length === 0) {
@@ -209,27 +210,46 @@ parseOneBranch = (rule, reqInfo) => {
 		case('host'):
 		//远程文件替换整个url路径包括参数
 		case('remoteFile'):
-			//转换成一个url的对象
-			let execObj = standardUrl(exec);
-			reqInfo.host = execObj.hostname;
-			reqInfo.protocol = execObj.protocol.split(':')[0];
-			reqInfo.port = execObj.port ? execObj.port : (reqInfo.protocol === 'https' ? 443 : 80);
-			reqInfo.path = type === 'host' ? reqInfo.path : execObj.path;
+			if (exec) {
+				//转换成一个url的对象
+				let execObj = standardUrl(exec);
+				reqInfo.host = execObj.hostname;
+				reqInfo.protocol = execObj.protocol.split(':')[0];
+				reqInfo.port = execObj.port ? execObj.port : (reqInfo.protocol === 'https' ? 443 : 80);
+				reqInfo.path = type === 'host' ? reqInfo.path : execObj.path;
+			} else  {
+				//没有配置exec如果是 host就访问线上，如果是 remoteFile就跳过
+				if (type === 'host') {
+					return new Promise((resolve, reject) => {
+						dns.resolve(reqInfo.host.split(':')[0], function(err, addresses) {
+							if (err || !addresses || !addresses.length) {
+								log.error(`规则解析中, dns解析出现错误，规则类型:${type},规则正则${test}`);
+								reject(reqInfo);
+							} else {
+								reqInfo.host = addresses[0];
+								resolve(reqInfo);
+							}
+						});
+					});
+				}
+			}
 		break;
 		case('localFile'):
-			reqInfo.sendToFile = exec;
+			if (exec) {
+				reqInfo.sendToFile = exec;
+			}
 		break;
 		case('localDir'):
-			//去掉hash和param
-			let p = reqInfo.path.split('?')[0];
-			
-			p = reqInfo.path.split('#')[0];
-			if (!isStartSlash.test(virtualPath)) {
-				virtualPath = "/" + virtualPath;
+			if (exec) {
+				//去掉hash和param
+				let p = reqInfo.path.split('?')[0];
+				p = reqInfo.path.split('#')[0];
+				if (!isStartSlash.test(virtualPath)) {
+					virtualPath = "/" + virtualPath;
+				}
+				p = p.replace(new RegExp('^' + virtualPath), "");
+				reqInfo.sendToFile = path.join(exec, p);
 			}
-			p = p.replace(new RegExp('^' + virtualPath), "");
-			console.log('ppppppp', p);
-			reqInfo.sendToFile = path.join(exec, p);
 		break;
 		default:
 	}
@@ -283,11 +303,11 @@ execParse = (tasks, index) => {
 
 // let reqInfo = {
 // 	headers: {},
-// 	host: "zhuhu.com",
+// 	host: "g.caipiao.163.com",
 // 	protocol: "http",
 // 	port: 80,
-// 	path: "/test/mm/bb",
-// 	originalFullUrl: "http://zhuhu.com/test/mm/bb"
+// 	path: "/caipiao/test/mm/bb.html",
+// 	originalFullUrl: "http://g.caipiao.163.com/caipiao/test/mm/bb.html"
 // };
 // parseRule(reqInfo)
 // .then((result) => {
