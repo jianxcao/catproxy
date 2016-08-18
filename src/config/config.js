@@ -13,8 +13,10 @@ export let getPath = () => {
 	// Windows XP - 'C:\Documents and Settings\User\Application Data'
 	// Linux - '/var/local'
 	// 获取系统临时目录
-	var tmpPath = process.env.APPDATA || 
-	(process.platform === 'darwin' ? path.join(process.env.HOME, 'Library/Preferences') : '/var/local');
+	var tmpPath = process.env.APPDATA;
+	if (!tmpPath || tmpPath === 'undefined') {
+		tmpPath = (process.platform === 'darwin' ? path.join(process.env.HOME, 'Library/Preferences') : '/var/local');
+	}
 	dirPath = path.resolve(tmpPath, "catproxy");
 	var exits = fs.existsSync(dirPath);
 	// 目录不存在

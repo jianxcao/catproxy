@@ -126,9 +126,13 @@ const initialState = new Immutable.fromJS({
 });
 //组合所有reducers
 let toDo = combineReducers(reducers);
+
 //创建带有 调试和各种中间件的stroe
-let store = createStore(toDo, initialState, compose(
-	applyMiddleware(thunk, vanillaPromise, readyStatePromise, logger, syncStateToSer, crashReporter),
+let middleware = [thunk, vanillaPromise, readyStatePromise, syncStateToSer, crashReporter];
+if (window.config.env === 'dev') {
+	middleware.push(logger);
+}
+let store = createStore(toDo, initialState, compose(applyMiddleware(...middleware),
 	window.devToolsExtension ? window.devToolsExtension() : f => f
 ));
 

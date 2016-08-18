@@ -4,8 +4,13 @@ import fse from 'fs-extra';
 import {md} from 'node-forge';
 import log from '../log';
 import {createRootCert, createSelfCert} from './createCert';
-var certDir = process.env.APPDATA || (process.platform === 'darwin' ? path.join(process.env.HOME, 'Library/Preferences') : '/var/local');
-		certDir = path.join(certDir, './cert_center');
+var certDir = process.env.APPDATA;
+
+if (!certDir || certDir === 'undefined') {
+	certDir = (process.platform === 'darwin' ? path.join(process.env.HOME, 'Library/Preferences') : '/var/local');
+}
+certDir = path.join(certDir, './cert_center');
+
 var rootKeyPath = path.resolve(certDir, './cert.key');
 var rootCrtPath = path.resolve(certDir, './cert.crt');
 var certCachePath = path.resolve(certDir, 'certCache');
@@ -15,24 +20,35 @@ var certCachePath = path.resolve(certDir, 'certCache');
 var isRootCertExits = () => {
 	return !!(fs.existsSync(certDir) && fs.existsSync(rootKeyPath) && fs.existsSync(rootCrtPath));
 };
+
+var setRootCert = () => {
+	fse.ensureDirSync(certDir);
+	log.info('根证书生成目录: ' + certDir);
+	var result = createRootCert();
+	let privateKey = result.privateKey;
+	let cert = result.cert;
+	fs.writeFileSync(rootKeyPath, privateKey);
+	fs.writeFileSync(rootCrtPath, cert);
+	return {
+		privateKey,
+		cert
+	};
+};
+
 //不存在根证书就创建
 var getRootCert = () => {
 	var privateKey, cert;
 	//确保证书目录存在
 	fse.ensureDirSync(certDir);
 	if (!isRootCertExits()) {
-		log.info('根证书生成目录: ' + certDir);
-		var result = createRootCert();
-		privateKey = result.privateKey;
-		cert = result.cert;
-		fs.writeFileSync(rootKeyPath, privateKey);
-		fs.writeFileSync(rootCrtPath, cert);
+		({privateKey, cert} = setRootCert());
 	} else {
 		privateKey = fs.readFileSync(rootKeyPath, {encoding: 'utf8'});
 		cert = fs.readFileSync(rootCrtPath, {encoding: 'utf8'});
 	}
 	return {privateKey, cert};
 };
+
 
 //证书是否存在
 var isCertExits = (keyPath, crtPath) => {
@@ -80,6 +96,7 @@ var getCertPath = () => certDir;
 // emptyCertDir();
 export {
 	isRootCertExits,
+	setRootCert,
 	setCertPath,
 	getCertPath,
 	emptyCertDir,

@@ -1,3 +1,8 @@
+#!/usr/bin/env node
+// catproxy cmd file
+
+require('./build/bin');
+
 // catproxy main file
 var app = require('./build/app');
 var catProxy = new app.CatProxy();

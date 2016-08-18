@@ -6,6 +6,12 @@
 	</head>
 	<body>
 	<div id="g-wrap"></div>
+		<script>
+			window.config = {
+				env: '<%=env%>',
+				host: '<%=host%>'
+			};
+		</script>
 		<script src="<%=cdnBasePath%>/app/app.js"></script>
 	</body>
 </html>
