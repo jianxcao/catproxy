@@ -3,6 +3,7 @@ import log from './log';
 import {parseRule} from './config/rule';
 import * as config from './config/config';
 import mime from 'mime';
+import iconv from 'iconv-lite';
 /**
  * 代理请求发出前
  * 该方法主要是处理在响应前的所有事情，可以用来替换header，替换头部数据等操作
@@ -92,22 +93,38 @@ var beforeRes = function(resInfo) {
 		resInfo.headers.expires = "0";
 		delete resInfo.headers.etag;
 		delete resInfo.headers['last-modifed'];
+		let bodyData = resInfo.bodyData;
+		let contentType = resInfo.headers['content-type'];
 		//如果访问的是一个html,并且成功截取到这个html的内容
-		if (resInfo.headers['content-type'] &&  
-			mime.extension(resInfo.headers['content-type']) === 'html' && 
-			resInfo.bodyData) {
-			resInfo.bodyData = resInfo.bodyData.toString().replace("<head>",
+		if (contentType &&  
+			mime.extension(contentType) === 'html' && 
+			bodyData) {
+			let charset = contentType.match(/charset=([^;]+)/);
+			if (charset && charset.length > 0) {
+				charset = charset[1].toUpperCase();
+			} else {
+				charset = 'UTF-8';
+			}
+			if (Buffer.isBuffer(bodyData)) {
+				if (charset === 'GBK' || charset === "GB2312") {
+					bodyData = iconv.decode(bodyData, 'GBK');
+				} else {
+					bodyData = bodyData.toString();
+				}
+			}
+			bodyData = bodyData.replace("<head>",
 			 `<head>
 				<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 				<meta http-equiv="Pragma" content="no-cache" />
 				<meta http-equiv="Expires" content="0" />`
 			);
+			resInfo.bodyData;
 		}
 	}
-
+	
 	// resInfo.statusCode = 302;
 	// resInfo.headers['test-cjx'] = 111;
-	// resInfo.bodyData = "test";
+	// bodyData = "test";
 	this.emit('beforeRes', resInfo);
 	return resInfo;
 };
