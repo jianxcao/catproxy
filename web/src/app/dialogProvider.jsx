@@ -14,6 +14,9 @@ const bodyStyle = {
 	padding: "12px",
 	minWidth: "200px"
 }
+const actionType = {
+	"CONTENT": "CONTENT"
+}
 var dialgoNum = 0;
 var dialogCache = {};
 export default class DialogProvider extends React.Component {
@@ -38,7 +41,7 @@ export default class DialogProvider extends React.Component {
 		let dialogConfig = dialogCache[dialogId];
 		let result;
 		if (dialogConfig.onBtnClick) {
-			result = dialogConfig.onBtnClick(btnId);
+			result = dialogConfig.onBtnClick(btnId, dialogId);
 		}
 		if (result !== false) {
 			this.destory(dialogId);
@@ -65,7 +68,22 @@ export default class DialogProvider extends React.Component {
 		}
 	}
 
-	dialog ({title, msg, onBtnClick, btn, contentStyle, bodyStyle, layout} = {}) {
+	dialog (opt, action, control) {
+		if (typeof opt === 'string') {
+			if (actionType[action] && dialogCache[opt]) {
+				switch(action) {
+					case(actionType.CONTENT):
+					dialogCache[opt].msg = control;
+					this.forceUpdate();
+					break;
+					default:
+				}
+			} else {
+				console.warn('错误的弹窗动作');
+			}
+			return;
+		}
+		let {title, msg, onBtnClick, btn, contentStyle, bodyStyle, layout} = opt;
 		if (!msg) {
 			return;
 		}
@@ -104,6 +122,7 @@ export default class DialogProvider extends React.Component {
 			overlayStyle: {backgroundColor: bgColor},
 			contentStyle,
 			bodyStyle,
+			onBtnClick,
 			button: this.getBtns(btn && btn.length >= 0 ? btn : ["取消", "*确定"], id),
 			modal: modal,
 			open: true
@@ -187,6 +206,7 @@ export default class DialogProvider extends React.Component {
 					contentStyle={current.contentStyle}
 					overlayStyle={current.overlayStyle}
 					bodyStyle={current.bodyStyle}
+					autoDetectWindowHeight={false}
 					open={current.open}>
 					{current.msg}
 				</Dialog>

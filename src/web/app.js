@@ -7,6 +7,7 @@ import path from 'path';
 import bodyParser from 'body-parser';
 import http from 'http';
 import wServer from '../ws/ws';
+import downloadrule from './downloadrule';
 
 var server = http.createServer();
 var uiApp = express();
@@ -18,6 +19,7 @@ uiApp.use("/static", express.static(path.join(__dirname, '../../web/build')));
 uiApp.use(bodyParser.json()); // for parsing application/json
 uiApp.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 uiApp.use(["/", "/index.html"], main());
+uiApp.use('/downloadrule.html', downloadrule());
 uiApp.use(err404);
 uiApp.use(err500);
 server.on('request', uiApp);

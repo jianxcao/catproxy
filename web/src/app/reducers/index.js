@@ -19,7 +19,8 @@ let  {
 	TOGGLE_FLOD,
 	SWITCH_BRANCH,
 	SWITCH_GROUP,
-	UPDATE_CURRENT_RULE
+	UPDATE_CURRENT_RULE,
+	DIS_CACHE
 } = actionType;
 
 let group = (state = new List(), action = {}) => {
@@ -134,6 +135,7 @@ let toggleFlod = (state = new List(), action = {}) => {
 	}
 };
 
+//控制所欲规则
 export let hosts = (state = new List(), action = {}) => {
 	if (/.+(?:BRANCH).*/.test(action.type)) {
 		return branch(state, action);
@@ -152,6 +154,7 @@ export let hosts = (state = new List(), action = {}) => {
 	}
 };
 
+//初次获取规则
 export let fetchRule = (state = new Map(), action = {}) => {
 	switch (action.type) {
 		case FETCH:
@@ -165,6 +168,7 @@ export let fetchRule = (state = new Map(), action = {}) => {
 	}
 };
 
+//左侧菜单状态
 export let drawerStatus = (state = false, action = {}) => {
 	switch (action.type) {
 		case DRAWERSTATUS:
@@ -174,10 +178,21 @@ export let drawerStatus = (state = false, action = {}) => {
 	}
 };
 
+//当前选中规则
 export let selectRule = (state = new Map(), action = {}) => {
 	switch (action.type) {
 		case UPDATE_CURRENT_RULE:
 			return state.set('groupId', action.groupId).set('branchId', action.branchId);
+		default:
+			return state;
+	}
+};
+
+//禁止缓存
+export let disCache = (state = true, action = {}) => {
+	switch (action.type) {
+		case DIS_CACHE:
+			return action.status;
 		default:
 			return state;
 	}

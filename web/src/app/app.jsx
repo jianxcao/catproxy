@@ -33,6 +33,7 @@ class App extends React.Component {
 		.then((action) => {
 			if (action.type === 'FETCH_SUCC') {
 				store.dispatch(actions.resetHosts(action.result.result.hosts))
+				store.dispatch(actions.disCache(action.result.result.disCache))
 			}
 		});
 	}

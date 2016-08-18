@@ -12,6 +12,8 @@ import Immutable, {OrderedMap, Map, List} from 'Immutable';
 import sendMsg from './ws/sendMsg'
 import key from 'keymaster';
 import store from './store/store';
+import Checkbox from 'material-ui/Checkbox';
+
 
 import {
 	addBranch,
@@ -24,6 +26,12 @@ const toobarStyle ={
 }
 const paperStyle = {
 	minWidth: "460px"
+}
+const checkBoxWraperStyle = {
+	maxWidth: "125px"
+}
+const toolbarTitleStyle = {
+	minWidth: "40px"
 }
 //二级导航
 export default class SubHeader extends React.Component {
@@ -132,9 +140,18 @@ export default class SubHeader extends React.Component {
 		}, 
 		message => com.context.toast(message.result))
 	}
+	//禁止使用缓存
+	handleDisCache(proxy, status) {
+		var com = this;
+		sendMsg.disCache(status)
+		.then(message => {
+			com.context.toast(message.result);
+		}, 
+		message => com.context.toast(message.result))
+	}
 
 	shouldComponentUpdate(nextProps, nextState) {
-		return this.state.openDialog !== nextState.openDialog;      
+		return this.state.openDialog !== nextState.openDialog || this.props.disCache !== nextProps.disCache;      
 	}
 
 	renderDialog() {
@@ -199,13 +216,16 @@ export default class SubHeader extends React.Component {
 		return (
 			<Paper zDepth={0} style={paperStyle}>
 				<Toolbar style={toobarStyle}>
-					<ToolbarGroup firstChild={false}>
-						<ToolbarTitle text="操作" />
+					<ToolbarGroup firstChild={false} style={{
+						alignItems: "center"
+					}}>
+						<ToolbarTitle text="操作" style={toolbarTitleStyle}/>
 						<RaisedButton label="新建" primary={true} onClick={this.handleOpenDialog.bind(this)}/>
 						<RaisedButton label="禁用全部" primary={true} onClick={this.handleDisAll.bind(this)}/>
+						<Checkbox label="禁用缓存" defaultChecked={this.props.disCache} onCheck={this.handleDisCache.bind(this)} style={checkBoxWraperStyle}/>
 					</ToolbarGroup>
 					<ToolbarGroup>
-						<RaisedButton label="保存" primary={true} onClick={this.handleSaveHosts.bind(this)}/>
+						<RaisedButton label="保存规则" primary={true} onClick={this.handleSaveHosts.bind(this)}/>
 					</ToolbarGroup>
 				</Toolbar>
 				{this.renderDialog()}
@@ -215,7 +235,8 @@ export default class SubHeader extends React.Component {
 }
 function mapStateToProps(state) {
 	return {
-		hosts: state.get('hosts')
+		hosts: state.get('hosts'),
+		disCache: state.get('disCache')
 	}
 }
 function mapDispatchToProps(dispatch) {

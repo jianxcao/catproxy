@@ -23,7 +23,8 @@ let  {
 	SWITCH_BRANCH,
 	SWITCH_GROUP,
 	SWITCH_RULE,
-	UPDATE_CURRENT_RULE
+	UPDATE_CURRENT_RULE,
+	DIS_CACHE
 } = actionType;
 
 // ------分支控制相关开始-----//
@@ -222,5 +223,14 @@ export let updateSelectRule = (groupId, branchId) => {
 		type: UPDATE_CURRENT_RULE,
 		groupId,
 		branchId
+	};
+};
+
+
+//禁止缓存
+export let disCache = (status) => {
+	return {
+		type: DIS_CACHE,
+		status
 	};
 };

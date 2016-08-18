@@ -1,6 +1,8 @@
 //事件触发中心
 import log from './log';
 import {parseRule} from './config/rule';
+import * as config from './config/config';
+import mime from 'mime';
 /**
  * 代理请求发出前
  * 该方法主要是处理在响应前的所有事情，可以用来替换header，替换头部数据等操作
@@ -77,7 +79,7 @@ var beforeReq = function(reqInfo) {
  *    ---注意如果有bodyData则会直接用bodyData的数据返回
  *		bodyData: "buffer 数据",
  *		bodyDataErr: "请求出错，目前如果是大文件会触发这个,这个时候bodyData为空，且不可以设置"
- *		//这个时候 reqInfo无效,bodyData无效
+ *		//这个时候 resInfo,bodyData无效
  *	}
  *	
  *   举例说明可以修改响应的地方/
@@ -85,10 +87,24 @@ var beforeReq = function(reqInfo) {
  * @return {[type]}         [description]
  */
 var beforeRes = function(resInfo) {
-	resInfo.headers['cache-control'] = "no-store";
-	resInfo.headers.expires = "0";
-	delete resInfo.headers.etag;
-	delete resInfo.headers['last-modifed'];
+	if (config.get('disCache')) {
+		resInfo.headers['cache-control'] = "no-store";
+		resInfo.headers.expires = "0";
+		delete resInfo.headers.etag;
+		delete resInfo.headers['last-modifed'];
+		//如果访问的是一个html,并且成功截取到这个html的内容
+		if (resInfo.headers['content-type'] &&  
+			mime.extension(resInfo.headers['content-type']) === 'html' && 
+			resInfo.bodyData) {
+			resInfo.bodyData = resInfo.bodyData.toString().replace("<head>",
+			 `<head>
+				<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+				<meta http-equiv="Pragma" content="no-cache" />
+				<meta http-equiv="Expires" content="0" />`
+			);
+		}
+	}
+
 	// resInfo.statusCode = 302;
 	// resInfo.headers['test-cjx'] = 111;
 	// resInfo.bodyData = "test";

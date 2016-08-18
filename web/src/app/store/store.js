@@ -121,7 +121,8 @@ const initialState = new Immutable.fromJS({
 	//当前菜单打开状态
 	drawerStatus: true,
 	//当前选中的规则
-	selectRule: {}
+	selectRule: {},
+	disCache: true
 });
 //组合所有reducers
 let toDo = combineReducers(reducers);

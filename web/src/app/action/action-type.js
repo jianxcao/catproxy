@@ -24,4 +24,5 @@ export default keyMirror({
 	SWITCH_GROUP: null,
 	SWITCH_RULE: null,
 	UPDATE_CURRENT_RULE: null,
+	DIS_CACHE: null,
 });

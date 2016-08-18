@@ -1,7 +1,7 @@
 /**
  * 规则管理入口
  */
-import config from './config';
+import * as config from './config';
 import log from '../log';
 import path from 'path';
 import Promise from 'promise';

@@ -1,6 +1,6 @@
 import * as status from './status';
 import log from '../log';
-import config from '../config/config';
+import * as config from '../config/config';
 import * as rule from '../config/rule';
 import * as sendType from './sendType';
 /*
@@ -75,6 +75,16 @@ let updateRule = (rules, ws) => {
 		return error('更新规则失败');
 	}
 };
+let disCache = (status, ws) => {
+	try {
+		config.set('disCache', status);
+		config.save();
+		return success('更新配置成功');
+	} catch(e) {
+		log.error(e);
+		return error('更新配置失败');
+	}
+};
 
 export let saveConfig = (msg = {}, ws = {}) => {
 	let {path, param} = msg;
@@ -87,6 +97,8 @@ export let saveConfig = (msg = {}, ws = {}) => {
 				return error('更新规则必须有rules属性');
 			}
 			break;
+			case('disCache'):
+			return disCache(!!param.status, ws);
 			default:
 			return error('未知的保存数据');
 		}

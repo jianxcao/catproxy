@@ -88,6 +88,17 @@ let getUrl = ({port, path: pathname, protocol, hostname})=> {
 		return `${protocol}://${hostname}${port}${pathname}`;
 	}
 };
+let toHeadersFirstLetterUpercase = (headers)=>{
+	let reg = /(?:^\w)|-\w/g;
+	let result = {};
+	if(headers) {
+		for (let key in headers) {
+			result[key.replace(reg, current => current ? current.toUpperCase() : current)] = headers[key];
+		}
+		return result;
+	}
+	return headers;
+};
 //处理本地数据
 export let local = function(reqInfo, resInfo, fileAbsPath) {
 	var com = this;
@@ -113,7 +124,7 @@ export let local = function(reqInfo, resInfo, fileAbsPath) {
 	.then(resInfo => {
 			let {bodyData, headers, statusCode, res} = resInfo;
 			headers['loacl-file'] = fileAbsPath;
-			res.writeHead(statusCode, headers || {});
+			res.writeHead(statusCode, toHeadersFirstLetterUpercase(headers) || {});
 			if (!res.headers) {
 				res.headers = headers || {};
 			}
@@ -206,7 +217,7 @@ export let remote = function(reqInfo, resInfo) {
 						triggerBeforeRes(merge({}, resInfo, {bodyDataErr: err.message}), com)
 						.then(({statusCode, headers}) => {
 							headers['remote-url'] = getUrl(merge({}, options, {protocol: reqInfo.protocol}));
-							res.writeHead(statusCode || 200, headers);
+							res.writeHead(statusCode || 200, toHeadersFirstLetterUpercase(headers));
 							res.write(Buffer.concat(resBodyData));
 							res.write(chunk);
 							resBodyData = [];
@@ -229,7 +240,7 @@ export let remote = function(reqInfo, resInfo) {
 							.then((resInfo) => {
 								let {statusCode, headers, bodyData} = resInfo;
 								headers['remote-url'] = getUrl(merge({}, options, {protocol: reqInfo.protocol}));
-								res.writeHead(statusCode || 200, headers);
+								res.writeHead(statusCode || 200, toHeadersFirstLetterUpercase(headers));
 								res.write(bodyData);
 								return resInfo;
 							});

@@ -2,11 +2,12 @@ import fs from 'fs';
 import path from 'path';
 import log from '../log';
 import merge from 'merge';
-var	dirPath,
-	data = {},
-	filePath;// 初始化配置
-var configInit = function() {
-	// The expected result is:
+var	data = {};
+	
+//获取配置路径
+export let getPath = () => {
+	let dirPath, filePath;
+		// The expected result is:
 	// OS X - '/Users/user/Library/Preferences'
 	// Windows 8 - 'C:\Users\User\AppData\Roaming'
 	// Windows XP - 'C:\Documents and Settings\User\Application Data'
@@ -22,8 +23,13 @@ var configInit = function() {
 	}
 	// 临时文件存放位置
 	filePath = path.resolve(dirPath, "rule.json");
+	return filePath;
+};
+
+let configInit = () => {
+	let filePath = getPath();
 	// 判断是否存在临时文件
-	exits = fs.existsSync(filePath);
+	let exits = fs.existsSync(filePath);
 	log.info("同步读取配置文件,如果不存在就跳过");
 	if (exits) {
 		var bufData = fs.readFileSync(filePath, "utf-8");
@@ -37,7 +43,7 @@ var configInit = function() {
 
 
 // 获取一个值
-exports.get = function(key) {
+export let get = (key) => {
 	var tmp = data;
 	if (!key) {
 		return data;
@@ -55,7 +61,7 @@ exports.get = function(key) {
 };
 
 // 设置一个直接
-exports.set = function(key, val) {
+export let set = (key, val) => {
 	if (!key) {
 		return false;
 	}
@@ -86,7 +92,7 @@ exports.set = function(key, val) {
 		return true;
 	}
 };
-exports.del = function(key) {
+export let del = (key) => {
 	// 不传递key删除所有
 	if (!key) {
 		data = {};
@@ -119,8 +125,9 @@ exports.del = function(key) {
 	}
 };
 // 保存到文件
-exports.save = function() {
+export let save = () => {
 	var myData = JSON.stringify(data);
+	var filePath = getPath();
 	log.info("规则文件路径:" + filePath);
 	try {
 		var fd = fs.openSync(filePath, "w+", "777");

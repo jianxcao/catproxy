@@ -30,8 +30,18 @@ export let updateRule = (data) => {
 		return send('saveConfig')(result);
 	}
 };
-
+export let disCache =(status) => {
+	status = !!status;
+	let result = {
+		param: {
+			status: status
+		},
+		path: "disCache"
+	};
+	return send('saveConfig')(result);
+};
 export default {
 	fetchConfig,
-	updateRule
+	updateRule,
+	disCache
 };
