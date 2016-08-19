@@ -6,7 +6,7 @@ import zlib from 'zlib';
 import {Buffer} from 'buffer';
 import fs from 'fs';
 import merge from 'merge';
-import {STATUS, LIMIT_SIZE} from './config/defCon';
+import {STATUS, LIMIT_SIZE} from './config/defCfg';
 import Promise from 'promise';
 import changeHost from './changeHost';
 import ip from 'ip';

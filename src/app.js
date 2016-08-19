@@ -1,7 +1,7 @@
 "use strict";
 import http from 'http';
 import https from 'https';
-import defCon from './config/defCon';
+import defCfg from './config/defCfg';
 import merge from 'merge';
 import Promise from 'promise';
 import log from './log';
@@ -13,12 +13,25 @@ import EventEmitter from 'events';
 import {getCert} from './cert/cert.js';
 import {SNICallback} from './httpsProxySer';
 import ui from './web/app';
+import {localIps} from './getLocalIps';
 //process.env.NODE_ENV
 //主类
 class CatProxy extends EventEmitter{
+	/**
+	 * 
+	 * @param  {[type]} option 
+	 *  {
+	 *  	type: "当前服务器类型"
+	 *		port: "当前端口"
+	 *		certHost: "https证书生成默认host代理"
+	 *		crackHttps 是否解开 https请求，在 http代理模式下
+	 *		uiPort 端口
+	 *		server: 可以传递服务器进来
+	 *	}
+	 */
 	constructor(option) {
 		super();
-		this.option = merge(option, defCon);
+		this.option = merge(option, defCfg);
 	}
 	init() {
 		//请求事件方法
@@ -52,7 +65,12 @@ class CatProxy extends EventEmitter{
 	checkEnv() {
 	}
 	uiInit() {
-		ui(this.option.uiPort);
+		let port = this.option.uiPort;
+		ui({
+			port : port,
+			hostname: localIps[0],
+			host: `http://${localIps[0]}:${port}`
+		});
 	}
 	//出错处理
 	errorHandle(err) {
@@ -64,14 +82,21 @@ class CatProxy extends EventEmitter{
 	createServer() {
 		let opt = this.option;
 		let server = opt.server;
+		let com = this;
 		//可以自定义server或者用系统内置的server
 		if (!(server instanceof http.Server || server instanceof https.Server)) {
 			if (opt.type === 'https') {
 				//找到证书，创建https的服务器
-				let {privateKey: key, cert} = getCert(opt.host);
+				let {privateKey: key, cert} = getCert(opt.certHost);
 				server = https.createServer({key,cert, rejectUnauthorized: false, SNICallback});
 			} else {
 				server = http.createServer();
+			}
+		} else {
+			if (server instanceof http.Server) {
+				this.option.type = 'http';
+			} else {
+				this.option.type = 'https';
 			}
 		}
 		//如果是https，则需要过度下请求
@@ -83,9 +108,14 @@ class CatProxy extends EventEmitter{
 		//如果server没有被监听，则调用默认端口监听
 		if (!server.listening) {
 			server.listen(opt.port, function () {
-				log.info('proxy server start from ' + 'http://127.0.0.1:' + opt.port);
+				log.info('proxy server start from ' + `http://${localIps[0]}:${opt.port}`);
+				let {port} = server.address();
+				com.option.port = port;
 			});			
+		} else {
+			console.log(server.address());
 		}
+		
 		server.on('error', err => log.error(err));
 		this.server = server;
 	}

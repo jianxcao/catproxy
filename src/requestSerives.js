@@ -5,7 +5,7 @@ import {Buffer} from 'buffer';
 import log from './log';
 import net from 'net';
 import getHttpsSer from './httpsProxySer';
-import {STATUS, LIMIT_SIZE} from './config/defCon';
+import {STATUS, LIMIT_SIZE} from './config/defCfg';
 //请求到后的解析
 let requestHandler = function(req, res) {
 	var com = this;

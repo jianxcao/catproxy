@@ -32,11 +32,12 @@ let configInit = () => {
 	let filePath = getPath();
 	// 判断是否存在临时文件
 	let exits = fs.existsSync(filePath);
-	log.info("同步读取配置文件,如果不存在就跳过");
+	log.info("配置文件加载中");
 	if (exits) {
 		var bufData = fs.readFileSync(filePath, "utf-8");
 		try {
 			data = JSON.parse(bufData);
+			log.info('配置文件加载成功');
 		} catch(e) {
 			data = {};
 		}
@@ -139,4 +140,5 @@ export let save = () => {
 		throw e;
 	}
 };
-configInit();
+
+export default configInit;

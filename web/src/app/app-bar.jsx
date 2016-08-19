@@ -30,7 +30,7 @@ class Header extends React.Component {
 	}
 	//点击下载
 	handleDownload = () => {
-
+		window.location.href = window.config.host + "/downloadrule.html";
 	}
 	//点击导入
 	handleImport = () => {

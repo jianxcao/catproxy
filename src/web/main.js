@@ -1,9 +1,7 @@
-import merge from 'merge';
-import config from './config';
-export default () => {
+export default (option) => {
 	return (req, res, next)=> {
 		if (req.path === '/' || req.path === '/index.html') {
-			res.render("app/app", merge({}, config));
+			res.render("app/app", option);
 		} else {
 			next();
 		}
