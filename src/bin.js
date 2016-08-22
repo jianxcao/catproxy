@@ -4,6 +4,7 @@ import prompt from 'prompt';
 import colors from 'colors';
 import * as cert from './cert/cert';
 import configInit from './config/config';
+import CatProxy from './app';
 //将字段变成list
 let numReg = /^([0-9]){2,}$/;
 let list = (val) => {
@@ -26,7 +27,7 @@ let out = `
 
   '-c' 表示生成根证书，根证书在https的情况下有用，不生成无法拦截请求
 `;
-
+let opt = {};
 program
 	.version(pkg.version)
 	.option('-v, --version', '版本号码')
@@ -40,13 +41,25 @@ program
 		/^(error|warn|info|verbose|debug|silly)$/i)
 	.parse(process.argv);
 
-['type','port','ui','log','all'].forEach((current) => {
+['type','port','ui','log'].forEach((current) => {
 	if (program[current] === true) {
 		program[current] = undefined;
 	}
 	//已经输入变量转成小写
 	if (typeof program[current] === 'string') {
 		program[current] = program[current].toLowerCase();
+	}
+	if (program[current] !== undefined) {
+		if (current === 'port' && program[current] && program[current].length) {
+			opt.port = program[current][0];
+			if (program[current][1]) {
+				opt.httpsPort = program[current][1];
+			}
+		} else if (current === 'ui') {
+			opt.uiPort = program[current];
+		} else {
+			opt[current] = program[current];
+		}
 	}
 });
 //生成证书
@@ -81,17 +94,8 @@ if (program.cert) {
 	}
 } else {
 	configInit();
-	let opt = {
-		type: program.type,
-		ports: program.port,
-		uiPort: program.ui,
-		logLevel: program.log,
-		allType: program.all
-	};
-	console.dir(opt);
 	// catproxy main file
-	// var app = require('./build/app');
-	// var catProxy = new app.CatProxy();
+	var catProxy = new CatProxy(opt);
 	//初始化代理服务器
-	// catProxy.init();
+	catProxy.init();
 }

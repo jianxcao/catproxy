@@ -4,6 +4,7 @@
 export const DEFAULT_TYPE = 'http';
 //默认代理端口为 8888
 export const DEFAULT_PORT = 80;
+export const DEFAULT_HTTPS_PORT = 443;
 export const DEFAULT_UI_PORT = 8001;
 //https服务器启动时候需要的证书
 export const  DEFAULT_CERT_HOST = "localhost";
@@ -17,6 +18,7 @@ export const STATUS = {
 export default {
 	type: DEFAULT_TYPE,
 	port: DEFAULT_PORT,
+	httpsPort: DEFAULT_HTTPS_PORT,
 	certHost: DEFAULT_CERT_HOST,
 	crackHttps: DEFAULT_CRACK_HTTPS,
 	uiPort: DEFAULT_UI_PORT

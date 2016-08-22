@@ -10,7 +10,7 @@ let attrs  = [{
   value: 'BJ'
 }, {
   name: 'organizationName',
-  value: 'catparoy'
+  value: 'catproxy'
 }, {
   shortName: 'OU',
   value: 'CP'
@@ -18,7 +18,7 @@ let attrs  = [{
 let rootAttrs = attrs.slice(0);
 rootAttrs.push({
 	name: 'commonName',
-	value: 'catparoy'
+	value: 'catproxy'
 });
 
 

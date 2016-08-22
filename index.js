@@ -8,6 +8,3 @@ exports = module.exports = {
 	config: config,
 	Server: app.CatProxy
 };
-// process.env.NODE_ENV = "production";
-
-console.log(process.env);
