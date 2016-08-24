@@ -42,8 +42,8 @@ let createRootCert = () => {
 	//cert.setSubject(csr.subject.attributes);
 	cert.setIssuer(rootAttrs);
 	cert.setExtensions([{
-	  name: 'basicConstraints',
-	  cA: true
+		name: 'basicConstraints',
+		cA: true
 	}]);
 	cert.sign(keys.privateKey, md.sha256.create());
 	// console.log(cert.subject.attributes);
@@ -66,10 +66,6 @@ let createSelfCert = (domain, rootOpt) => {
 		name: 'commonName',
 		value: domain
 	}]));
-	cert.setExtensions([{
-	  name: 'basicConstraints',
-	  cA: true
-	}]);
 	cert.sign(rootKey, md.sha256.create());
 	return {
 		cert: pki.certificateToPem(cert),

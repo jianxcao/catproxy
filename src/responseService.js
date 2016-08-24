@@ -150,7 +150,7 @@ export let remote = function(reqInfo, resInfo) {
 			};
 			try {
 				//忽略不安全的警告
-				options.rejectUnauthorized = false;
+				options.rejectUnauthorized = true;
 			} catch (e) {}
 			//发送请求，包括https和http
 			log.verbose('send proxy', options.hostname, /https/.test(reqInfo.protocol) ? 'https' : 'http');

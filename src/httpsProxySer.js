@@ -43,7 +43,7 @@ export default (host, port, callback) => {
 	.then(port => {
 		let {privateKey: key, cert} = getCert(host);
 		//SNICallback
-		let server = https.createServer({key, cert, rejectUnauthorized: false, SNICallback}, callback);
+		let server = https.createServer({key, cert, rejectUnauthorized: true, SNICallback}, callback);
 		server.listen(port);
 		return {server, port};
 	})

@@ -113,7 +113,7 @@ let requestConnectHandler = function(req, cltSocket, head) {
 	let opt = this.option;
 	//如果需要捕获https的请求
 	if (opt.crackHttps) {
-		log.verbose(`crack https http://${req.url}`);
+		log.verbose(`crack https https://${req.url}`);
 		getSer(this.requestHandler)
 			.then(({
 				port
@@ -132,7 +132,7 @@ let requestConnectHandler = function(req, cltSocket, head) {
 	} else {
 		log.verbose(` through https connect http://${req.url}`);
 		// connect to an origin server
-		var srvUrl = url.parse(`http://${req.url}`);
+		var srvUrl = url.parse(`https://${req.url}`);
 		var srvSocket = net.connect(srvUrl.port, srvUrl.hostname, () => {
 			cltSocket.write('HTTP/1.1 200 Connection Established\r\n' +
 				'Proxy-agent: Node-CatProxy\r\n' +
@@ -152,8 +152,11 @@ let requestConnectHandler = function(req, cltSocket, head) {
  */
 let requestUpgradeHandler = function(req, socket) {
 	//socket请求直接转发吧
-	socket.write('HTTP/1.1 101 Web Socket Protocol Handshake\r\n' + 'Upgrade: WebSocket\r\n' + 'Connection: Upgrade\r\n' + '\r\n');
-	socket.pipe(socket); // echo back
+	socket.write('HTTP/1.1 101 Web Socket Protocol Handshake\r\n' +
+               'Upgrade: WebSocket\r\n' +
+               'Connection: Upgrade\r\n' +
+               '\r\n');
+  socket.pipe(socket); // echo back
 };
 export default {
 	requestHandler,

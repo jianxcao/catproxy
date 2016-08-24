@@ -8,7 +8,7 @@ var {
 var server = https.Server({
 	key,
 	cert,
-	rejectUnauthorized: false
+	rejectUnauthorized: true
 }, function(req, res) {
 	console.log('in request');
 	console.log(req.socket instanceof tls.TLSSocket);
