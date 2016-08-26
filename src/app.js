@@ -129,15 +129,25 @@ class CatProxy extends EventEmitter{
 				server.on('connect', com.requestConnectHandler);
 			}
 			server.on('request', com.requestHandler);
+			let port = server instanceof  http.Server ? opt.port : opt.httpsPort;
 			//如果server没有被监听，则调用默认端口监听
 			if (!server.listening) {
 				//根据server的类型调用不同的端口
-				let port = server instanceof  http.Server ? opt.port : opt.httpsPort;
 				server.listen(port, function () {
 					log.info('proxy server start from ' + `http://${localIps[0]}:${port}`);
 				});
 			}
-			server.on('error', err => log.error(err));
+			server.on('error', err => {
+				if (err.message && err.message.indexOf("EACCES") > -1) {
+					log.error("请用sudo管理员权限打开");
+					process.exit(1);
+				} else if (err.message.indexOf("EADDRINUSE") > -1) {
+					log.error(`端口${port}被占用，请检查端口占用情况`);
+					process.exit(1);
+				} else {
+					log.error("出现错误：" + err.stack);
+				}
+			});
 		});
 		this.servers = servers;
 	}

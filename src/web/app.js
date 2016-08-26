@@ -33,4 +33,15 @@ export default (option) => {
 	server.listen(option.port, function() {
 		log.info(`ui server start up:  ${option.host}`);
 	});
+	server.on('error', err => {
+		if (err.message && err.message.indexOf("EACCES") > -1) {
+			log.error("请用sudo管理员权限打开");
+			process.exit(1);
+		} else if (err.message.indexOf("EADDRINUSE") > -1) {
+			log.error(`端口${option.port}被占用，请检查端口占用情况`);
+			process.exit(1);
+		} else {
+			log.error("出现错误：" + err.stack);
+		}
+	});
 };
