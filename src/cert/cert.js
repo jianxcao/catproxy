@@ -85,7 +85,7 @@ var emptyCertDir = () => {
 	fse.emptyDirSync(certDir);
 };
 
-var setCertPath = (path) => {
+var setCertDir = (path) => {
 	if (!path) {return;}
 	fse.ensureDirSync(path);
 	certDir = path;
@@ -93,14 +93,16 @@ var setCertPath = (path) => {
 	rootCrtPath = path.resolve(certDir, './cert.crt');
 	certCachePath = path.resolve(certDir, 'certCache');
 };
-var getCertPath = () => certDir;
+var getCertDir = () => certDir;
+var getRootCertPath = () => rootCrtPath;
 //getCert('lmlc.com');
 // emptyCertDir();
 export {
 	isRootCertExits,
 	setRootCert,
-	setCertPath,
-	getCertPath,
+	setCertDir,
+	getCertDir,
+	getRootCertPath,
 	emptyCertDir,
 	getCert,
 	getRootCert

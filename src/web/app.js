@@ -8,6 +8,7 @@ import bodyParser from 'body-parser';
 import http from 'http';
 import wServer from '../ws/ws';
 import downloadrule from './downloadrule';
+import downloadcert from './downloadcert';
 import merge from 'merge';
 import webCfg from '../config/webCfg';
 
@@ -24,6 +25,7 @@ export default (option) => {
 	uiApp.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 	uiApp.use(["/", "/index.html"], main(option));
 	uiApp.use('/downloadrule.html', downloadrule());
+	uiApp.use('/downloadcert.html', downloadcert());
 	uiApp.use(err404);
 	uiApp.use(err500);
 	server.on('request', uiApp);

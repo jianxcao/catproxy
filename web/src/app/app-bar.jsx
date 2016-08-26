@@ -29,11 +29,11 @@ class Header extends React.Component {
 		changeDrawerStatus(!drawerStatus);
 	}
 	//点击下载
-	handleDownload = () => {
+	handleDownloadRule = () => {
 		window.location.href = window.config.host + "/downloadrule.html";
 	}
 	//点击导入
-	handleImport = () => {
+	handleImportRule = () => {
 		let {dialog, toast} = this.context;
 		let reader;
 		let getReader = (result) => {
@@ -91,6 +91,10 @@ class Header extends React.Component {
 		});
 	}
 
+	handleDownloadCert =() => {
+		window.location.href = window.config.host + "/downloadcert.html";
+	}
+
 	render() {
 		return (<AppBar
 		title="catproxy"
@@ -100,8 +104,9 @@ class Header extends React.Component {
 						iconButtonElement={<IconButton><MoreVertIcon /></IconButton>}
 						targetOrigin={{horizontal: 'right', vertical: 'top'}}
 						anchorOrigin={{horizontal: 'right', vertical: 'top'}}>
-						<MenuItem primaryText="下载host文件" onClick={this.handleDownload}/>
-						<MenuItem primaryText="导入host文件" onClick={this.handleImport}/>
+						<MenuItem primaryText="下载host文件" onClick={this.handleDownloadRule}/>
+						<MenuItem primaryText="导入host文件" onClick={this.handleImportRule}/>
+						<MenuItem primaryText="下载cert文件" onClick={this.handleDownloadCert}/>
 						<MenuItem primaryText="帮助" />
 					</IconMenu>
 		}/>)

@@ -11,7 +11,3 @@ export default () => (req, res, next) => {
 		next('没有可用的配置')	;
 	}
 };
-
-
-
-	
