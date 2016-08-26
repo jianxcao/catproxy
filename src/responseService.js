@@ -13,6 +13,7 @@ import ip from 'ip';
 import {localIps} from './getLocalIps';
 import {getUrl} from './tools';
 import net from 'net';
+import {getCert} from './cert/cert.js';
 let isStartHttps = /https/;
 //解压数据
 let decodeCompress = function(bodyData, encode) {
@@ -126,7 +127,7 @@ export let remote = function(reqInfo, resInfo) {
 	let {req} = reqInfo;
 	let {res} = resInfo;
 	let com = this;
-	let currentHost = reqInfo.headers.host;
+	let oldProtocol = reqInfo.protocol;
 	Promise.resolve()
 	.then(() => {
 		 	let t = /^\/.*/;
@@ -142,9 +143,17 @@ export let remote = function(reqInfo, resInfo) {
 				method: reqInfo.method,
 				headers: toHeadersFirstLetterUpercase(reqInfo.headers) //大小写问题，是否需要转换
 			};
-			options.rejectUnauthorized = true;
+			if (reqInfo.protocol === 'https') {
+				options.rejectUnauthorized = true;
+				//旧的协议是http-即http跳转向https--从新生成证书
+				if (oldProtocol === https) {
+					let {privateKey: key, cert} = getCert(hostname);
+					options.key = key;
+					options.cert = cert;
+				}
+			}
 			//发送请求，包括https和http
-			log.verbose('send proxy', options.hostname, /https/.test(reqInfo.protocol) ? 'https' : 'http');
+			log.verbose('send proxy', options.hostname, reqInfo.protocol);
 			return options;
 	})
 	.then(options => {
@@ -190,8 +199,8 @@ export let remote = function(reqInfo, resInfo) {
 			//没有内容
 			// if (+statusCode === 204) {
 			// 	res.end();
-			// } else {
 			// }
+			
 			//数据太大的时候触发
 			let err = {
 				message: 'request entity too large',
@@ -283,7 +292,14 @@ export let remote = function(reqInfo, resInfo) {
 			proxyReq.end();
 		}
 	})
-	.then(null, err => log.error(err));
+	.then(null, err => {
+		if (!res.finished) {
+			res.writeHead(500);
+			res.write(err.message);
+			res.end(err.stack);
+		}
+		log.error(err);
+	});
 };
 
 export default function(reqInfo, resInfo){
