@@ -12,6 +12,26 @@ import UploadContent from './dragUpload'
 import sendMsg from './ws/sendMsg'
 import store from './store/store';
 import {resetHosts} from './action/actions';
+import LinkItem from './LinkItem'
+
+let getIcon = (props = {}, className ="", style = {}) => {
+	let defStyle ={
+		padding: "0px",
+	};
+	let iconStyle = {
+		fontSize: '24px'
+	};
+	style = Object.assign({}, defStyle, style);
+	return 	(
+		<IconButton
+			{...props}
+			style={style}
+			iconStyle={iconStyle}
+			iconClassName={"basefont " + className}
+		/>
+	);
+};
+
 class Header extends React.Component {
 	constructor(props) {
 		super(props)
@@ -28,10 +48,7 @@ class Header extends React.Component {
 		let {drawerStatus, changeDrawerStatus} = this.props;
 		changeDrawerStatus(!drawerStatus);
 	}
-	//点击下载
-	handleDownloadRule = () => {
-		window.location.href = window.config.host + "/downloadrule.html";
-	}
+	
 	//点击导入
 	handleImportRule = () => {
 		let {dialog, toast} = this.context;
@@ -91,24 +108,24 @@ class Header extends React.Component {
 		});
 	}
 
-	handleDownloadCert =() => {
-		window.location.href = window.config.host + "/downloadcert.html";
-	}
-
 	render() {
+		let host = window.config.host;
+		let downloadrule = host +  "/downloadrule.html";
+		let downloadcert = host + "/downloadcert.html";
 		return (<AppBar
 		title="catproxy"
 		onLeftIconButtonTouchTap = {this.handleToggle}
 		iconElementRight={
-					<IconMenu
-						iconButtonElement={<IconButton><MoreVertIcon /></IconButton>}
-						targetOrigin={{horizontal: 'right', vertical: 'top'}}
-						anchorOrigin={{horizontal: 'right', vertical: 'top'}}>
-						<MenuItem primaryText="下载host文件" onClick={this.handleDownloadRule}/>
-						<MenuItem primaryText="导入host文件" onClick={this.handleImportRule}/>
-						<MenuItem primaryText="下载cert文件" onClick={this.handleDownloadCert}/>
-						<MenuItem primaryText="帮助" />
-					</IconMenu>
+			<IconMenu
+				iconButtonElement={<IconButton><MoreVertIcon /></IconButton>}
+				targetOrigin={{horizontal: 'right', vertical: 'top'}}
+				anchorOrigin={{horizontal: 'right', vertical: 'top'}}>
+				<LinkItem primaryText="下载host文件" leftIcon={getIcon({}, "icon-download")} href={downloadrule}/>
+				<MenuItem primaryText="导入host文件" leftIcon={getIcon({}, "icon-upload")} onClick={this.handleImportRule}/>
+				<LinkItem primaryText="下载cert文件" leftIcon={getIcon({}, "icon-download")} href={downloadcert}/>
+				<LinkItem primaryText="github" leftIcon={getIcon({}, "icon-github")} href="https://github.com/jianxcao/catproxy"/>
+				<LinkItem primaryText="帮助" leftIcon={getIcon({}, "icon-help")} href="https://github.com/jianxcao/catproxy"/>
+			</IconMenu>
 		}/>)
 	}
 }

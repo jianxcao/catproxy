@@ -31,7 +31,8 @@ export default class MyListItem extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			hoverList: false
+			hoverList: false,
+			isEditor: false
 		}
 	}
 	static propTypes = {
@@ -63,6 +64,9 @@ export default class MyListItem extends React.Component {
 				changeGroupName(groupId, newName);
 			}
 		}
+		this.setState(Object.assign({}, this.state, {
+			isEditor: false
+		}));
 	}
 	//删除事件
 	handleDel = (e) => {
@@ -89,7 +93,16 @@ export default class MyListItem extends React.Component {
 			toggleGroupDis(groupId);
 		}
 	}
-	
+
+	//变成可编辑状态
+	handleChangeToEditor = (e) => {
+		e.stopPropagation();
+		e.preventDefault();
+		this.setState(Object.assign({}, this.state, {
+			isEditor: true
+		}));
+	}
+
 	//获取文本内容
 	getPrimaryContent = ()=> {
 		let isDisplay = this.state.hoverList ? "inline-block" : "none";
@@ -107,7 +120,14 @@ export default class MyListItem extends React.Component {
 				display: isDisplay,
 				left: '24px'
 			}), 
-			<EditField val={this.props.primaryText} key={2} valChange={this.changeName.bind(this)}/>];
+			getIcon({
+				key: 2,
+				onClick: this.handleChangeToEditor.bind(this)
+			},'icon-editor', {
+				display: isDisplay,
+				left: '48px'
+			}),
+			<EditField val={this.props.primaryText} key={3} valChange={this.changeName.bind(this)} isEditor= {this.state.isEditor}/>];
 	}
 
 	getInnerDivStyle = () => {
@@ -118,15 +138,17 @@ export default class MyListItem extends React.Component {
 			lineHeight: '48px'
 		}, innerDivStyle);
 	}
+
 	handleMouseOver = () => {
-		this.setState({
+		this.setState(Object.assign({}, this.state, {
 			hoverList: true
-		});
+		}));
 	}
+
 	handleMouseOut = () => {
-		this.setState({
+		this.setState(Object.assign({}, this.state, {
 			hoverList: false
-		});
+		}));
 	}
 	//改变当前指定的分组分支
 	handleUpdateSelectRule = () => {
