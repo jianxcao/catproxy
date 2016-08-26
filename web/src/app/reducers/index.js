@@ -192,7 +192,7 @@ export let selectRule = (state = new Map(), action = {}) => {
 export let disCache = (state = true, action = {}) => {
 	switch (action.type) {
 		case DIS_CACHE:
-			return action.status;
+			return !!action.status;
 		default:
 			return state;
 	}
