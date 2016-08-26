@@ -11,6 +11,9 @@ import Promise from 'promise';
 import changeHost from './changeHost';
 import ip from 'ip';
 import {localIps} from './getLocalIps';
+import {getUrl} from './tools';
+import net from 'net';
+let isStartHttps = /https/;
 //解压数据
 let decodeCompress = function(bodyData, encode) {
 	return new Promise(function(resolve, reject) {
@@ -73,21 +76,6 @@ let triggerBeforeRes = (resInfo, com) => {
 	});
 };
 
-let getUrl = ({port, path: pathname, protocol, hostname})=> {
-	if (hostname && protocol) {
-		hostname = hostname.split(':')[0];
-		port  = ":" + port;
-		protocol === "https" ? "http" : "https";
-		if (+port === 80 && protocol === "http") {
-			port = "";
-		}
-		if (+port === 443 && protocol === "https") {
-			port = "";
-		}
-		pathname = pathname || "";
-		return `${protocol}://${hostname}${port}${pathname}`;
-	}
-};
 let toHeadersFirstLetterUpercase = (headers)=>{
 	let reg = /(?:^\w)|-\w/g;
 	let result = {};
@@ -124,6 +112,7 @@ export let local = function(reqInfo, resInfo, fileAbsPath) {
 	.then(resInfo => {
 			let {bodyData, headers, statusCode, res} = resInfo;
 			headers['loacl-file'] = fileAbsPath;
+			delete headers['content-length'];
 			res.writeHead(statusCode, toHeadersFirstLetterUpercase(headers) || {});
 			if (!res.headers) {
 				res.headers = headers || {};
@@ -137,29 +126,34 @@ export let remote = function(reqInfo, resInfo) {
 	let {req} = reqInfo;
 	let {res} = resInfo;
 	let com = this;
+	let currentHost = reqInfo.headers.host;
 	Promise.resolve()
 	.then(() => {
 		 	let t = /^\/.*/;
+		 	let hostname = reqInfo.host.split(':')[0];
+		 	if (!net.isIP(hostname)) {
+		 		reqInfo.headers.host =  reqInfo.host;
+		 	}
 			//请求选项
 			let options = {
-				hostname: reqInfo.host.split(':')[0],
+				hostname,
 				port: reqInfo.port || (reqInfo.protocol === 'http' ? 80 : 443),
 				path: t.test(reqInfo.path) ? reqInfo.path : "/" + reqInfo.path,
 				method: reqInfo.method,
-				headers: reqInfo.headers //大小写问题，是否需要转换
+				headers: toHeadersFirstLetterUpercase(reqInfo.headers) //大小写问题，是否需要转换
 			};
-			try {
-				//忽略不安全的警告
-				options.rejectUnauthorized = true;
-			} catch (e) {}
+			options.rejectUnauthorized = true;
 			//发送请求，包括https和http
 			log.verbose('send proxy', options.hostname, /https/.test(reqInfo.protocol) ? 'https' : 'http');
 			return options;
 	})
 	.then(options => {
 		//取当前启动的port
-		let {port} = com.option;
+		let {port, httpsPort} = com.option;
 		let isServerPort = +port === +options.port;
+		if (isStartHttps.test(reqInfo.protocol)) {
+			isServerPort = +httpsPort === +options.port;
+		}
 		return changeHost(options.hostname, isServerPort)
 		.then(address => {
 			//如果还是死循环，则跳出
@@ -184,14 +178,15 @@ export let remote = function(reqInfo, resInfo) {
 		if (!options) {
 			return;
 		}
-		let proxyReq = (/https/.test(reqInfo.protocol) ? https : http)
+		let proxyReq = (isStartHttps.test(reqInfo.protocol) ? https : http)
 		.request(options, function(proxyRes) {
-			log.verbose('received request from: ' + reqInfo.originalFullUrl);
+			let remoteUrl = getUrl(merge({}, options, {protocol: reqInfo.protocol}));
+			log.verbose(`received request from : ${remoteUrl}`);
+			log.verbose('request originalFullUrl: ' + reqInfo.originalFullUrl);
 			resInfo = merge(resInfo, {
 				headers: proxyRes.headers || {},
 				statusCode: proxyRes.statusCode
 			});
-			//delete headers['content-length'];
 			//没有内容
 			// if (+statusCode === 204) {
 			// 	res.end();
@@ -216,7 +211,9 @@ export let remote = function(reqInfo, resInfo) {
 						//如果数据太大提前触发事件，没找到更好的方法，这个时候 用户无法设置bodData
 						triggerBeforeRes(merge({}, resInfo, {bodyDataErr: err.message}), com)
 						.then(({statusCode, headers}) => {
-							headers['remote-url'] = getUrl(merge({}, options, {protocol: reqInfo.protocol}));
+							//无法确定文长度，删掉这个
+							delete headers['content-length'];
+							headers['remote-url'] = remoteUrl;
 							res.writeHead(statusCode || 200, toHeadersFirstLetterUpercase(headers));
 							res.write(Buffer.concat(resBodyData));
 							res.write(chunk);
@@ -239,6 +236,8 @@ export let remote = function(reqInfo, resInfo) {
 						return triggerBeforeRes(merge({}, resInfo, {bodyData}), com)
 							.then((resInfo) => {
 								let {statusCode, headers, bodyData} = resInfo;
+								//无法确定文长度，删掉这个
+								delete headers['content-length'];
 								headers['remote-url'] = getUrl(merge({}, options, {protocol: reqInfo.protocol}));
 								res.writeHead(statusCode || 200, toHeadersFirstLetterUpercase(headers));
 								res.write(bodyData);

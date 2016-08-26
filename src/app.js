@@ -125,8 +125,8 @@ class CatProxy extends EventEmitter{
 		servers.forEach(server => {
 			//如果在http下代理https，则需要过度下请求
 			if (server instanceof  http.Server) {
-				server.on('connect', com.requestConnectHandler);
 				server.on('upgrade', com.requestUpgradeHandler);
+				server.on('connect', com.requestConnectHandler);
 			}
 			server.on('request', com.requestHandler);
 			//如果server没有被监听，则调用默认端口监听

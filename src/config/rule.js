@@ -7,7 +7,7 @@ import path from 'path';
 import Promise from 'promise';
 import URL from 'url';
 import dns from 'dns';
-
+import {getUrl} from '../tools';
 let parseOneRule, parseBranch, parseOneBranch, execParse, standardUrl;
 let isStringReg = /^\/.+\/$/;
 let isStartHttp = /^http(s)?:\/\//;
@@ -147,6 +147,7 @@ export let getRules =()=> {
  *		path: "请求路径，包括参数"
  *		originalUrl: "原始的请求地址,不包括参数,请不要修改",
  *		bodyData: "buffer 数据，body参数，可以修改"
+ *		原始地址仅供查看，无法修改
  *	}
  */
 export let parseRule = reqInfo => {
@@ -198,13 +199,15 @@ parseOneBranch = (rule, reqInfo) => {
 	if (isStringReg.test(test)) {
 		test = test.slice(1, test.length -1);
 	}
+	test = isStartHttp.test(test) ? test : 'http://' + test;
 	//将test转换成正则
 	test = new RegExp(test);
+	let currentUrl = getUrl(reqInfo);
 	//测试没有通过
-	if (!test.test(reqInfo.originalFullUrl) || rule.disable) {
+	if (!test.test(currentUrl) || rule.disable) {
 		return;
 	}
-	log.verbose(`解析规则,规则类型:${type},规则正则${test},规则执行${exec}`);
+	log.verbose(`解析规则,当前url:${currentUrl}, 规则类型:${type},规则正则${test},规则执行${exec}`);
 	switch(type){
 		//host模式下只能修改 host protocol port
 		case('host'):
@@ -213,7 +216,7 @@ parseOneBranch = (rule, reqInfo) => {
 			if (exec) {
 				//转换成一个url的对象
 				let execObj = standardUrl(exec);
-				reqInfo.host = execObj.hostname;
+				reqInfo.host = execObj.host;
 				reqInfo.protocol = execObj.protocol.split(':')[0];
 				reqInfo.port = execObj.port ? execObj.port : (reqInfo.protocol === 'https' ? 443 : 80);
 				reqInfo.path = type === 'host' ? reqInfo.path : execObj.path;

@@ -16,7 +16,7 @@ import iconv from 'iconv-lite';
  *   reqInfo 包含的信息
  *  {
  *    headers: "请求头"
- *		host: "请求地址"
+ *		host: "请求地址,包括端口，默认端口省略"
  *		method: "请求方法"
  *		protocol: "请求协议"
  *		originalFullUrl: "原始请求地址，包括参数"
@@ -121,7 +121,6 @@ var beforeRes = function(resInfo) {
 			resInfo.bodyData;
 		}
 	}
-	
 	// resInfo.statusCode = 302;
 	// resInfo.headers['test-cjx'] = 111;
 	// bodyData = "test";

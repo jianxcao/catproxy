@@ -19,7 +19,8 @@ let requestHandler = function(req, res) {
 		urlObject = url.parse(fullUrl),
 		port = urlObject.port || (protocol === "http" ? '80' : '443'),
 		pathStr = urlObject.path,
-		visitUrl = protocol + "://" + host + pathStr;
+		pathname = urlObject.pathname,
+		visitUrl = protocol + "://" + host + pathname;
 	log.verbose("request url: " + fullUrl);
 	//请求信息
 	let reqInfo = {
