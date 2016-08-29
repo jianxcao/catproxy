@@ -18,7 +18,8 @@ import {
 	toggleFlod,
 	switchBranch,
 	switchGroup,
-	updateSelectRule
+	updateSelectRule,
+	disableAll
 } from './action/actions';
 import {List} from 'material-ui/List';
 import ListItem from './listItem';
@@ -62,7 +63,8 @@ class LeftDrawer extends React.Component {
 		changeBranchName: React.PropTypes.func,
 		toggleGroupDis: React.PropTypes.func,
 		toggleBranchDis: React.PropTypes.func,
-		updateSelectRule: React.PropTypes.func
+		updateSelectRule: React.PropTypes.func,
+		disableAll: React.PropTypes.func
 	}
 	componentDidMount() {
 		let {changeDrawerStatus} = this.props;
@@ -85,7 +87,8 @@ class LeftDrawer extends React.Component {
 			changeBranchName,
 			toggleGroupDis,
 			toggleBranchDis,
-			updateSelectRule
+			updateSelectRule,
+			disableAll
 		} = this.props;
 		return {
 			delGroup,
@@ -94,7 +97,8 @@ class LeftDrawer extends React.Component {
 			changeBranchName,
 			toggleGroupDis,
 			toggleBranchDis,
-			updateSelectRule
+			updateSelectRule,
+			disableAll
 		}
 	}
 
@@ -218,7 +222,8 @@ function mapDispatchToProps(dispatch) {
 		toggleFlod: bindActionCreators(toggleFlod, dispatch),
 		switchBranch: bindActionCreators(switchBranch, dispatch),
 		switchGroup: bindActionCreators(switchGroup, dispatch),
-		updateSelectRule: bindActionCreators(updateSelectRule, dispatch)
+		updateSelectRule: bindActionCreators(updateSelectRule, dispatch),
+		disableAll: bindActionCreators(disableAll, dispatch)
 	};
 }
 

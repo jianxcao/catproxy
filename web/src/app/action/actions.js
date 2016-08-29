@@ -88,19 +88,21 @@ export let changeBranchName = (groupId, id, name) => {
 		name
 	};
 };
-
-export let toggleGroupDis = (id) => {
+//status为undefined或者null取反原来的状态
+export let toggleGroupDis = (id, status) => {
 	return {
 		type: TOGGLE_GROUP_DIS,
-		id
+		id,
+		status
 	};
 };
-
-export let toggleBranchDis = (groupId, id) => {
+//status为undefined或者null取反原来的状态
+export let toggleBranchDis = (groupId, id, status) => {
 	return {
 		type: TOGGLE_BRANCH_DIS,
 		groupId,
-		id
+		id,
+		status
 	};
 };
 

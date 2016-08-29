@@ -37,8 +37,8 @@ let group = (state = new List(), action = {}) => {
 		case CHANGE_GROUP_NAME:
 			return state.updateIn([action.id, "name"], ()=> action.name);
 		case TOGGLE_GROUP_DIS:
-			let dis;
-			state = state.updateIn([action.id, "disable"], val => dis = !val);
+			let dis, status = action.status;
+			state = state.updateIn([action.id, "disable"], val => dis = status === undefined ? !val : status);
 			return state.updateIn([action.id, "branch"], branch => branch.map(branch => {
 				return branch.set('disable', dis)
 				.update('rules', rules=> rules.map(rule => rule.set('disable', dis)));
@@ -86,7 +86,7 @@ let branch = (state = new List(), action = {}) => {
 		case TOGGLE_BRANCH_DIS:
 			state = state.updateIn([action.groupId, "branch", action.id], 
 				branch => {
-					let status = !branch.get('disable');
+					let status = action.status === undefined ? !branch.get('disable') : action.status;
 					return branch.set('disable', status)
 					.update('rules', rules => rules.map(rule => rule.set('disable', status)));
 				});

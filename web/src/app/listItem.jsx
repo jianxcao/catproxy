@@ -46,7 +46,8 @@ export default class MyListItem extends React.Component {
 		delGroup: React.PropTypes.func,
 		toggleGroupDis: React.PropTypes.func,
 		toggleBranchDis: React.PropTypes.func,
-		updateSelectRule: React.PropTypes.func
+		updateSelectRule: React.PropTypes.func,
+		disableAll: React.PropTypes.func
 	}
 
 	static defaultProps = {
@@ -159,14 +160,23 @@ export default class MyListItem extends React.Component {
 			}
 		}
 	}
-	
+	//强制启用当前分支，禁止其他分支
+	handleSetCurrent = () => {
+		let {groupId, branchId} = this.props;
+		let {disableAll, toggleBranchDis} = this.context;
+		if (branchId !== null && branchId >= 0) {
+			disableAll();
+			toggleBranchDis(groupId, branchId, false);
+		}
+	}
+
 	//所有属性雷同 material-ui/List下的 ListItem的组件
 	render() {
 			var myProps = Object.assign({}, this.props);
 			delete myProps.groupId;
 			delete myProps.branchId;
 			delete myProps.changeBranch;
-			return (<ListItem {...myProps}  innerDivStyle ={this.getInnerDivStyle()} onMouseOver={this.handleMouseOver} onMouseOut={this.handleMouseOut} onClick={this.handleUpdateSelectRule} primaryText={this.getPrimaryContent()}/>
+			return (<ListItem {...myProps}  innerDivStyle ={this.getInnerDivStyle()} onMouseOver={this.handleMouseOver} onMouseOut={this.handleMouseOut} onClick={this.handleUpdateSelectRule} primaryText={this.getPrimaryContent()} onDoubleClick={this.handleSetCurrent}/>
 		);
 	}
 }
