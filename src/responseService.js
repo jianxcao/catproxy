@@ -297,7 +297,13 @@ let proxyReq = function(options, reqInfo, resInfo, req) {
 		});
 	})
 	.then(null, function(err) {
-		///-----------------------------------------------------------处理超时无响应等等请求状态
+		let {headers = {}, res} = resInfo;
+		if (!res.finished) {
+			res.writeHead(500, toHeadersFirstLetterUpercase(headers));
+			err = writeErr(err);
+			res.write(err);
+			res.end();
+		}
 	});
 };
 
