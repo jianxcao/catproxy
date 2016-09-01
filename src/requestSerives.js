@@ -115,8 +115,8 @@ let requestConnectHandler = function(req, cltSocket, head) {
 	let reqUrl = `https://${req.url}`;
 	let srvUrl = url.parse(reqUrl);
 	//如果需要捕获https的请求
-	//访问地址直接是ip，跳过不代理 && !net.isIP(srvUrl.hostname)
-	if (opt.crackHttps) {
+	//访问地址直接是ip，跳过不代理 
+	if (opt.crackHttps && !net.isIP(srvUrl.hostname)) {
 		log.verbose(`crack https ${reqUrl}`);
 		getSer(this.requestHandler)
 			.then(({

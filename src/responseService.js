@@ -15,6 +15,9 @@ import {getUrl} from './tools';
 import net from 'net';
 import {getCert} from './cert/cert.js';
 import {writeErr} from './tools';
+import mime from 'mime';
+import path from 'path';
+import querystring from 'querystring'
 let isStartHttps = /https/;
 //解压数据
 let decodeCompress = function(bodyData, encode) {
@@ -118,9 +121,13 @@ export let local = function(reqInfo, resInfo, fileAbsPath) {
 	})
 	.then(resInfo => {
 		let {bodyData, headers = {}, statusCode, res} = resInfo;
-		headers['loacl-file'] = fileAbsPath;
+		headers['loacl-file'] = querystring.escape(fileAbsPath);
 		delete headers['content-length'];
 		delete headers['content-encoding'];
+		if (!headers['content-type']) {	
+			let mimeType = mime.lookup((path.extname(fileAbsPath) || "").slice(1));
+			headers['content-type'] = mimeType;
+		}
 		res.writeHead(statusCode, toHeadersFirstLetterUpercase(headers) || {});
 		if (!res.headers) {
 			res.headers = headers || {};
@@ -138,7 +145,10 @@ export let local = function(reqInfo, resInfo, fileAbsPath) {
 		err = writeErr(err);
 		res.end(err);
 		res.emit('resBodyDataReady', err, null);
-	});
+	})
+	.then(null, function(err) {
+		log.error(err);
+	})
 };
 //处理将 域名转换成ip
 let detailHost = function(result, reqInfo, resInfo) {
@@ -233,7 +243,7 @@ let proxyReq = function(options, reqInfo, resInfo, req) {
 					isFired = true;
 					let {statusCode, headers} = resInfo;
 					delete headers['content-length'];
-					headers['remote-url'] = remoteUrl;
+					headers['remote-url'] = querystring.escape(remoteUrl);
 					res.writeHead(statusCode || 200, toHeadersFirstLetterUpercase(headers));
 					res.write(Buffer.concat(resBodyData));
 					res.write(chunk);	
@@ -256,14 +266,14 @@ let proxyReq = function(options, reqInfo, resInfo, req) {
 						.then((resInfo) => {
 							let {statusCode, headers, bodyData} = resInfo;
 							delete headers['content-length'];
-							headers['remote-url'] = remoteUrl;
+							headers['remote-url'] = querystring.escape(remoteUrl);
 							res.writeHead(statusCode || 200, toHeadersFirstLetterUpercase(headers));
 							res.write(bodyData);
 							return resInfo;
 						}, (err) => {
 							let headers = resInfo.headers;
 							delete headers['content-length'];
-							headers['remote-url'] = remoteUrl;
+							headers['remote-url'] = querystring.escape(remoteUrl);
 							res.writeHead(500, toHeadersFirstLetterUpercase(headers));
 							err = writeErr(err);
 							res.write(err);
