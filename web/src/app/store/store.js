@@ -1,5 +1,5 @@
 import * as reducers from '../reducers/index';
-import Immutable from 'Immutable';
+import Immutable from 'immutable';
 import sendMsg from '../ws/sendMsg';
 import {
     combineReducers

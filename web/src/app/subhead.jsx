@@ -8,7 +8,7 @@ import AutoComplete from 'material-ui/AutoComplete';
 import TextField from 'material-ui/TextField';
 import { Provider,connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
-import Immutable, {OrderedMap, Map, List} from 'Immutable';
+import Immutable, {OrderedMap, Map, List} from 'immutable';
 import sendMsg from './ws/sendMsg'
 import key from 'keymaster';
 import store from './store/store';

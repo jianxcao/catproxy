@@ -3,7 +3,7 @@ import Paper from 'material-ui/Paper';
 import SubHeader from './subhead';
 import { Provider,connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
-import Immutable,{Map, List} from 'Immutable';
+import Immutable,{Map, List} from 'immutable';
 import EditRule from "./editRule";
 import RaisedButton from 'material-ui/RaisedButton';
 import dragCon from './dragConnect';

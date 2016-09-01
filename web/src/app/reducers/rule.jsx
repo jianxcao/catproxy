@@ -1,4 +1,4 @@
-import Immutable, {OrderedMap, Map, List} from 'Immutable';
+import Immutable, {OrderedMap, Map, List} from 'immutable';
 import actionType from "../action/action-type";
 let  {
 	ADD_RULE,

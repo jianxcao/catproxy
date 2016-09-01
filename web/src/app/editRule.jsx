@@ -1,6 +1,6 @@
 import React, {PropTypes} from 'react';
 import Paper from 'material-ui/Paper';
-import Immutable,{Map, List} from 'Immutable';
+import Immutable,{Map, List} from 'immutable';
 import TextField from 'material-ui/TextField';
 import Divider from 'material-ui/Divider';
 import SelectField from 'material-ui/SelectField';
