@@ -40,11 +40,7 @@ const config = {
             }, {
                 test: /(\.jsx|\.js)$/, // All .js files
                 loader: 'babel',
-                exclude: [nodeModulesPath],
-                query: {
-                     "presets": ['es2015', "stage-0", "react"],
-                     "plugins": []
-                }
+                exclude: [nodeModulesPath]
             }, {
                 test: /\.(eot|woff|woff2|ttf|svg|png|jpg)$/,
                 loader: 'url-loader?limit=30000&name=[name]-[hash].[ext]'
