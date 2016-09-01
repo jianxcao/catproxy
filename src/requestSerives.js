@@ -54,7 +54,7 @@ let requestHandler = function(req, res) {
 		}
 	});
 	//响应信息
-	let resInfo = {};
+	let resInfo = {headers: {}};
 	Object.defineProperties(resInfo, {
 		res: {
 			writable: false,
@@ -112,14 +112,17 @@ let getSer = requestHandler => {
  */
 let requestConnectHandler = function(req, cltSocket, head) {
 	let opt = this.option;
+	let reqUrl = `https://${req.url}`;
+	let srvUrl = url.parse(reqUrl);
 	//如果需要捕获https的请求
+	//访问地址直接是ip，跳过不代理 && !net.isIP(srvUrl.hostname)
 	if (opt.crackHttps) {
-		log.verbose(`crack https https://${req.url}`);
+		log.verbose(`crack https ${reqUrl}`);
 		getSer(this.requestHandler)
 			.then(({
 				port
 			}) => {
-				var srvSocket = net.connect(port, "localhost", () => {
+				let srvSocket = net.connect(port, "localhost", () => {
 					cltSocket.write(`HTTP/${req.httpVersion} 200 Connection Established\r\n` +
 						'Proxy-agent: Node-CatProxy\r\n' +
 						'\r\n');
@@ -131,10 +134,9 @@ let requestConnectHandler = function(req, cltSocket, head) {
 				srvSocket.on('error', err => log.error(`crack https请求出现错误: ${err}`));
 			});
 	} else {
-		log.verbose(` through https connect http://${req.url}`);
+		log.verbose(`through https connect ${reqUrl}`);
 		// connect to an origin server
-		var srvUrl = url.parse(`https://${req.url}`);
-		var srvSocket = net.connect(srvUrl.port, srvUrl.hostname, () => {
+		let srvSocket = net.connect(srvUrl.port, srvUrl.hostname, () => {
 			cltSocket.write('HTTP/1.1 200 Connection Established\r\n' +
 				'Proxy-agent: Node-CatProxy\r\n' +
 				'\r\n');
@@ -151,13 +153,34 @@ let requestConnectHandler = function(req, cltSocket, head) {
  * @param req
  * @param socket
  */
-let requestUpgradeHandler = function(req, socket) {
+let requestUpgradeHandler = function(req, cltSocket, head) {
+	// connect to an origin server
+	// log.debug(req.headers);
+	log.debug(req.headers.host);
+	let {headers} = req; 
+	let headersStr = 'HTTP/1.1 101 Web Socket Protocol Handshake\r\n';
+	// headersStr +=  'Upgrade:WebSocket\r\n';
+	// headersStr += 'Connection:Upgrade\r\n';
+	for(let key in headers) {
+		headersStr += key + ":" + headers[key] + "\r\n"
+	}
+	headersStr + '\r\n';
+	// let srvSocket = net.connect(443, req.headers.host, () => {
+	// 	log.debug('connect success');
+	// 	cltSocket.write(headersStr);
+	// 	srvSocket.write(head);
+	// 	srvSocket.pipe(cltSocket);
+	// 	cltSocket.pipe(srvSocket);
+	// });
+	// cltSocket.on('error', err => log.error(`转发https请求出现错误: ${err}`));
+	// srvSocket.on('error', err => log.error(`转发https请求出现错误: ${err}`));
+
+	// log.debug('********************');
+	// log.debug(req.url);
+	// log.debug('********************');
 	//socket请求直接转发吧
-	socket.write('HTTP/1.1 101 Web Socket Protocol Handshake\r\n' +
-               'Upgrade: WebSocket\r\n' +
-               'Connection: Upgrade\r\n' +
-               '\r\n');
-  socket.pipe(socket); // echo back
+	cltSocket.write(headersStr);
+  	cltSocket.pipe(cltSocket); // echo back
 };
 export default {
 	requestHandler,

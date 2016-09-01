@@ -16,7 +16,8 @@ const ruleType = {
 	host: "host",
 	localFile: "localFile",
 	localDir: "localDir",
-	remoteFile: "remoteFile"
+	remoteFile: "remoteFile",
+	redirect: 'redirect'
 };
 
 let checkRules = (branch) => {
@@ -237,6 +238,11 @@ parseOneBranch = (rule, reqInfo) => {
 				}
 			}
 		break;
+		case('redirect') :
+			if (exec) {
+				reqInfo.redirect = isStartHttp.test(exec) ? exec : "http://" + exec;
+			}
+		break;
 		case('localFile'):
 			if (exec) {
 				reqInfo.sendToFile = exec;
@@ -256,7 +262,6 @@ parseOneBranch = (rule, reqInfo) => {
 		break;
 		default:
 	}
-	// log.verbose(reqInfo);
 	return reqInfo;
 };
 //转换url为一个标准对象

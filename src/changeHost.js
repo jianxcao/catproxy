@@ -12,7 +12,7 @@ export default (hostname, isServerPort) => {
 	return new Promise((resolve, reject) => {
 		dns.lookup(hostname, (err, address) => {
 			if (err || !address) {
-				reject(err.code || '为找到合适的ip');
+				reject(err || '为找到合适的ip');
 			} else {
 				resolve(address);
 			}

@@ -45,6 +45,8 @@ import iconv from 'iconv-lite';
  *    reqInfo.bodyData = "请求数据",
  *    //直接定位到某个文件 --如果返回某个文件，有这个，就会忽略远程的调用即host设置之类的都无效
  *    reqInfo.sendToFile
+ *    //重定向到某个url，--有这个，就会忽略远程的调用即host设置之类的都无效
+ *    reqInfo.redirect
  */
 var beforeReq = function(reqInfo) {
 	// reqInfo.headers['test-cjx'] = 111;
@@ -75,7 +77,7 @@ var beforeReq = function(reqInfo) {
  * @param  {[type]} resInfo [响应信息]
  *  *  resInfo包含的信息
  *  {
- *  	statusCode: "响应状态码, 可以修改"
+ *    statusCode: "响应状态码, 可以修改"
  *    headers: "请求头,可修改"
  *    ---注意如果有bodyData则会直接用bodyData的数据返回
  *		bodyData: "buffer 数据",
@@ -95,6 +97,7 @@ var beforeRes = function(resInfo) {
 		delete resInfo.headers['last-modifed'];
 		let bodyData = resInfo.bodyData;
 		let contentType = resInfo.headers['content-type'];
+		
 		//如果访问的是一个html,并且成功截取到这个html的内容
 		if (contentType &&  
 			mime.extension(contentType) === 'html' && 
@@ -118,13 +121,14 @@ var beforeRes = function(resInfo) {
 				<meta http-equiv="Pragma" content="no-cache" />
 				<meta http-equiv="Expires" content="0" />`
 			);
-			resInfo.bodyData;
+			resInfo.bodyData = bodyData;
 		}
 	}
+	// throw new Error('调用resize错误');
 	// resInfo.statusCode = 302;
 	// resInfo.headers['test-cjx'] = 111;
 	// bodyData = "test";
-	this.emit('beforeRes', resInfo);
+	// this.emit('beforeRes', resInfo);
 	return resInfo;
 };
 
@@ -153,6 +157,7 @@ var beforeRes = function(resInfo) {
  * @returns {*}
  */
 var afterRes = function(result) {
+	// log.debug('after', result);
 	this.emit('afterRes', result);
 	return result;
 };

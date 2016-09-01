@@ -1,3 +1,4 @@
+import log from './log';
 export let getUrl = ({port, path: pathname, protocol, hostname, host})=> {
 	if (protocol && (hostname || host)) {
 		hostname = hostname || host;
@@ -16,3 +17,23 @@ export let getUrl = ({port, path: pathname, protocol, hostname, host})=> {
 		return `${protocol}://${hostname}${port}${pathname}`;
 	}
 };
+
+export let writeErr = (err) => {
+	err = err || "系统内部错误";
+	if (err.stack && err.message) {
+		err = err.message + "<br>" + err.stack;
+	}
+	return err;
+}
+
+export let error = err => {
+	if (err.message && err.message.indexOf("EACCES") > -1) {
+		log.error("请用sudo管理员权限打开");
+		process.exit(1);
+	} else if (err.message.indexOf("EADDRINUSE") > -1) {
+		log.error(`端口${port}被占用，请检查端口占用情况`);
+		process.exit(1);
+	} else {
+		log.error("出现错误：" + err.stack);
+	}
+}
