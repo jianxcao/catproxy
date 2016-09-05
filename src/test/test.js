@@ -16,10 +16,17 @@ import changeHost from '../changeHost';
 // });
 // 
 // 
-changeHost("pimg1.126.net", true)
+// changeHost("pimg1.126.net", true)
 
-.then(address => {
-	console.log(address);
-}, (err) => {
-	console.log(err);
-});
+// .then(address => {
+// 	console.log(address);
+// }, (err) => {
+// 	console.log(err);
+// });
+
+
+var a = '<meta charset="gb2312">'
+var b = '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">';
+var checkMetaCharset = /<meta(?:\s)+.*charset(?:\s)*=(?:[\s'"])*([^"']+)/;
+console.log(b.match(checkMetaCharset));
+console.log(a.match(checkMetaCharset));

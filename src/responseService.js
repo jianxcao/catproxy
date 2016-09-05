@@ -75,7 +75,7 @@ let triggerBeforeRes = (resInfo, com) => {
 		if (result) {
 			//返回的是一个promise
 			if(result.then) {
-				return result.then(result => merge(resInfo, result), () => resInfo);
+				return result.then(result => merge(resInfo, result));
 			//返回的是一个resInfo
 			} else {
 				resInfo = merge(resInfo, result);
@@ -188,11 +188,11 @@ let proxyReq = function(options, reqInfo, resInfo, req) {
 	var com = this;
 	return new Promise((resolve, reject) => {
 		//发出请求
+		log.verbose('send proxy request originalFullUrl: ' + reqInfo.originalFullUrl);
 		let proxyReq = (isStartHttps.test(reqInfo.protocol) ? https : http)
 		.request(options, proxyRes => {
 			let remoteUrl = getUrl(merge({}, options, {protocol: reqInfo.protocol}));
 			log.verbose(`received request from : ${remoteUrl}`);
-			log.verbose('request originalFullUrl: ' + reqInfo.originalFullUrl);
 			resInfo = merge(resInfo, {
 				headers: proxyRes.headers || {},
 				statusCode: proxyRes.statusCode
@@ -336,8 +336,6 @@ export let remote = function(reqInfo, resInfo) {
 				options.cert = cert;
 			}
 		}
-		//发送请求，包括https和http
-		log.verbose('send proxy', options.hostname, reqInfo.protocol);
 		return options;
 	})
 	.then(options => {

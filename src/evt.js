@@ -4,6 +4,11 @@ import {parseRule} from './config/rule';
 import * as config from './config/config';
 import mime from 'mime';
 import iconv from 'iconv-lite';
+//<meta charset="gb2312">
+//<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+var checkMetaCharset = /<meta(?:\s)+.*charset(?:\s)*=(?:[\s'"])*([^"']+)/;
+//自动解析类型，其他类型一律保存的是 Buffer
+var autoDecodeRegs = /text\/.+|(?:application\/(?:json.*|.*javascript))/;
 /**
  * 代理请求发出前
  * 该方法主要是处理在响应前的所有事情，可以用来替换header，替换头部数据等操作
@@ -67,11 +72,53 @@ var beforeReq = function(reqInfo) {
 	return parseRule(reqInfo)
 	.then(result => result || reqInfo)
 	.then(reqInfo => {
-		this.emit('beforeReq', reqInfo);
 		return reqInfo;
 	});
 };
-
+//如果不是合法的类型，就不进行decode
+var decodeContent = function(bodyData, contentType) {
+	//默认编码是utf8
+	let charset = 'UTF-8', tmp;
+	if (!bodyData || !autoDecodeRegs.test(contentType)) {
+		return {bodyData, charset};
+	}
+	if(contentType) {
+		//如果contenttype上又编码，则重新设置编码
+		tmp = contentType.match(/charset=([^;]+)/);
+		if (tmp && tmp.length > 0) {
+			charset = tmp[1].toUpperCase();
+		}
+	}
+	let ext = mime.extension(contentType) === 'html';
+	if (Buffer.isBuffer(bodyData)) {
+		//其他编码先尝试用 iconv去解码
+		if (charset !== 'UTF-8' && iconv.encodingExists(charset)) {
+			bodyData = iconv.decode(bodyData, charset);
+		} else if(contentType &&  (ext === 'html' || ext === 'htm')) {//如果是一个文档，在取一次编码
+			let strBodyData = bodyData.toString();
+			//在内容中再次找寻编码
+			let tmp = strBodyData.match(checkMetaCharset);
+			if (tmp && tmp[1]) {
+				tmp[1] = tmp[1].toUpperCase();
+				if (tmp[1]!== "UTF-8" && iconv.encodingExists(tmp[1])) {
+					charset = tmp[1];
+					bodyData = iconv.decode(bodyData, tmp[1]);
+				} else {
+					bodyData = strBodyData;
+				}
+			} else {
+				bodyData = strBodyData;
+			}
+		} else {
+			bodyData = bodyData.toString();
+		}
+	}
+	//再次加编码传递到页面
+	return {
+		bodyData,
+		charset
+	}
+}
 /**
  * 准备响应请求前
  * @param  {[type]} resInfo [响应信息]
@@ -90,46 +137,48 @@ var beforeReq = function(reqInfo) {
  * @return {[type]}         [description]
  */
 var beforeRes = function(resInfo) {
-	if (config.get('disCache')) {
-		resInfo.headers['cache-control'] = "no-store";
-		resInfo.headers.expires = "0";
-		delete resInfo.headers.etag;
-		delete resInfo.headers['last-modifed'];
-		let bodyData = resInfo.bodyData;
-		let contentType = resInfo.headers['content-type'];
-		
-		//如果访问的是一个html,并且成功截取到这个html的内容
-		if (contentType &&  
-			mime.extension(contentType) === 'html' && 
-			bodyData) {
-			let charset = contentType.match(/charset=([^;]+)/);
-			if (charset && charset.length > 0) {
-				charset = charset[1].toUpperCase();
-			} else {
-				charset = 'UTF-8';
+	return Promise.resolve(resInfo)
+	.then(function (resInfo) {
+		var disCache = config.get('disCache');
+		//用户监听
+		var useListener = false;
+		if (disCache) {
+			resInfo.headers['cache-control'] = "no-store";
+			resInfo.headers.expires = "0";
+			delete resInfo.headers.etag;
+			delete resInfo.headers['last-modifed'];
+		}
+		if (disCache || useListener) {
+			let contentType = resInfo.headers['content-type'];
+			//按照指定编码解码内容
+			let {charset, bodyData} = decodeContent(resInfo.bodyData, contentType);
+			let extension = mime.extension(contentType);
+			//如果访问的是一个html,并且成功截取到这个html的内容
+			if (disCache && contentType &&  (extension === 'html' || extension === 'htm') && bodyData) {
+				bodyData = bodyData.replace("<head>",
+					`<head>
+					<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+					<meta http-equiv="Pragma" content="no-cache" />
+					<meta http-equiv="Expires" content="0" />`
+				);
 			}
-			if (Buffer.isBuffer(bodyData)) {
-				if (charset === 'GBK' || charset === "GB2312") {
-					bodyData = iconv.decode(bodyData, 'GBK');
-				} else {
-					bodyData = bodyData.toString();
-				}
-			}
-			bodyData = bodyData.replace("<head>",
-			 `<head>
-				<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-				<meta http-equiv="Pragma" content="no-cache" />
-				<meta http-equiv="Expires" content="0" />`
-			);
+			resInfo.charset = charset;
 			resInfo.bodyData = bodyData;
 		}
-	}
+		return resInfo;
+	})
+	.then(function(resInfo) {
+		//为什么要变成buffer主要是为了让浏览器认识，根据浏览器当前的编码解析
+		if (typeof resInfo.bodyData === 'string') {
+			resInfo.bodyData = iconv.encode(resInfo.bodyData, resInfo.charset || "UTF-8");
+		}
+		return resInfo;
+	});
 	// throw new Error('调用resize错误');
 	// resInfo.statusCode = 302;
 	// resInfo.headers['test-cjx'] = 111;
 	// bodyData = "test";
-	// this.emit('beforeRes', resInfo);
-	return resInfo;
+	
 };
 
 /**
@@ -158,7 +207,6 @@ var beforeRes = function(resInfo) {
  */
 var afterRes = function(result) {
 	// log.debug('after', result);
-	this.emit('afterRes', result);
 	return result;
 };
 
