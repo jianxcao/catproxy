@@ -89,7 +89,7 @@ var decodeContent = function(bodyData, contentType) {
 			charset = tmp[1].toUpperCase();
 		}
 	}
-	let ext = mime.extension(contentType) === 'html';
+	let ext = mime.extension(contentType);
 	if (Buffer.isBuffer(bodyData)) {
 		//其他编码先尝试用 iconv去解码
 		if (charset !== 'UTF-8' && iconv.encodingExists(charset)) {
