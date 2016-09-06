@@ -14,7 +14,7 @@ certDir = path.join(certDir, './cert_center');
 var rootKeyPath = path.resolve(certDir, './cert.key');
 var rootCrtPath = path.resolve(certDir, './cert.crt');
 var certCachePath = path.resolve(certDir, 'certCache');
-
+var certCache = {};
 // console.log(log);
 //是否纯在根证书
 var isRootCertExits = () => {
@@ -38,15 +38,19 @@ var setRootCert = () => {
 //不存在根证书就创建
 var getRootCert = () => {
 	var privateKey, cert;
+	//存在缓存，直接调用
+	if (certCache.root) {
+		return certCache.root;
+	}
 	//确保证书目录存在
 	fse.ensureDirSync(certDir);
 	if (!isRootCertExits()) {
 		log.error('没有生成根证书，请调用命令生成根证书 -h查看帮助');
 		process.exit(0);
-		// ({privateKey, cert} = setRootCert());
 	} else {
 		privateKey = fs.readFileSync(rootKeyPath, {encoding: 'utf8'});
 		cert = fs.readFileSync(rootCrtPath, {encoding: 'utf8'});
+		certCache.root = {privateKey, cert};
 	}
 	return {privateKey, cert};
 };
@@ -61,6 +65,10 @@ var getCert = (domain) => {
 	var result = {};
 	if (!domain) {
 		return result;
+	}
+	//已经存在，则从缓存中获取
+	if (certCache[domain]) {
+		return certCache[domain];
 	}
 	var mc = md.md5.create();
 	mc.update(domain);
@@ -77,6 +85,7 @@ var getCert = (domain) => {
 		fs.writeFileSync(keyPath, privateKey);
 		fs.writeFileSync(certPath, cert);		
 	}
+	certCache[domain] = {cert, privateKey};
 	return {cert, privateKey};
 };
 

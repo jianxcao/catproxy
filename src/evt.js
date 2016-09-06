@@ -158,10 +158,9 @@ var decodeContent = function(bodyData, contentType, contentEncoding) {
 		return {
 			bodyData,
 			charset
-		}
+		};
 	});
-
-}
+};
 /**
  * 准备响应请求前
  * @param  {[type]} resInfo [响应信息]
