@@ -4,11 +4,48 @@ import {parseRule} from './config/rule';
 import * as config from './config/config';
 import mime from 'mime';
 import iconv from 'iconv-lite';
+import zlib from 'zlib';
+import {Buffer} from 'buffer';
 //<meta charset="gb2312">
 //<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-var checkMetaCharset = /<meta(?:\s)+.*charset(?:\s)*=(?:[\s'"])*([^"']+)/;
+var checkMetaCharset = /<meta(?:\s)+.*charset(?:\s)*=(?:[\s'"])*([^"']+)/i;
 //自动解析类型，其他类型一律保存的是 Buffer
-var autoDecodeRegs = /text\/.+|(?:application\/(?:json.*|.*javascript))/;
+var autoDecodeRegs = /text\/.+|(?:application\/(?:json.*|.*javascript))/i;
+
+//解压数据
+let decodeCompress = function(bodyData, encode) {
+	return new Promise(function(resolve, reject) {
+		//成功的取到bodyData
+		if (bodyData) {
+			let isZip = /gzip/i.test(encode);
+			let isDeflate = /deflate/i.test(encode);
+			if (isZip) {
+				zlib.gunzip(bodyData, function(err, buff) {
+					if (err) {
+						reject(err.message);
+						log.error('decompress err: ', err.message);
+					} else {
+						resolve(buff);
+					}
+				});
+			} else if(isDeflate) {
+				zlib.inflateRaw(bodyData, function(err, buff) {
+					if (err) {
+						reject(err.message);
+						log.error('decompress err: ', err.message);
+					} else {
+						resolve(buff);
+					}
+				});
+			} else {
+				resolve(bodyData);
+			}
+		} else {
+			resolve(new Buffer(""));
+		}
+	});
+};
+
 /**
  * 代理请求发出前
  * 该方法主要是处理在响应前的所有事情，可以用来替换header，替换头部数据等操作
@@ -32,7 +69,7 @@ var autoDecodeRegs = /text\/.+|(?:application\/(?:json.*|.*javascript))/;
  *		originalUrl: "原始的请求地址,不包括参数,请不要修改",
  *		bodyData: "buffer 数据，body参数，可以修改"
  *	}
- *	
+ *
  *  举例说明,可以请求的修改的地方
  *  	修改请求头，注意只有请求远程服务器的时候管用
  *  	reqInfo.headers['test-cjx'] = 111;
@@ -61,9 +98,9 @@ var beforeReq = function(reqInfo) {
 	// reqInfo.path = "/a/b?c=d";
 	// reqInfo.method = "post";
 	// reqInfo.headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
-	// reqInfo.bodyData = new Buffer('a=b&c=d');	
+	// reqInfo.bodyData = new Buffer('a=b&c=d');
 	// reqInfo.sendToFile = "D:/project/gitWork/catproxy/bin.js";
-	
+
 	// log.debug(reqInfo.headers);
 	// log.debug(reqInfo.bodyData.toString());
 	// if (reqInfo.host.indexOf('pimg1.126.net') > -1) {
@@ -76,48 +113,54 @@ var beforeReq = function(reqInfo) {
 	});
 };
 //如果不是合法的类型，就不进行decode
-var decodeContent = function(bodyData, contentType) {
-	//默认编码是utf8
-	let charset = 'UTF-8', tmp;
-	if (!bodyData || !autoDecodeRegs.test(contentType)) {
-		return {bodyData, charset};
-	}
-	if(contentType) {
-		//如果contenttype上又编码，则重新设置编码
-		tmp = contentType.match(/charset=([^;]+)/);
-		if (tmp && tmp.length > 0) {
-			charset = tmp[1].toUpperCase();
+var decodeContent = function(bodyData, contentType, contentEncoding) {
+	//先看看是否需要解压数据
+	return decodeCompress(bodyData, contentEncoding)
+	//解压后在通过编码去解码数据
+	.then(function(bodyData) {
+		//默认编码是utf8
+		let charset = 'UTF-8', tmp;
+		if (!bodyData || !autoDecodeRegs.test(contentType)) {
+			return {bodyData, charset};
 		}
-	}
-	let ext = mime.extension(contentType);
-	if (Buffer.isBuffer(bodyData)) {
-		//其他编码先尝试用 iconv去解码
-		if (charset !== 'UTF-8' && iconv.encodingExists(charset)) {
-			bodyData = iconv.decode(bodyData, charset);
-		} else if(contentType &&  (ext === 'html' || ext === 'htm')) {//如果是一个文档，在取一次编码
-			let strBodyData = bodyData.toString();
-			//在内容中再次找寻编码
-			let tmp = strBodyData.match(checkMetaCharset);
-			if (tmp && tmp[1]) {
-				tmp[1] = tmp[1].toUpperCase();
-				if (tmp[1]!== "UTF-8" && iconv.encodingExists(tmp[1])) {
-					charset = tmp[1];
-					bodyData = iconv.decode(bodyData, tmp[1]);
+		if(contentType) {
+			//如果contenttype上又编码，则重新设置编码
+			tmp = contentType.match(/charset=([^;]+)/);
+			if (tmp && tmp.length > 0) {
+				charset = tmp[1].toUpperCase();
+			}
+		}
+		let ext = mime.extension(contentType);
+		if (Buffer.isBuffer(bodyData)) {
+			//其他编码先尝试用 iconv去解码
+			if (charset !== 'UTF-8' && iconv.encodingExists(charset)) {
+				bodyData = iconv.decode(bodyData, charset);
+			} else if(contentType &&  (ext === 'html' || ext === 'htm')) {//如果是一个文档，在取一次编码
+				let strBodyData = bodyData.toString();
+				//在内容中再次找寻编码
+				let tmp = strBodyData.match(checkMetaCharset);
+				if (tmp && tmp[1]) {
+					tmp[1] = tmp[1].toUpperCase();
+					if (tmp[1]!== "UTF-8" && iconv.encodingExists(tmp[1])) {
+						charset = tmp[1];
+						bodyData = iconv.decode(bodyData, tmp[1]);
+					} else {
+						bodyData = strBodyData;
+					}
 				} else {
 					bodyData = strBodyData;
 				}
 			} else {
-				bodyData = strBodyData;
+				bodyData = bodyData.toString();
 			}
-		} else {
-			bodyData = bodyData.toString();
 		}
-	}
-	//再次加编码传递到页面
-	return {
-		bodyData,
-		charset
-	}
+		//再次加编码传递到页面
+		return {
+			bodyData,
+			charset
+		}
+	});
+
 }
 /**
  * 准备响应请求前
@@ -131,7 +174,7 @@ var decodeContent = function(bodyData, contentType) {
  *		bodyDataErr: "请求出错，目前如果是大文件会触发这个,这个时候bodyData为空，且不可以设置"
  *		//这个时候 resInfo,bodyData无效
  *	}
- *	
+ *
  *   举例说明可以修改响应的地方/
  *  	resInfo.headers['test-cjx'] = 111;
  * @return {[type]}         [description]
@@ -139,33 +182,44 @@ var decodeContent = function(bodyData, contentType) {
 var beforeRes = function(resInfo) {
 	return Promise.resolve(resInfo)
 	.then(function (resInfo) {
+		//禁用缓存则删掉缓存相关的header
 		var disCache = config.get('disCache');
-		//用户监听
-		var useListener = false;
 		if (disCache) {
 			resInfo.headers['cache-control'] = "no-store";
 			resInfo.headers.expires = "0";
 			delete resInfo.headers.etag;
 			delete resInfo.headers['last-modifed'];
 		}
-		if (disCache || useListener) {
-			let contentType = resInfo.headers['content-type'];
-			//按照指定编码解码内容
-			let {charset, bodyData} = decodeContent(resInfo.bodyData, contentType);
-			let extension = mime.extension(contentType);
-			//如果访问的是一个html,并且成功截取到这个html的内容
-			if (disCache && contentType &&  (extension === 'html' || extension === 'htm') && bodyData) {
-				bodyData = bodyData.replace("<head>",
-					`<head>
-					<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-					<meta http-equiv="Pragma" content="no-cache" />
-					<meta http-equiv="Expires" content="0" />`
-				);
-			}
-			resInfo.charset = charset;
-			resInfo.bodyData = bodyData;
-		}
 		return resInfo;
+	})
+	.then(function(resInfo) {
+		//禁用缓存或者用户这是监听，则需哟啊解码内容返回给用户
+		var disCache = config.get('disCache');
+		//用户监听
+		var useListener = false;
+		if (disCache || useListener) {
+			let contentType = resInfo.headers['content-type'] || "";
+			let contentEncoding = resInfo.headers['content-encoding'];
+			//按照指定编码解码内容
+			return decodeContent(resInfo.bodyData, contentType, contentEncoding)
+			.then(function({charset, bodyData}) {
+				let extension = mime.extension(contentType);
+				delete resInfo.headers['content-encoding'];
+				//如果访问的是一个html,并且成功截取到这个html的内容
+				if (disCache && contentType &&  (extension === 'html' || extension === 'htm') && bodyData) {
+					bodyData = bodyData.replace("<head>",
+						`<head>
+						<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+						<meta http-equiv="Pragma" content="no-cache" />
+						<meta http-equiv="Expires" content="0" />`
+					);
+				}
+				resInfo.charset = charset;
+				resInfo.bodyData = bodyData;
+				return resInfo;
+			})
+		}
+		return Promise.resolve(resInfo);
 	})
 	.then(function(resInfo) {
 		//为什么要变成buffer主要是为了让浏览器认识，根据浏览器当前的编码解析
@@ -178,7 +232,6 @@ var beforeRes = function(resInfo) {
 	// resInfo.statusCode = 302;
 	// resInfo.headers['test-cjx'] = 111;
 	// bodyData = "test";
-	
 };
 
 /**
@@ -215,9 +268,3 @@ export {
 	afterRes,
 	beforeRes
 };
-
-//=============注意看，请求出错的是的错误和bodyData
-//====================检查reqInfo和resinfo
-
-//测试修改请求，响应的头部数据和body数据看是否正常
-//响应头添加statusCode

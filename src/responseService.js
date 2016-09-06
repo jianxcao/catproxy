@@ -2,7 +2,6 @@
 import http from 'http';
 import https from 'https';
 import log from './log';
-import zlib from 'zlib';
 import {Buffer} from 'buffer';
 import fs from 'fs';
 import merge from 'merge';
@@ -19,72 +18,21 @@ import mime from 'mime';
 import path from 'path';
 import querystring from 'querystring'
 let isStartHttps = /https/;
-//解压数据
-let decodeCompress = function(bodyData, encode) {
-	return new Promise(function(resolve, reject) {
-		//成功的取到bodyData
-		if (bodyData) {
-			let isZip = /gzip/i.test(encode);
-			let isDeflate = /deflate/i.test(encode);
-			if (isZip) {
-					zlib.gunzip(bodyData, function(err, buff) {
-						if (err) {
-							reject(err.message);
-							log.error('decompress err: ', err.message);
-						} else {
-							resolve(buff);
-						}
-					}); 
-			} else if(isDeflate) {
-					zlib.inflateRaw(bodyData, function(err, buff) {
-						if (err) {
-							reject(err.message);
-							log.error('decompress err: ', err.message);
-						} else {
-							resolve(buff);
-						}
-					});
-			} else {
-				resolve(bodyData);
-			}
-		} else {
-			resolve([]);
-		}
-	});
-};
 
+//发送代理请求钱触发
 let triggerBeforeRes = (resInfo, com) => {
 	let headers = resInfo.headers || {};
-	return decodeCompress(resInfo.bodyData, headers['content-encoding'])
-	.then((bodyData) => {
-		//不压缩
-		//获取数据出错，就不解压
-		if (!resInfo.bodyDataErr) {
-			delete headers['content-encoding'];
-		}
-		resInfo.bodyData = bodyData;
-		let result, info = merge({}, resInfo);
+	return new Promise.resolve(resInfo)
+	.then((resInfo) => {
+		let info = merge({}, resInfo);
 		delete info.res;
-		try{
-			result = com.beforeRes(info);
-		} catch(e) {
-			log.error('调用beforeRes出错', e.message);
-			return Promise.reject(e.message);
-		}
-		//如果有返回结果
-		if (result) {
-			//返回的是一个promise
-			if(result.then) {
-				return result.then(result => merge(resInfo, result));
-			//返回的是一个resInfo
-			} else {
-				resInfo = merge(resInfo, result);
-			}
-		}
-		return  Promise.resolve(resInfo);
+		return com.beforeRes(info).then(result => {
+			return merge(resInfo, result);
+		});
 	});
 };
 
+//转换headers头部的大小写
 let toHeadersFirstLetterUpercase = (headers = {})=>{
 	let reg = /(?:^\w)|-\w/g;
 	let result = {};
