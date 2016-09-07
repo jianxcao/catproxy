@@ -114,8 +114,9 @@ let requestConnectHandler = function(req, cltSocket, head) {
 	let opt = this.option;
 	let reqUrl = `https://${req.url}`;
 	let srvUrl = url.parse(reqUrl);
+	log.debug(req.headers);
 	//如果需要捕获https的请求
-	//访问地址直接是ip，跳过不代理 
+	//访问地址直接是ip，跳过不代理  
 	if (opt.crackHttps && !net.isIP(srvUrl.hostname)) {
 		log.verbose(`crack https ${reqUrl}`);
 		getSer(this.requestHandler)
@@ -154,33 +155,38 @@ let requestConnectHandler = function(req, cltSocket, head) {
  * @param socket
  */
 let requestUpgradeHandler = function(req, cltSocket, head) {
-	// connect to an origin server
-	// log.debug(req.headers);
-	log.debug(req.headers.host);
 	let {headers} = req; 
-	let headersStr = 'HTTP/1.1 101 Web Socket Protocol Handshake\r\n';
-	// headersStr +=  'Upgrade:WebSocket\r\n';
-	// headersStr += 'Connection:Upgrade\r\n';
+	let headersStr = '';
+	let host = headers.host;
+	headersStr += 'HTTP/1.1 101 Web Socket Protocol Handshake\r\n';
+	headersStr +=  'Upgrade:WebSocket\r\n';
+	headersStr += 'Connection:Upgrade\r\n';
 	for(let key in headers) {
-		headersStr += key + ":" + headers[key] + "\r\n"
+		if (key !== "Upgrade" && key !== 'Connection') {
+			headersStr += key + ":" + headers[key] + "\r\n"
+		}
 	}
 	headersStr + '\r\n';
-	// let srvSocket = net.connect(443, req.headers.host, () => {
-	// 	log.debug('connect success');
-	// 	cltSocket.write(headersStr);
-	// 	srvSocket.write(head);
-	// 	srvSocket.pipe(cltSocket);
-	// 	cltSocket.pipe(srvSocket);
-	// });
-	// cltSocket.on('error', err => log.error(`转发https请求出现错误: ${err}`));
-	// srvSocket.on('error', err => log.error(`转发https请求出现错误: ${err}`));
-
+	host = host.split(':')[0];
+	log.debug(req.headers);
+	log.debug(host);
+	log.debug(headersStr);
+	let reqSocket = net.connect({
+		rejectUnauthorized: false,
+		host: host,
+		port: 443
+	}, () => {
+		log.debug('in htererer')
+		reqSocket.write(headersStr);
+		cltSocket.pipe(reqSocket);
+		reqSocket.pipe(cltSocket);
+	});
 	// log.debug('********************');
 	// log.debug(req.url);
 	// log.debug('********************');
 	//socket请求直接转发吧
-	cltSocket.write(headersStr);
-  	cltSocket.pipe(cltSocket); // echo back
+	// cltSocket.write(headersStr);
+ //  cltSocket.pipe(cltSocket); // echo back
 };
 export default {
 	requestHandler,

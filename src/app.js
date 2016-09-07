@@ -124,7 +124,7 @@ class CatProxy extends EventEmitter{
 			servers.push(https.createServer({key,cert, rejectUnauthorized: true, SNICallback}));
 		}
 		servers.forEach(server => {
-			server.on('upgrade', com.requestUpgradeHandler);
+			// server.on('upgrade', com.requestUpgradeHandler);
 			//如果在http下代理https，则需要过度下请求
 			if (server instanceof  http.Server) {
 				server.on('connect', com.requestConnectHandler);
