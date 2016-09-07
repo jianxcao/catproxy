@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "node ./node_modules/cross-env/bin/cross-env NODE_ENV=dev node ./node_modules/gulp/bin/gulp build",
-    "publish": "node ./node_modules/cross-env/bin/cross-env NODE_ENV=production  BABEL_ENV=production node ./node_modules/gulp/bin/gulp publish",
+    "pub": "node ./node_modules/cross-env/bin/cross-env NODE_ENV=production  BABEL_ENV=production node ./node_modules/gulp/bin/gulp publish",
     "start": "node ./node_modules/cross-env/bin/cross-env NODE_ENV=dev node ./node_modules/supervisor/lib/cli-wrapper.js -w ./build ./app.js"
   },
   "keywords": [

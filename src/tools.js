@@ -24,16 +24,20 @@ export let writeErr = (err) => {
 		err = err.message + "<br>" + err.stack;
 	}
 	return err;
-}
+};
+
+let portReg = /EADDRINUSE\s*[^0-9]*([0-9]+)/i;
 
 export let error = err => {
 	if (err.message && err.message.indexOf("EACCES") > -1) {
 		log.error("请用sudo管理员权限打开");
 		process.exit(1);
 	} else if (err.message.indexOf("EADDRINUSE") > -1) {
+		let port = err.message.match(portReg);
+		port  = port && port.length > 1 ? port[1] : "";
 		log.error(`端口${port}被占用，请检查端口占用情况`);
 		process.exit(1);
 	} else {
 		log.error("出现错误：" + err.stack);
 	}
-}
+};
