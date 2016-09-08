@@ -16,7 +16,7 @@ import {getCert} from './cert/cert.js';
 import {writeErr} from './tools';
 import mime from 'mime';
 import path from 'path';
-import querystring from 'querystring'
+import querystring from 'querystring';
 let isStartHttps = /https/;
 
 //发送代理请求钱触发
@@ -96,7 +96,7 @@ export let local = function(reqInfo, resInfo, fileAbsPath) {
 	})
 	.then(null, function(err) {
 		log.error(err);
-	})
+	});
 };
 //处理将 域名转换成ip
 let detailHost = function(result, reqInfo, resInfo) {

@@ -15,7 +15,7 @@ import {getCert} from './cert/cert.js';
 import {SNICallback} from './httpsProxySer';
 import ui from './web/app';
 import {localIps} from './getLocalIps';
-import {error as errFun} from './tools'
+import {error as errFun} from './tools';
 //process.env.NODE_ENV
 //主类
 class CatProxy extends EventEmitter{
@@ -31,8 +31,10 @@ class CatProxy extends EventEmitter{
 	 *		log: '日志级别',
 	 *		uiPort 端口
 	 *	}
+	 *	@param servers 自定义服务器,最多同时开启2个服务器，一个http一个https, 2个服务器的时候顺序是http,https 
+	 *	如果只有一个则没有顺序问题
 	 */
-	constructor(option) {
+	constructor(option, sers) {
 		super();
 		//读取缓存配置文件
 		let fileCfg = {};
@@ -52,6 +54,18 @@ class CatProxy extends EventEmitter{
 				config.set(current, option[current]);
 			}
 		});
+		//如果存在自定义sever
+		if (sers && sers.length) {
+			let servers = [];
+			let type = this.option.type;
+			if (type === 'http' && sers[0] instanceof http) {
+				servers[0] = sers[0];
+			} else if (type === 'https' && sers[0] instanceof https) {
+				servers[0] = sers[0];
+			} else if (type === 'all' && sers[0] instanceof http && sers[1] instanceof https) {
+				servers = sers.slice(0, 2);
+			}
+		}
 		config.save();
 	}
 	init() {
@@ -110,18 +124,18 @@ class CatProxy extends EventEmitter{
 	createServer() {
 		let opt = this.option;
 		let com = this;
-		let servers = [];
+		let servers = this.servers || [];
 		//可以自定义server或者用系统内置的server
-		if (opt.type === 'http') {
-			servers.push(http.createServer());
-		} else  if (opt.type === 'https'){
+		if (opt.type === 'http' && !servers[0]) {
+			servers[0] = http.createServer();
+		} else  if (opt.type === 'https' && !servers[0]){
 			//找到证书，创建https的服务器
 			let {privateKey: key, cert} = getCert(opt.certHost);
-			servers.push(https.createServer({key,cert, rejectUnauthorized: true, SNICallback}));
-		} else if (opt.type === 'all') {
-			servers.push(http.createServer());
+			servers.push[0] = https.createServer({key,cert, rejectUnauthorized: true, SNICallback});
+		} else if (opt.type === 'all' && !servers[0]  && !servers[1]) {
+			servers[0] = http.createServer();
 			let {privateKey: key, cert} = getCert(opt.certHost);
-			servers.push(https.createServer({key,cert, rejectUnauthorized: true, SNICallback}));
+			servers[1] = https.createServer({key,cert, rejectUnauthorized: true, SNICallback});
 		}
 		servers.forEach(server => {
 			// server.on('upgrade', com.requestUpgradeHandler);

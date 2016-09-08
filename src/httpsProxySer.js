@@ -8,7 +8,7 @@ import tls from 'tls';
 import util from 'util';
 let SNICallback = (servername, callback) => {
 	try {
-		let {privateKey: key, cert} = getCert(servername)
+		let {privateKey: key, cert} = getCert(servername);
 		let ctx = tls.createSecureContext({key, cert});
 		callback(null, ctx);
 	} catch (e) {
