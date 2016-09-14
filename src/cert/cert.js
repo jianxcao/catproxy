@@ -16,6 +16,7 @@ var rootCrtPath = path.resolve(certDir, './cert.crt');
 var certCachePath = path.resolve(certDir, 'certCache');
 var certCache = {};
 // console.log(log);
+log.debug(certDir);
 //是否纯在根证书
 var isRootCertExits = () => {
 	return !!(fs.existsSync(certDir) && fs.existsSync(rootKeyPath) && fs.existsSync(rootCrtPath));

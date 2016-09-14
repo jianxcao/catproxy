@@ -131,11 +131,11 @@ class CatProxy extends EventEmitter{
 		} else  if (opt.type === 'https' && !servers[0]){
 			//找到证书，创建https的服务器
 			let {privateKey: key, cert} = getCert(opt.certHost);
-			servers.push[0] = https.createServer({key,cert, rejectUnauthorized: true, SNICallback});
+			servers.push[0] = https.createServer({key,cert, rejectUnauthorized: false, SNICallback});
 		} else if (opt.type === 'all' && !servers[0]  && !servers[1]) {
 			servers[0] = http.createServer();
 			let {privateKey: key, cert} = getCert(opt.certHost);
-			servers[1] = https.createServer({key,cert, rejectUnauthorized: true, SNICallback});
+			servers[1] = https.createServer({key,cert, rejectUnauthorized: false, SNICallback});
 		}
 		servers.forEach(server => {
 			// server.on('upgrade', com.requestUpgradeHandler);

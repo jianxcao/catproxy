@@ -213,6 +213,7 @@ let proxyReq = function(options, reqInfo, resInfo, req) {
 					return triggerBeforeRes(merge({}, resInfo, {bodyData}), com)
 						.then((resInfo) => {
 							let {statusCode, headers, bodyData} = resInfo;
+							// log.debug(headers, statusCode);
 							delete headers['content-length'];
 							headers['remote-url'] = querystring.escape(remoteUrl);
 							res.writeHead(statusCode || 200, toHeadersFirstLetterUpercase(headers));

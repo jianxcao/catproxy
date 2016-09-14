@@ -6,6 +6,8 @@ import mime from 'mime';
 import iconv from 'iconv-lite';
 import zlib from 'zlib';
 import {Buffer} from 'buffer';
+import Promise from 'promise';
+
 //<meta charset="gb2312">
 //<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 var checkMetaCharset = /<meta(?:\s)+.*charset(?:\s)*=(?:[\s'"])*([^"']+)/i;
@@ -172,6 +174,8 @@ var decodeContent = function(bodyData, contentType, contentEncoding) {
  *		bodyData: "buffer 数据",
  *		bodyDataErr: "请求出错，目前如果是大文件会触发这个,这个时候bodyData为空，且不可以设置"
  *		//这个时候 resInfo,bodyData无效
+ *		originalFullUrl 原始请求url
+ *		originalUrl 原始请求url
  *	}
  *
  *   举例说明可以修改响应的地方/
@@ -194,7 +198,7 @@ var beforeRes = function(resInfo) {
 	.then(function(resInfo) {
 		//禁用缓存或者用户这是监听，则需哟啊解码内容返回给用户
 		var disCache = config.get('disCache');
-		//用户监听
+ 		//用户监听
 		var useListener = false;
 		if (disCache || useListener) {
 			let contentType = resInfo.headers['content-type'] || "";
@@ -216,7 +220,7 @@ var beforeRes = function(resInfo) {
 				resInfo.charset = charset;
 				resInfo.bodyData = bodyData;
 				return resInfo;
-			})
+			});
 		}
 		return Promise.resolve(resInfo);
 	})
@@ -227,7 +231,6 @@ var beforeRes = function(resInfo) {
 		}
 		return resInfo;
 	});
-	// throw new Error('调用resize错误');
 	// resInfo.statusCode = 302;
 	// resInfo.headers['test-cjx'] = 111;
 	// bodyData = "test";
@@ -258,7 +261,6 @@ var beforeRes = function(resInfo) {
  * @returns {*}
  */
 var afterRes = function(result) {
-	// log.debug('after', result);
 	return result;
 };
 

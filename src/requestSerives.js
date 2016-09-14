@@ -10,7 +10,7 @@ import {STATUS, LIMIT_SIZE} from './config/defCfg';
 let requestHandler = function(req, res) {
 	var com = this;
 	//build  req info object
-	let isSecure = req.socket instanceof tls.TLSSocket,
+	let isSecure = req.connection.encrypted || req.connection.pai,
 		headers = req.headers,
 		method = req.method,
 		host = req.headers.host,
@@ -59,6 +59,16 @@ let requestHandler = function(req, res) {
 		res: {
 			writable: false,
 			value: res,
+			enumerable: true
+		},
+		originalFullUrl: {
+			writable: false,
+			value: fullUrl,
+			enumerable: true
+		},
+		originalUrl: {
+			writable: false,
+			value: visitUrl,
 			enumerable: true
 		}
 	});
@@ -115,6 +125,14 @@ let requestConnectHandler = function(req, cltSocket, head) {
 	let reqUrl = `https://${req.url}`;
 	let srvUrl = url.parse(reqUrl);
 	log.debug(req.headers);
+	// var all = [];
+	// req.on('data', function(buffer) {
+	// 	all.push(buffer);
+	// 	log.debug(buffer, reqUrl);
+	// });
+	// req.on('end', function() {
+	// 	log.debug('end ', reqUrl, all.length, Buffer.concat(all).toString());
+	// });
 	//如果需要捕获https的请求
 	//访问地址直接是ip，跳过不代理  
 	if (opt.crackHttps && !net.isIP(srvUrl.hostname)) {
@@ -124,29 +142,33 @@ let requestConnectHandler = function(req, cltSocket, head) {
 				port
 			}) => {
 				let srvSocket = net.connect(port, "localhost", () => {
-					cltSocket.write(`HTTP/${req.httpVersion} 200 Connection Established\r\n` +
-						'Proxy-agent: Node-CatProxy\r\n' +
-						'\r\n');
-					srvSocket.write(head);
-					srvSocket.pipe(cltSocket);
-					cltSocket.pipe(srvSocket);
+				cltSocket.write('HTTP/' + req.httpVersion +' 200 Connection Established\r\n' +
+					'Proxy-agent: Node-CatProxy\r\n' +
+					'\r\n');
+					srvSocket.pipe(cltSocket).pipe(srvSocket);
+				});
+				srvSocket.on('error', (err) => {
+					cltSocket.write("HTTP/" + req.httpVersion + " 500 Connection error\r\n\r\n");
+					cltSocket.end();
+					log.error(`crack https请求出现错误: ${err}`)
 				});
 				cltSocket.on('error', err => log.error(`crack https请求出现错误: ${err}`));
-				srvSocket.on('error', err => log.error(`crack https请求出现错误: ${err}`));
 			});
 	} else {
 		log.verbose(`through https connect ${reqUrl}`);
 		// connect to an origin server
 		let srvSocket = net.connect(srvUrl.port, srvUrl.hostname, () => {
-			cltSocket.write('HTTP/1.1 200 Connection Established\r\n' +
+			cltSocket.write('HTTP/' + req.httpVersion +' 200 Connection Established\r\n' +
 				'Proxy-agent: Node-CatProxy\r\n' +
 				'\r\n');
-			srvSocket.write(head);
-			srvSocket.pipe(cltSocket);
-			cltSocket.pipe(srvSocket);
+			srvSocket.pipe(cltSocket).pipe(srvSocket);
 		});
 		cltSocket.on('error', err => log.error(`转发https请求出现错误: ${err}`));
-		srvSocket.on('error', err => log.error(`转发https请求出现错误: ${err}`));
+		srvSocket.on('error',  (err) => {
+			cltSocket.write("HTTP/" + req.httpVersion + " 500 Connection error\r\n\r\n");
+			cltSocket.end();
+			log.error(`转发https请求出现错误: ${err}`);
+		});
 	}
 };
 /**
@@ -163,20 +185,15 @@ let requestUpgradeHandler = function(req, cltSocket, head) {
 	headersStr += 'Connection:Upgrade\r\n';
 	for(let key in headers) {
 		if (key !== "Upgrade" && key !== 'Connection') {
-			headersStr += key + ":" + headers[key] + "\r\n"
+			headersStr += key + ":" + headers[key] + "\r\n";
 		}
 	}
 	headersStr + '\r\n';
 	host = host.split(':')[0];
-	log.debug(req.headers);
-	log.debug(host);
-	log.debug(headersStr);
 	let reqSocket = net.connect({
-		rejectUnauthorized: false,
 		host: host,
 		port: 443
 	}, () => {
-		log.debug('in htererer')
 		reqSocket.write(headersStr);
 		cltSocket.pipe(reqSocket);
 		reqSocket.pipe(cltSocket);

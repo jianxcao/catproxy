@@ -11,7 +11,6 @@ var server = https.Server({
 	rejectUnauthorized: true
 }, function(req, res) {
 	console.log('in request');
-	console.log(req.socket instanceof tls.TLSSocket);
 	 res.write('success');
 	 res.end();
 });
