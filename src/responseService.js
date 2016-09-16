@@ -398,6 +398,33 @@ export default function(reqInfo, resInfo){
 			if (result && result.res) {
 				reqInfo = result;
 			}
+			Object.defineProperties(resInfo, {
+				host: {
+					writable: false,
+					value: reqInfo.host,
+					enumerable: true
+				},
+				method: {
+					writable: false,
+					value: reqInfo.method,
+					enumerable: true
+				},
+				protocol: {
+					writable: false,
+					value: reqInfo.protocol,
+					enumerable: true
+				},
+				port: {
+					writable: false,
+					value: reqInfo.port,
+					enumerable: true
+				},
+				path: {
+					writable: false,
+					value: reqInfo.path,
+					enumerable: true
+				}			
+			});
 			return {reqInfo, resInfo};
 		})
 		.then(({reqInfo, resInfo}) => {

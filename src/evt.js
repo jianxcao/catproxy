@@ -7,13 +7,14 @@ import iconv from 'iconv-lite';
 import zlib from 'zlib';
 import {Buffer} from 'buffer';
 import Promise from 'promise';
-
+import path from 'path';
 //<meta charset="gb2312">
 //<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 var checkMetaCharset = /<meta(?:\s)+.*charset(?:\s)*=(?:[\s'"])*([^"']+)/i;
 //自动解析类型，其他类型一律保存的是 Buffer
 var autoDecodeRegs = /text\/.+|(?:application\/(?:json.*|.*javascript))/i;
-
+//不解码的后缀格式
+var excludeDecodeExt = ['ttf', 'eot', 'svg', 'woff']; 
 //解压数据
 let decodeCompress = function(bodyData, encode) {
 	return new Promise(function(resolve, reject) {
@@ -115,14 +116,15 @@ var beforeReq = function(reqInfo) {
 	});
 };
 //如果不是合法的类型，就不进行decode
-var decodeContent = function(bodyData, contentType, contentEncoding) {
+var decodeContent = function(bodyData, contentType, contentEncoding, isDecode) {
 	//先看看是否需要解压数据
 	return decodeCompress(bodyData, contentEncoding)
 	//解压后在通过编码去解码数据
 	.then(function(bodyData) {
 		//默认编码是utf8
 		let charset = 'UTF-8', tmp;
-		if (!bodyData || !autoDecodeRegs.test(contentType)) {
+		let ext = mime.extension(contentType);
+		if (!bodyData || !isDecode) {
 			return {bodyData, charset};
 		}
 		if(contentType) {
@@ -132,7 +134,6 @@ var decodeContent = function(bodyData, contentType, contentEncoding) {
 				charset = tmp[1].toUpperCase();
 			}
 		}
-		let ext = mime.extension(contentType);
 		if (Buffer.isBuffer(bodyData)) {
 			//其他编码先尝试用 iconv去解码
 			if (charset !== 'UTF-8' && iconv.encodingExists(charset)) {
@@ -204,12 +205,17 @@ var beforeRes = function(resInfo) {
 			let contentType = resInfo.headers['content-type'] || "";
 			let contentEncoding = resInfo.headers['content-encoding'];
 			//按照指定编码解码内容
-			return decodeContent(resInfo.bodyData, contentType, contentEncoding)
+			let ext = path.extname(resInfo.path.split('?')[0].split('#')[0]) || "";
+			ext = (ext.split('.')[1] || "").toLowerCase();
+			if (excludeDecodeExt.some(cur => cur === ext)) {
+				ext  = "";
+			}
+			return decodeContent(resInfo.bodyData, contentType, contentEncoding, autoDecodeRegs.test(contentType) && !!ext)
 			.then(function({charset, bodyData}) {
 				let extension = mime.extension(contentType);
 				delete resInfo.headers['content-encoding'];
 				//如果访问的是一个html,并且成功截取到这个html的内容
-				if (disCache && contentType &&  (extension === 'html' || extension === 'htm') && bodyData) {
+				if (disCache && contentType &&  (extension === 'html' || extension === 'htm') && typeof bodyData === 'string') {
 					bodyData = bodyData.replace("<head>",
 						`<head>
 						<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />

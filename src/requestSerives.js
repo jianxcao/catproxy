@@ -29,7 +29,7 @@ let requestHandler = function(req, res) {
 		method,
 		protocol,
 		port,
-		path: pathStr,
+		path: pathStr
 	};
 	Object.defineProperties(reqInfo, {
 		req: {
