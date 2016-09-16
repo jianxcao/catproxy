@@ -122,7 +122,7 @@ const initialState = new Immutable.fromJS({
 	drawerStatus: true,
 	//当前选中的规则
 	selectRule: {},
-	disCache: true
+	disCache: false
 });
 //组合所有reducers
 let toDo = combineReducers(reducers);
@@ -135,5 +135,4 @@ if (window.config.env === 'dev') {
 let store = createStore(toDo, initialState, compose(applyMiddleware(...middleware),
 	window.devToolsExtension ? window.devToolsExtension() : f => f
 ));
-
 export default store;

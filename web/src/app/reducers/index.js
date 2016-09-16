@@ -189,7 +189,7 @@ export let selectRule = (state = new Map(), action = {}) => {
 };
 
 //禁止缓存
-export let disCache = (state = true, action = {}) => {
+export let disCache = (state, action = {}) => {
 	switch (action.type) {
 		case DIS_CACHE:
 			return !!action.status;

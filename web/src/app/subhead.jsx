@@ -18,7 +18,8 @@ import Checkbox from 'material-ui/Checkbox';
 import {
 	addBranch,
 	addGroup,
-	disableAll
+	disableAll,
+	disCache
 } from './action/actions';
 var previousHosts = null;
 const toobarStyle ={
@@ -143,6 +144,8 @@ export default class SubHeader extends React.Component {
 	//禁止使用缓存
 	handleDisCache(proxy, status) {
 		var com = this;
+		let {disCacheMethod} = this.props;
+		disCacheMethod(status);
 		sendMsg.disCache(status)
 		.then(message => {
 			com.context.toast(message.result);
@@ -183,7 +186,7 @@ export default class SubHeader extends React.Component {
 				text: current.get('name'),
 				value: index
 			}
-		}).toJS()
+		}).toJS();
 		return (<Dialog
 			actions={actions}
 			modal={true}
@@ -222,7 +225,7 @@ export default class SubHeader extends React.Component {
 						<ToolbarTitle text="操作" style={toolbarTitleStyle}/>
 						<RaisedButton label="新建" primary={true} onClick={this.handleOpenDialog.bind(this)}/>
 						<RaisedButton label="禁用全部" primary={true} onClick={this.handleDisAll.bind(this)}/>
-						<Checkbox label="禁用缓存" defaultChecked={this.props.disCache} onCheck={this.handleDisCache.bind(this)} style={checkBoxWraperStyle}/>
+						<Checkbox label="禁用缓存" checked={this.props.disCache} onCheck={this.handleDisCache.bind(this)} style={checkBoxWraperStyle}/>
 					</ToolbarGroup>
 					<ToolbarGroup>
 						<RaisedButton label="保存规则" primary={true} onClick={this.handleSaveHosts.bind(this)}/>
@@ -243,7 +246,8 @@ function mapDispatchToProps(dispatch) {
 	return {
 		addBranch: bindActionCreators(addBranch, dispatch),
 		addGroup: bindActionCreators(addGroup, dispatch),
-		disableAll: bindActionCreators(disableAll, dispatch)
+		disableAll: bindActionCreators(disableAll, dispatch),
+		disCacheMethod: bindActionCreators(disCache, dispatch)
 	};
 }
 export default connect(mapStateToProps, mapDispatchToProps)(SubHeader);
