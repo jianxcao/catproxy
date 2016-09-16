@@ -199,8 +199,10 @@ parseOneBranch = (rule, reqInfo) => {
 	let {test, exec, type, virtualPath = ""} = rule;
 	if (isStringReg.test(test)) {
 		test = test.slice(1, test.length -1);
+	} else {
+		test = isStartHttp.test(test) ? test : 'http://' + test;
+		test = "^" + test;
 	}
-	test = isStartHttp.test(test) ? test : 'http://' + test;
 	//将test转换成正则
 	test = new RegExp(test);
 	let currentUrl = getUrl(reqInfo);
@@ -216,11 +218,12 @@ parseOneBranch = (rule, reqInfo) => {
 		case('remoteFile'):
 			if (exec) {
 				//转换成一个url的对象
-				let execObj = standardUrl(exec);
+				let execObj = standardUrl(exec, reqInfo.protocol);
 				reqInfo.host = execObj.host;
 				reqInfo.protocol = execObj.protocol.split(':')[0];
 				reqInfo.port = execObj.port ? execObj.port : (reqInfo.protocol === 'https' ? 443 : 80);
 				reqInfo.path = type === 'host' ? reqInfo.path : execObj.path;
+				log.debug("********", reqInfo.protocol, reqInfo.port, exec);
 			} else  {
 				//没有配置exec如果是 host就访问线上，如果是 remoteFile就跳过
 				if (type === 'host') {
@@ -265,8 +268,8 @@ parseOneBranch = (rule, reqInfo) => {
 	return reqInfo;
 };
 //转换url为一个标准对象
-standardUrl = (originalUrl) => {
-	originalUrl = isStartHttp.test(originalUrl) ? originalUrl : "http://" + originalUrl;
+standardUrl = (originalUrl, protocol) => {
+	originalUrl = isStartHttp.test(originalUrl) ? originalUrl : protocol + "://" + originalUrl;
 	return URL.parse(originalUrl);
 };
 

@@ -145,6 +145,7 @@ let proxyReq = function(options, reqInfo, resInfo, req) {
 				headers: proxyRes.headers || {},
 				statusCode: proxyRes.statusCode
 			});
+			//log.debug(resInfo.headers, resInfo.statusCode);
 			resolve({proxyRes, remoteUrl, reqInfo, resInfo});
 		});
 		//向 直接请求写入数据
