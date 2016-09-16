@@ -144,12 +144,13 @@ class CatProxy extends EventEmitter{
 				server.on('connect', com.requestConnectHandler);
 			}
 			server.on('request', com.requestHandler);
-			let port = server instanceof  http.Server ? opt.port : opt.httpsPort;
+			let serverType = server instanceof  http.Server ? 'http' : 'https';
+			let port = serverType === 'http' ? opt.port : opt.httpsPort;
 			//如果server没有被监听，则调用默认端口监听
 			if (!server.listening) {
 				//根据server的类型调用不同的端口
 				server.listen(port, function () {
-					log.info('proxy server start from ' + `http://${localIps[0]}:${port}`);
+					log.info('proxy server start from ' + `${serverType}://${localIps[0]}:${port}`);
 				});
 			}
 			server.on('error', errFun);
