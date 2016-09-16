@@ -248,7 +248,11 @@ let proxyReq = function(options, reqInfo, resInfo, req) {
 	.then(null, function(err) {
 		let {headers = {}, res} = resInfo;
 		if (!res.finished) {
-			res.writeHead(500, toHeadersFirstLetterUpercase(headers));
+			let statusCode = 500;
+			if (err && err.message && err.message.indexOf('ETIMEDOUT') > -1) {
+				statusCode = 504;
+			}
+			res.writeHead(statusCode, toHeadersFirstLetterUpercase(headers));
 			err = writeErr(err);
 			res.write(err);
 			res.end();

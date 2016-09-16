@@ -9,14 +9,13 @@ var certDir = process.env.APPDATA;
 if (!certDir || certDir === 'undefined') {
 	certDir = (process.platform === 'darwin' ? path.join(process.env.HOME, 'Library/Preferences') : '/var/local');
 }
-certDir = path.join(certDir, './cert_center');
+certDir = path.join(certDir, './.cert_center');
 
 var rootKeyPath = path.resolve(certDir, './cert.key');
 var rootCrtPath = path.resolve(certDir, './cert.crt');
 var certCachePath = path.resolve(certDir, 'certCache');
 var certCache = {};
 // console.log(log);
-log.debug(certDir);
 //是否纯在根证书
 var isRootCertExits = () => {
 	return !!(fs.existsSync(certDir) && fs.existsSync(rootKeyPath) && fs.existsSync(rootCrtPath));
@@ -24,6 +23,8 @@ var isRootCertExits = () => {
 
 var setRootCert = () => {
 	fse.ensureDirSync(certDir);
+	//清除已经有的证书
+	fse.emptyDirSync(certDir);
 	log.info('根证书生成目录: ' + certDir);
 	var result = createRootCert();
 	let privateKey = result.privateKey;

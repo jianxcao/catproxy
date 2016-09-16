@@ -12,7 +12,8 @@ import UploadContent from './dragUpload'
 import sendMsg from './ws/sendMsg'
 import store from './store/store';
 import {resetHosts} from './action/actions';
-import LinkItem from './LinkItem'
+import LinkItem from './LinkItem';
+import QrCode from './qrcode';
 
 let getIcon = (props = {}, className ="", style = {}) => {
 	let defStyle ={
@@ -107,11 +108,23 @@ class Header extends React.Component {
 			}
 		});
 	}
-
+	//显示证书的二维码
+	handleShowCertQrcode = () => {
+		let {dialog} = this.context;
+		let opt = {
+				text: location.host + "/downloadcert.html"
+			};
+		dialog({
+			title: '证书二维码',
+			msg: (<QrCode opt={opt} ></QrCode>),
+			btn: ["关闭"]
+		});
+		console.log(document.getElementById('certQrCode'));
+	}
 	render() {
-		let host = window.config.host;
-		let downloadrule = host +  "/downloadrule.html";
-		let downloadcert = host + "/downloadcert.html";
+		let host = location.host;
+		let downloadrule = "/downloadrule.html";
+		let downloadcert = "/downloadcert.html";
 		return (<AppBar
 		title="catproxy"
 		onLeftIconButtonTouchTap = {this.handleToggle}
@@ -122,7 +135,8 @@ class Header extends React.Component {
 				anchorOrigin={{horizontal: 'right', vertical: 'top'}}>
 				<LinkItem primaryText="下载host文件" leftIcon={getIcon({}, "icon-download")} href={downloadrule}/>
 				<MenuItem primaryText="导入host文件" leftIcon={getIcon({}, "icon-upload")} onClick={this.handleImportRule}/>
-				<LinkItem primaryText="下载cert文件" leftIcon={getIcon({}, "icon-download")} href={downloadcert}/>
+				<MenuItem primaryText="证书二维码" leftIcon={getIcon({}, "icon-qrcode")} onClick={this.handleShowCertQrcode}/>
+				<LinkItem primaryText="下载证书文件" leftIcon={getIcon({}, "icon-download")} href={downloadcert}/>
 				<LinkItem primaryText="github" leftIcon={getIcon({}, "icon-github")} href="https://github.com/jianxcao/catproxy"/>
 				<LinkItem primaryText="帮助" leftIcon={getIcon({}, "icon-help")} href="https://github.com/jianxcao/catproxy"/>
 			</IconMenu>

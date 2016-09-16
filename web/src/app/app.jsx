@@ -16,10 +16,6 @@ import store from './store/store';
 import * as actions from './action/actions';
 import DialogProvider from './dialogProvider';
 
-window.actions = actions;
-window.store = store;
-window.React = React;
-
 // Needed for onTouchTap
 // http://stackoverflow.com/a/34015469/988941
 injectTapEventPlugin();

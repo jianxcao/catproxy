@@ -5,6 +5,8 @@ import colors from 'colors';
 import * as cert from './cert/cert';
 import configInit from './config/config';
 import CatProxy from './app';
+import fse from 'fs-extra';
+import log from './log';
 //将字段变成list
 let numReg = /^([0-9]){2,}$/;
 let list = (val) => {
@@ -94,6 +96,8 @@ if (program.cert) {
 	}
 } else {
 	configInit();
+	let certDir = cert.getCertDir();
+	log.info(`当前证书目录： ${certDir}`);
 	// catproxy main file
 	var catProxy = new CatProxy(opt);
 	//初始化代理服务器
