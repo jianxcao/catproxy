@@ -18,3 +18,6 @@ npm-debug.log
 
 #前端编译输出目录
 ./web/build
+
+#vs配置文件
+/.vscode
