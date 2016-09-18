@@ -48,7 +48,7 @@ class CatProxy extends EventEmitter{
 		//混合三种配置
 		this.option = merge({}, defCfg, fileCfg, option);
 		//将用户当前设置保存到缓存配置文件
-		['port', 'httpsPort', 'uiPort', 'type', 'log']
+		['port', 'httpsPort', 'uiPort', 'type', 'log', 'breakHttps']
 		.forEach(current => {
 			if (option[current] !== null && option[current] !== undefined) {
 				config.set(current, option[current]);
@@ -87,6 +87,7 @@ class CatProxy extends EventEmitter{
 		this.afterRes = afterRes.bind(this);
 		//请求前 
 		this.beforeRes = beforeRes.bind(this); 
+		
 		return Promise.resolve()
 		.then(this.createCache.bind(this))
 		.then(this.checkParam.bind(this))

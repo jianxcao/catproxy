@@ -121,21 +121,26 @@ let getSer = requestHandler => {
  * @param head
  */
 let requestConnectHandler = function(req, cltSocket, head) {
+	let startTan = /^!.*/;
 	let opt = this.option;
 	let reqUrl = `https://${req.url}`;
 	let srvUrl = url.parse(reqUrl);
-	log.debug(req.headers);
-	// var all = [];
-	// req.on('data', function(buffer) {
-	// 	all.push(buffer);
-	// 	log.debug(buffer, reqUrl);
-	// });
-	// req.on('end', function() {
-	// 	log.debug('end ', reqUrl, all.length, Buffer.concat(all).toString());
-	// });
+	let crackHttps = true;
+	if (opt.breakHttps === false) {
+		crackHttps = false;
+	} else if (typeof opt.breakHttps === 'object' && opt.breakHttps.length) {
+		for(let current of opt.breakHttps) {
+			if (current === srvUrl.hostname) {
+				crackHttps =  false;
+				break;
+			}
+		}
+	}
+	// log.debug(opt.breakHttps, crackHttps, srvUrl.hostname);
+
 	//如果需要捕获https的请求
 	//访问地址直接是ip，跳过不代理  
-	if (opt.crackHttps && !net.isIP(srvUrl.hostname)) {
+	if (crackHttps && !net.isIP(srvUrl.hostname)) {
 		log.verbose(`crack https ${reqUrl}`);
 		getSer(this.requestHandler)
 			.then(({
@@ -150,7 +155,7 @@ let requestConnectHandler = function(req, cltSocket, head) {
 				srvSocket.on('error', (err) => {
 					cltSocket.write("HTTP/" + req.httpVersion + " 500 Connection error\r\n\r\n");
 					cltSocket.end();
-					log.error(`crack https请求出现错误: ${err}`)
+					log.error(`crack https请求出现错误: ${err}`);
 				});
 				cltSocket.on('error', err => log.error(`crack https请求出现错误: ${err}`));
 			});

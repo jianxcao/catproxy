@@ -8,7 +8,7 @@ export const DEFAULT_HTTPS_PORT = 443;
 export const DEFAULT_UI_PORT = 8001;
 //https服务器启动时候需要的证书
 export const  DEFAULT_CERT_HOST = "localhost";
-export const DEFAULT_CRACK_HTTPS = true;
+export const DEFAULT_BREAK_HTTPS = true;
 export const LIMIT_SIZE = 1024 * 1024 * 5;
 export const STATUS = {
 	//request错误
@@ -20,7 +20,7 @@ export default {
 	port: DEFAULT_PORT,
 	httpsPort: DEFAULT_HTTPS_PORT,
 	certHost: DEFAULT_CERT_HOST,
-	crackHttps: DEFAULT_CRACK_HTTPS,
+	breakHttps: DEFAULT_BREAK_HTTPS,
 	uiPort: DEFAULT_UI_PORT
 };
 

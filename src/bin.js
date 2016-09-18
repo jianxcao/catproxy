@@ -28,6 +28,8 @@ let out = `
   '-u' 表示图形操作界面端口
 
   '-c' 表示生成根证书，根证书在https的情况下有用，不生成无法拦截请求
+
+  '-b' 表示破解http true表示破解，false表示不破解(注意不破解的话就不走proxy，会直接穿越到在线或者本机host配置的那个地址)，默认true, 也可以配置 host，不同的host用,分割 如： baidu.com,uc.com,test.com, 表示只有这些配置的host需要跳过，其他得都需要破解
 `;
 let opt = {};
 program
@@ -37,13 +39,13 @@ program
 	.option('-p, --port [list]', '代理端口 默认  http: 80, https: 443, 多个端口用，分割第一个表示http，第二个表示https', list)
 	.option('-u, --ui [port]' , '界面端口 8001', parseInt)
 	.option('-c, --cert', '生成根证书')
+	.option('-b, --break-https [value]', "是否破解https,破解https前请先安装证书")
 	.on('--help', () => console.log(colors.green(out)))
 	.option('-l, --log [item]', 
 		'设置日志级别error, warn, info, verbose, debug, silly', 
 		/^(error|warn|info|verbose|debug|silly)$/i)
 	.parse(process.argv);
-
-['type','port','ui','log'].forEach((current) => {
+['type','port','ui','log', 'breakHttps'].forEach((current) => {
 	if (program[current] === true) {
 		program[current] = undefined;
 	}
@@ -59,6 +61,12 @@ program
 			}
 		} else if (current === 'ui') {
 			opt.uiPort = program[current];
+		} else if (current === 'breakHttps') {
+			if (typeof program[current] === 'string') {
+				opt[current] = program[current].split(',');
+			} else {
+				opt[current] = program[current];
+			}
 		} else {
 			opt[current] = program[current];
 		}
