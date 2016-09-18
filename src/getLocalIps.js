@@ -1,6 +1,6 @@
 import ip from 'ip';
 import os from 'os';
-
+import log from './log';
 export default function getIps() {
 	var interfaces = os.networkInterfaces();
 	var all = Object.keys(interfaces).map(function (nic) {

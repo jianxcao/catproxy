@@ -112,7 +112,7 @@ class Header extends React.Component {
 	handleShowCertQrcode = () => {
 		let {dialog} = this.context;
 		let opt = {
-				text: location.host + "/downloadcert.html"
+				text: 'http://' + location.host + "/downloadcert.html"
 			};
 		dialog({
 			title: '证书二维码',
@@ -122,7 +122,7 @@ class Header extends React.Component {
 		console.log(document.getElementById('certQrCode'));
 	}
 	render() {
-		let host = location.host;
+		let host = 'http://' + location.host;
 		let downloadrule = "/downloadrule.html";
 		let downloadcert = "/downloadcert.html";
 		return (<AppBar
