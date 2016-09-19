@@ -34,7 +34,7 @@ class CatProxy extends EventEmitter{
 	 *	@param servers 自定义服务器,最多同时开启2个服务器，一个http一个https, 2个服务器的时候顺序是http,https 
 	 *	如果只有一个则没有顺序问题
 	 */
-	constructor(option, sers) {
+	constructor(option, sers, isSave) {
 		super();
 		//读取缓存配置文件
 		let fileCfg = {};
@@ -66,7 +66,9 @@ class CatProxy extends EventEmitter{
 				servers = sers.slice(0, 2);
 			}
 		}
-		config.save();
+		if (isSave !== false) {
+			config.save();
+		}
 	}
 	init() {
 		if (this.option.log) {

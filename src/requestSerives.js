@@ -157,7 +157,10 @@ let requestConnectHandler = function(req, cltSocket, head) {
 					cltSocket.end();
 					log.error(`crack https请求出现错误: ${err}`);
 				});
-				cltSocket.on('error', err => log.error(`crack https请求出现错误: ${err}`));
+				cltSocket.on('error', err => {
+					log.error(`crack https请求出现错误: ${err}`);
+					srvSocket.end();
+				});
 			});
 	} else {
 		log.verbose(`through https connect ${reqUrl}`);
@@ -168,7 +171,10 @@ let requestConnectHandler = function(req, cltSocket, head) {
 				'\r\n');
 			srvSocket.pipe(cltSocket).pipe(srvSocket);
 		});
-		cltSocket.on('error', err => log.error(`转发https请求出现错误: ${err}`));
+		cltSocket.on('error', err => {
+			log.error(`转发https请求出现错误: ${err}`);
+			srvSocket.end();
+		});
 		srvSocket.on('error',  (err) => {
 			cltSocket.write("HTTP/" + req.httpVersion + " 500 Connection error\r\n\r\n");
 			cltSocket.end();
