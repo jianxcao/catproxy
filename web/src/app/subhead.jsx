@@ -9,7 +9,7 @@ import TextField from 'material-ui/TextField';
 import { Provider,connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 import Immutable, {OrderedMap, Map, List} from 'immutable';
-import sendMsg from './ws/sendMsg'
+import sendMsg from './ws/sendMsg';
 import key from 'keymaster';
 import store from './store/store';
 import Checkbox from 'material-ui/Checkbox';
@@ -24,18 +24,18 @@ import {
 var previousHosts = null;
 const toobarStyle ={
 	paddingLeft: 20
-}
+};
 const paperStyle = {
 	minWidth: "460px"
-}
+};
 const checkBoxWraperStyle = {
 	maxWidth: "125px"
-}
+};
 const toolbarTitleStyle = {
 	minWidth: "40px"
-}
+};
 //二级导航
-export default class SubHeader extends React.Component {
+class SubHeader extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -43,7 +43,7 @@ export default class SubHeader extends React.Component {
 		}
 	}
 	componentDidMount() {
-		key('⌘+s, ctrl+s', (evt) =>{
+		key('⌘+s, ctrl+s', () =>{
 			this.handleSaveHosts();
 			return false;
 		});		
@@ -139,7 +139,7 @@ export default class SubHeader extends React.Component {
 			com.context.toast(message.result);
 			previousHosts = hosts;
 		}, 
-		message => com.context.toast(message.result))
+		message => com.context.toast(message.result));
 	}
 	//禁止使用缓存
 	handleDisCache(proxy, status) {
@@ -150,7 +150,7 @@ export default class SubHeader extends React.Component {
 		.then(message => {
 			com.context.toast(message.result);
 		}, 
-		message => com.context.toast(message.result))
+		message => com.context.toast(message.result));
 	}
 
 	shouldComponentUpdate(nextProps, nextState) {

@@ -21,7 +21,6 @@ let isStartHttps = /https/;
 
 //发送代理请求钱触发
 let triggerBeforeRes = (resInfo, com) => {
-	let headers = resInfo.headers || {};
 	return new Promise.resolve(resInfo)
 	.then((resInfo) => {
 		let info = merge({}, resInfo);

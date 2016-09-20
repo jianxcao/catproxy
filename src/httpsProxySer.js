@@ -6,7 +6,6 @@ import Promise from 'promise';
 import log from './log';
 import tls from 'tls';
 import util from 'util';
-import constants from 'constants';
 let SNICallback = (servername, callback) => {
 	try {
 		let {privateKey: key, cert} = getCert(servername);

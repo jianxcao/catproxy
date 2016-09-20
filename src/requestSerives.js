@@ -1,6 +1,5 @@
 import url from 'url';
 import Promise from 'promise';
-import tls from 'tls';
 import {Buffer} from 'buffer';
 import log from './log';
 import net from 'net';
@@ -121,7 +120,6 @@ let getSer = requestHandler => {
  * @param head
  */
 let requestConnectHandler = function(req, cltSocket, head) {
-	let startTan = /^!.*/;
 	let opt = this.option;
 	let reqUrl = `https://${req.url}`;
 	let srvUrl = url.parse(reqUrl);

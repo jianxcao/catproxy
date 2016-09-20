@@ -16,8 +16,9 @@ import {SNICallback} from './httpsProxySer';
 import ui from './web/app';
 import {localIps} from './getLocalIps';
 import {error as errFun} from './tools';
+import * as requestMiddleware from './requestMiddleware';
 //process.env.NODE_ENV
-//主类
+
 class CatProxy extends EventEmitter{
 	/**
 	 * 
@@ -122,6 +123,7 @@ class CatProxy extends EventEmitter{
 		if (err) {
 			log.error(err);
 		}
+		return Promise.reject(err);
 	}
 	//根据配置创建服务器
 	createServer() {
@@ -146,7 +148,7 @@ class CatProxy extends EventEmitter{
 			if (server instanceof  http.Server) {
 				server.on('connect', com.requestConnectHandler);
 			}
-			server.on('request', com.requestHandler);
+			server.on('request', requestMiddleware.middleWare(com.requestHandler));
 			let serverType = server instanceof  http.Server ? 'http' : 'https';
 			let port = serverType === 'http' ? opt.port : opt.httpsPort;
 			//如果server没有被监听，则调用默认端口监听
@@ -160,7 +162,13 @@ class CatProxy extends EventEmitter{
 		});
 		this.servers = servers;
 	}
+	//想服务器添加request事件
+	use (fun) {
+		requestMiddleware.use(fun);
+	}
 }
+
 process.on('uncaughtException', errFun);
 process.on('exit', ()=> log.info('服务器退出'));
 export default CatProxy;
+export {CatProxy};

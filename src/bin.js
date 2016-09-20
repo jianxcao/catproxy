@@ -5,7 +5,6 @@ import colors from 'colors';
 import * as cert from './cert/cert';
 import configInit from './config/config';
 import CatProxy from './app';
-import fse from 'fs-extra';
 import log from './log';
 //将字段变成list
 let numReg = /^([0-9]){2,}$/;
