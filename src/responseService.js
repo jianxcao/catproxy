@@ -1,4 +1,4 @@
-//处理请求来后返回的数据
+// 处理请求来后返回的数据
 import http from 'http';
 import https from 'https';
 import log from './log';
@@ -19,7 +19,7 @@ import path from 'path';
 import querystring from 'querystring';
 let isStartHttps = /https/;
 
-//发送代理请求钱触发
+// 发送代理请求钱触发
 let triggerBeforeRes = (resInfo, com) => {
 	return new Promise.resolve(resInfo)
 	.then((resInfo) => {
@@ -31,7 +31,7 @@ let triggerBeforeRes = (resInfo, com) => {
 	});
 };
 
-//转换headers头部的大小写
+// 转换headers头部的大小写
 let toHeadersFirstLetterUpercase = (headers = {})=>{
 	let reg = /(?:^\w)|-\w/g;
 	let result = {};
@@ -44,7 +44,7 @@ let toHeadersFirstLetterUpercase = (headers = {})=>{
 	return headers;
 };
 
-//处理本地数据
+// 处理本地数据
 export let local = function(reqInfo, resInfo, fileAbsPath) {
 	var com = this;
 	resInfo.headers = resInfo.headers || {};
@@ -52,11 +52,11 @@ export let local = function(reqInfo, resInfo, fileAbsPath) {
 		fs.readFile(fileAbsPath, function(err, buffer) {
 			if (err) {
 				resInfo.bodyData = new Buffer("local file error" + err);
-				//如果用户没有设置statusCode就设置默认的
+				// 如果用户没有设置statusCode就设置默认的
 				resInfo.statusCode = 404;
 				resolve(resInfo);
 			} else {
-				//如果用户没有设置statusCode就设置默认的
+				// 如果用户没有设置statusCode就设置默认的
 				resInfo.statusCode = 200;
 				resInfo.bodyData = buffer;
 				resolve(resInfo);
@@ -97,19 +97,19 @@ export let local = function(reqInfo, resInfo, fileAbsPath) {
 		log.error(err);
 	});
 };
-//处理将 域名转换成ip
+// 处理将 域名转换成ip
 let detailHost = function(result, reqInfo, resInfo) {
-	//取当前启动的port
+	// 取当前启动的port
 	let com = this;
 	let {port, httpsPort} = com.option;
 	let isServerPort = +port === +result.port;
 	if (isStartHttps.test(reqInfo.protocol)) {
 		isServerPort = +httpsPort === +result.port;
 	}
-	//这里自己将死循环嗯哼获取ip错误的情况已经处理了
+	// 这里自己将死循环嗯哼获取ip错误的情况已经处理了
 	return changeHost(result.hostname, isServerPort)
 	.then(address => {
-		//如果还是死循环，则跳出
+		// 如果还是死循环，则跳出
 		if (isServerPort && localIps.some(current => ip.isEqual(current, address))) {
 			return Promise.reject('Dead circulation');
 		}
@@ -130,11 +130,11 @@ let detailHost = function(result, reqInfo, resInfo) {
 	});
 };
 
-//真正代理请求
+// 真正代理请求
 let proxyReq = function(options, reqInfo, resInfo, req) {
 	var com = this;
 	return new Promise((resolve, reject) => {
-		//发出请求
+		// 发出请求
 		log.verbose('send proxy request originalFullUrl: ' + reqInfo.originalFullUrl);
 		let proxyReq = (isStartHttps.test(reqInfo.protocol) ? https : http)
 		.request(options, proxyRes => {
@@ -144,10 +144,10 @@ let proxyReq = function(options, reqInfo, resInfo, req) {
 				headers: proxyRes.headers || {},
 				statusCode: proxyRes.statusCode
 			});
-			//log.debug(resInfo.headers, resInfo.statusCode);
+			// log.debug(resInfo.headers, resInfo.statusCode);
 			resolve({proxyRes, remoteUrl, reqInfo, resInfo});
 		});
-		//向 直接请求写入数据
+		// 向 直接请求写入数据
 		if (reqInfo.bodyData && reqInfo.bodyData.length) {
 			if (!reqInfo.bodyDataErr) {
 				proxyReq.write(reqInfo.bodyData);
@@ -163,10 +163,10 @@ let proxyReq = function(options, reqInfo, resInfo, req) {
 				req.resume();
 				req.pipe(proxyReq);				
 			}
-		} else {//没有数据就直接end否则读取数据
+		} else {// 没有数据就直接end否则读取数据
 			proxyReq.end();
 		}
-		//出错直接结束请求
+		// 出错直接结束请求
 		proxyReq.on("error", (err) => {
 			log.error(err);
 			reject(err);
@@ -174,19 +174,19 @@ let proxyReq = function(options, reqInfo, resInfo, req) {
 	})
 	.then(({proxyRes, remoteUrl, reqInfo, resInfo}) => {
 		let {res} = resInfo;
-		//数据太大的时候触发
+		// 数据太大的时候触发
 		let err = {
 			message: 'request entity too large',
 			status: STATUS.LIMIT_ERROR
 		};
 		let resBodyData = [], l = 0, isError = false, isFired = false;
 		proxyRes
-		//过滤大文件，只有小文件才返回
-		//文件过大的将无法拦截，没有事件通知
+		// 过滤大文件，只有小文件才返回
+		// 文件过大的将无法拦截，没有事件通知
 		.on('data', chunk => {
 			if (l > LIMIT_SIZE) {
 				isError = true;
-				//log.debug('in size', LIMIT_SIZE, l);
+				// log.debug('in size', LIMIT_SIZE, l);
 				if (!isFired) {
 					isFired = true;
 					let {statusCode, headers} = resInfo;
@@ -208,7 +208,7 @@ let proxyReq = function(options, reqInfo, resInfo, req) {
 			let bodyData = Buffer.concat(resBodyData);
 			return Promise.resolve(bodyData)
 			.then((bodyData) => {
-				//文件大小没有出错的情况下
+				// 文件大小没有出错的情况下
 				if (!isError) {
 					return triggerBeforeRes(merge({}, resInfo, {bodyData}), com)
 						.then((resInfo) => {
@@ -236,7 +236,7 @@ let proxyReq = function(options, reqInfo, resInfo, req) {
 				}
 			})
 			.then(({headers, bodyData}) => {
-				//转换head大小写问题
+				// 转换head大小写问题
 				if (!res.headers) {
 					res.headers = headers;
 				}
@@ -272,17 +272,17 @@ export let remote = function(reqInfo, resInfo) {
 		if (!net.isIP(hostname)) {
 			reqInfo.headers.host =  reqInfo.host;
 		}
-		//请求选项
+		// 请求选项
 		let options = {
 			hostname,
 			port: reqInfo.port || (reqInfo.protocol === 'http' ? 80 : 443),
 			path: t.test(reqInfo.path) ? reqInfo.path : "/" + reqInfo.path,
 			method: reqInfo.method,
-			headers: toHeadersFirstLetterUpercase(reqInfo.headers) //大小写问题，是否需要转换
+			headers: toHeadersFirstLetterUpercase(reqInfo.headers) // 大小写问题，是否需要转换
 		};
 		if (reqInfo.protocol === 'https') {
 			options.rejectUnauthorized = true;
-			//旧的协议是http-即http跳转向https--从新生成证书
+			// 旧的协议是http-即http跳转向https--从新生成证书
 			if (oldProtocol === https) {
 				let {privateKey: key, cert} = getCert(hostname);
 				options.key = key;
@@ -313,7 +313,7 @@ export default function(reqInfo, resInfo){
 	let com = this;
 	let res = resInfo.res;
 	let req = reqInfo.req;
-	//当bodyData缓存处理完毕就触发事件告诉用户数据
+	// 当bodyData缓存处理完毕就触发事件告诉用户数据
 	res.on("resBodyDataReady", (err, bodyData) => {
 		let headers = res.headers || {};
 		let result = {};
@@ -324,7 +324,7 @@ export default function(reqInfo, resInfo){
 				enumerable: true
 			});
 		}
-		//响应回来后所有的字段都是只读的
+		// 响应回来后所有的字段都是只读的
 		Object.defineProperties(result, {
 			headers: {
 				writable: false,
@@ -392,7 +392,7 @@ export default function(reqInfo, resInfo){
 	req.on('reqBodyDataReady', (err, reqBodyData) => {
 		reqInfo.bodyData = reqBodyData || [];
 		reqInfo.bodyDataErr = err;
-		//请求前拦截一次--所有的拦截都在evt.js中处理
+		// 请求前拦截一次--所有的拦截都在evt.js中处理
 		Promise.resolve(com.beforeReq(reqInfo))
 		.then((result) => {
 			if (result && result.res) {
@@ -430,7 +430,7 @@ export default function(reqInfo, resInfo){
 		.then(({reqInfo, resInfo}) => {
 			// 如果在事件里面已经结束了请求，那就结束了
 			if (res.finished) {
-				//用户做了转发处理，这个时候不知道内容是什么
+				// 用户做了转发处理，这个时候不知道内容是什么
 				res.emit('resBodyDataReady', null, null);
 			} else if (reqInfo.redirect) {
 				resInfo.headers = {

@@ -30,7 +30,7 @@ export default (option) => {
 	uiApp.use(err500);
 	server.on('request', uiApp);
 
-	//链接ws 服务器
+	// 链接ws 服务器
 	wServer(server);
 	server.listen(option.port, function() {
 		log.info(`ui server start up:  ${option.host}`);

@@ -26,21 +26,21 @@ import * as receiveType from './receiveType';
 
 var wss;
 
-//方法分发
-//会根据receiveType中定义的不同类型调用不同的事件，每个事件的方法就是receiveType的键
-//方法有三个参数message(当前客户端的消息)， ws(当前的client连接), wss (io对象)
-//方法返回值 可以是promise或者 值，如果返回值为空，则不会给客户端回写值
+// 方法分发
+// 会根据receiveType中定义的不同类型调用不同的事件，每个事件的方法就是receiveType的键
+// 方法有三个参数message(当前客户端的消息)， ws(当前的client连接), wss (io对象)
+// 方法返回值 可以是promise或者 值，如果返回值为空，则不会给客户端回写值
 let recive = (ws, evtType) => {
 	ws.on(receiveType[evtType], (message, callback) => {
 		log.verbose('收到消息, 消息类型: ' + receiveType[evtType]);
 		let method = receiveMsg[evtType];
 		let result = null;
 		if (method) {
-			//调用定义的方法
+			// 调用定义的方法
 			result = method(message, ws, wss);
-			//需要向客户端返回结果
+			// 需要向客户端返回结果
 			if (result) {
-				//返回的是一个promise
+				// 返回的是一个promise
 				if (result.then) {
 					result.then(msg => msg && callback(msg), msg => msg && callback(msg));
 				} else {
@@ -53,9 +53,9 @@ let recive = (ws, evtType) => {
 	});
 };
 
-//将接受到的消息映射到 receiveMsg中去处理
+// 将接受到的消息映射到 receiveMsg中去处理
 let distributeReciveMethod = () => {
-	//有新德客户端建立链接
+	// 有新德客户端建立链接
 	wss.on('connection', (ws) => {
 		for(let type in receiveType) {
 			recive(ws, type);

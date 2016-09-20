@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 import http from 'http';
 import https from 'https';
 import defCfg from './config/defCfg';
@@ -8,7 +8,6 @@ import Promise from 'promise';
 import log from './log';
 import reqSer from './requestSerives';
 import resSer from './responseService';
-import {local, remote} from './responseService';
 import {beforeReq, afterRes, beforeRes} from './evt';
 import EventEmitter from 'events';
 import {getCert} from './cert/cert.js';
@@ -17,7 +16,7 @@ import ui from './web/app';
 import {localIps} from './getLocalIps';
 import {error as errFun} from './tools';
 import * as requestMiddleware from './requestMiddleware';
-//process.env.NODE_ENV
+//	process.env.NODE_ENV
 
 class CatProxy extends EventEmitter{
 	/**
@@ -37,7 +36,7 @@ class CatProxy extends EventEmitter{
 	 */
 	constructor(option, sers, isSave) {
 		super();
-		//读取缓存配置文件
+		// 读取缓存配置文件
 		let fileCfg = {};
 		['port', 'httpsPort', 'uiPort', 'type', 'log']
 		.forEach(current => {
@@ -46,16 +45,16 @@ class CatProxy extends EventEmitter{
 				fileCfg[current] = val;
 			}
 		});
-		//混合三种配置
+		// 混合三种配置
 		this.option = merge({}, defCfg, fileCfg, option);
-		//将用户当前设置保存到缓存配置文件
+		// 将用户当前设置保存到缓存配置文件
 		['port', 'httpsPort', 'uiPort', 'type', 'log', 'breakHttps']
 		.forEach(current => {
 			if (option[current] !== null && option[current] !== undefined) {
 				config.set(current, option[current]);
 			}
 		});
-		//如果存在自定义sever
+		// 如果存在自定义sever
 		if (sers && sers.length) {
 			let servers = [];
 			let type = this.option.type;
@@ -75,20 +74,13 @@ class CatProxy extends EventEmitter{
 		if (this.option.log) {
 			log.transports.console.level = this.option.log;
 		}
-
-		//请求事件方法
-		this.requestHandler = reqSer.requestHandler.bind(this);
-		this.requestConnectHandler = reqSer.requestConnectHandler.bind(this);
-		this.requestUpgradeHandler = reqSer.requestUpgradeHandler.bind(this);
-		//response 服务
+		// response 服务
 		this.responseService = resSer.bind(this);
-		//this.responseServiceRemote = remote.bind(this);
-		//this.responseServiceLocal = local.bind(this);
-		//请求前
+		// 请求前
 		this.beforeReq = beforeReq.bind(this); 
-		//请求后
+		// 请求后
 		this.afterRes = afterRes.bind(this);
-		//请求前 
+		// 请求前 
 		this.beforeRes = beforeRes.bind(this); 
 		
 		return Promise.resolve()
@@ -99,12 +91,12 @@ class CatProxy extends EventEmitter{
 		.then(this.uiInit.bind(this))
 		.then(null, this.errorHandle.bind(this));
 	}
-	//创建缓存，创建请求保存
+	// 创建缓存，创建请求保存
 	createCache() {
 	}
 	checkParam() {
 	}
-	//环境检测
+	// 环境检测
 	checkEnv() {
 	}
 	uiInit() {
@@ -118,23 +110,26 @@ class CatProxy extends EventEmitter{
 			host: `http://${localIps[0]}:${port}`
 		});
 	}
-	//出错处理
+	// 出错处理
 	errorHandle(err) {
 		if (err) {
 			log.error(err);
 		}
 		return Promise.reject(err);
 	}
-	//根据配置创建服务器
+	// 根据配置创建服务器
 	createServer() {
 		let opt = this.option;
-		let com = this;
 		let servers = this.servers || [];
-		//可以自定义server或者用系统内置的server
+		// 请求事件方法
+		let requestHandler = reqSer.requestHandler.bind(this);
+		let requestConnectHandler = reqSer.requestConnectHandler.bind(this);
+		// let requestUpgradeHandler = reqSer.requestUpgradeHandler.bind(this);
+		// 可以自定义server或者用系统内置的server
 		if (opt.type === 'http' && !servers[0]) {
 			servers[0] = http.createServer();
 		} else  if (opt.type === 'https' && !servers[0]){
-			//找到证书，创建https的服务器
+			// 找到证书，创建https的服务器
 			let {privateKey: key, cert} = getCert(opt.certHost);
 			servers.push[0] = https.createServer({key,cert, rejectUnauthorized: false, SNICallback});
 		} else if (opt.type === 'all' && !servers[0]  && !servers[1]) {
@@ -143,17 +138,17 @@ class CatProxy extends EventEmitter{
 			servers[1] = https.createServer({key,cert, rejectUnauthorized: false, SNICallback});
 		}
 		servers.forEach(server => {
-			// server.on('upgrade', com.requestUpgradeHandler);
-			//如果在http下代理https，则需要过度下请求
+			// server.on('upgrade', requestUpgradeHandler);
+			// 如果在http下代理https，则需要过度下请求
 			if (server instanceof  http.Server) {
-				server.on('connect', com.requestConnectHandler);
+				server.on('connect', requestConnectHandler);
 			}
-			server.on('request', requestMiddleware.middleWare(com.requestHandler));
+			server.on('request', requestMiddleware.middleWare(requestHandler));
 			let serverType = server instanceof  http.Server ? 'http' : 'https';
 			let port = serverType === 'http' ? opt.port : opt.httpsPort;
-			//如果server没有被监听，则调用默认端口监听
+			// 如果server没有被监听，则调用默认端口监听
 			if (!server.listening) {
-				//根据server的类型调用不同的端口
+				// 根据server的类型调用不同的端口
 				server.listen(port, function () {
 					log.info('proxy server start from ' + `${serverType}://${localIps[0]}:${port}`);
 				});
@@ -162,7 +157,7 @@ class CatProxy extends EventEmitter{
 		});
 		this.servers = servers;
 	}
-	//想服务器添加request事件
+	// 想服务器添加request事件
 	use (fun) {
 		requestMiddleware.use(fun);
 	}

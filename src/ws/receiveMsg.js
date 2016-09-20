@@ -50,11 +50,11 @@ export let fetchConfig = ()=> {
 		status: status.SUCC
 	};
 	try {
- 		data.result = config.get();
- 		if (!data.result.hosts) {
- 			data.result.hosts = [];
- 		}
- 		return data;
+		data.result = config.get();
+		if (!data.result.hosts) {
+			data.result.hosts = [];
+		}
+		return data;
 	} catch(e) {
 		return error();
 	}
@@ -90,16 +90,15 @@ export let saveConfig = (msg = {}, ws = {}) => {
 	let {path, param} = msg;
 	if (path) {
 		switch(msg.path) {
-			case("rule"):
+		case("rule"):
 			if (param && param.rules) {
 				return updateRule(param.rules, ws);
 			} else {
 				return error('更新规则必须有rules属性');
 			}
-			break;
-			case('disCache'):
+		case('disCache'):
 			return disCache(!!param.status, ws);
-			default:
+		default:
 			return error('未知的保存数据');
 		}
 	} else {

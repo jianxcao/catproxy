@@ -1,4 +1,4 @@
-//创建一个https的代理服务器
+// 创建一个https的代理服务器
 import https from 'https';
 import {getCert} from './cert/cert.js';
 import getPort from 'empty-port';
@@ -40,7 +40,7 @@ export default (host, port, callback) => {
 			});
 		}
 	})
-	//不支持sni的请求可能点了就没反应,SNICallback在客户端不支持的情况下，不会报错，会直接返回
+	// 不支持sni的请求可能点了就没反应,SNICallback在客户端不支持的情况下，不会报错，会直接返回
 	.then(port => {
 		let {privateKey: key, cert} = getCert(host);
 		let server = https.createServer({

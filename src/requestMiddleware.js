@@ -1,8 +1,8 @@
-//一个中间件类
+// 一个中间件类
 import util from 'util';
 import log from './log';
 var requestHandlers = [];
-//最终掉用
+// 最终掉用
 var finalReq = finalCallback => (err, req, res) => {
 	if (err) {
 		res.writeHead(res.statusCode || '500', res.headers || {});
@@ -14,11 +14,11 @@ var finalReq = finalCallback => (err, req, res) => {
 	}
 };
 
-//request请求调用
+// request请求调用
 var requestFun = finalCallback => (req, res) => {
 	requestHandlers.reduceRight((next, current) => {
 		return function my(err) {
-			//参数为4个，如果当前有错就调用，没有错误，就跳过
+			// 参数为4个，如果当前有错就调用，没有错误，就跳过
 			if (current.length === 4) {
 				if (err) {
 					try {
@@ -46,14 +46,14 @@ var requestFun = finalCallback => (req, res) => {
 	})();
 };
 
-//添加一个中间件
+// 添加一个中间件
 export let use = (handle) => {
 	if (util.isFunction(handle)) {
 		requestHandlers.push(handle);
 	}
 };
 
-//删除或者清空某个中间件
+// 删除或者清空某个中间件
 export let unuse = (handle) => {
 	if (util.isFunction(handle)) {
 		var current = null;
@@ -68,5 +68,5 @@ export let unuse = (handle) => {
 		requestHandlers = [];
 	}
 };
-//中间件入口
+// 中间件入口
 export let middleWare = requestFun;

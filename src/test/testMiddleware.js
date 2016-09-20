@@ -6,8 +6,8 @@ var a = (req, res, next)=> {
 	}, 300);
 };
 var b = (req, res, next) => {
-		console.log('b', req, res);
-		next();
+	console.log('b', req, res);
+	next();
 	
 };
 

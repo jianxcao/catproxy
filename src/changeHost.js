@@ -8,7 +8,7 @@ export default (hostname, isServerPort) => {
 	if (net.isIP(hostname)) {
 		return Promise.resolve(hostname);
 	}
-	//取当前启动的port
+	// 取当前启动的port
 	return new Promise((resolve, reject) => {
 		dns.lookup(hostname, (err, address) => {
 			if (err || !address) {
@@ -20,9 +20,9 @@ export default (hostname, isServerPort) => {
 	})
 	.then(visitIp => {
 		return new Promise((resolve, reject) => {
-			//是一个本地的ip
+			// 是一个本地的ip
 			if (ip.isPrivate(visitIp)) {
-				//如果解析的ip和当前服务器开的ip一样
+				// 如果解析的ip和当前服务器开的ip一样
 				if (localIps.some(current => ip.isEqual(current, visitIp)) && isServerPort) {
 					dns.resolve(hostname, function(err, addresses) {
 						if (err || !addresses || !addresses.length) {

@@ -5,10 +5,10 @@ import log from './log';
 import net from 'net';
 import getHttpsSer from './httpsProxySer';
 import {STATUS, LIMIT_SIZE} from './config/defCfg';
-//请求到后的解析
+// 请求到后的解析
 let requestHandler = function(req, res) {
 	var com = this;
-	//build  req info object
+	// build  req info object
 	let isSecure = req.connection.encrypted || req.connection.pai,
 		headers = req.headers,
 		method = req.method,
@@ -21,7 +21,7 @@ let requestHandler = function(req, res) {
 		pathname = urlObject.pathname,
 		visitUrl = protocol + "://" + host + pathname;
 	log.verbose("request url: " + fullUrl);
-	//请求信息
+	// 请求信息
 	let reqInfo = {
 		headers,
 		host,
@@ -52,7 +52,7 @@ let requestHandler = function(req, res) {
 			enumerable: true
 		}
 	});
-	//响应信息
+	// 响应信息
 	let resInfo = {headers: {}};
 	Object.defineProperties(resInfo, {
 		res: {
@@ -81,7 +81,7 @@ let requestHandler = function(req, res) {
 	let data = (buffer)=> {
 		l = l + buffer.length;
 		reqBodyData.push(buffer);
-		//超过长度了
+		// 超过长度了
 		if (l > LIMIT_SIZE) {
 			req.pause();
 			req.unpipe();
@@ -136,8 +136,8 @@ let requestConnectHandler = function(req, cltSocket, head) {
 	}
 	// log.debug(opt.breakHttps, crackHttps, srvUrl.hostname);
 
-	//如果需要捕获https的请求
-	//访问地址直接是ip，跳过不代理  
+	// 如果需要捕获https的请求
+	// 访问地址直接是ip，跳过不代理  
 	if (crackHttps && !net.isIP(srvUrl.hostname)) {
 		log.verbose(`crack https ${reqUrl}`);
 		getSer(this.requestHandler)
@@ -145,7 +145,7 @@ let requestConnectHandler = function(req, cltSocket, head) {
 				port
 			}) => {
 				let srvSocket = net.connect(port, "localhost", () => {
-				cltSocket.write('HTTP/' + req.httpVersion +' 200 Connection Established\r\n' +
+					cltSocket.write('HTTP/' + req.httpVersion +' 200 Connection Established\r\n' +
 					'Proxy-agent: Node-CatProxy\r\n' +
 					'\r\n');
 					srvSocket.pipe(cltSocket).pipe(srvSocket);
@@ -210,7 +210,7 @@ let requestUpgradeHandler = function(req, cltSocket, head) {
 	// log.debug('********************');
 	// log.debug(req.url);
 	// log.debug('********************');
-	//socket请求直接转发吧
+	// socket请求直接转发吧
 	// cltSocket.write(headersStr);
  //  cltSocket.pipe(cltSocket); // echo back
 };

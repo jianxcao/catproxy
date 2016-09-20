@@ -13,17 +13,17 @@ let isStringReg = /^\/.+\/$/;
 let isStartHttp = /^http(s)?:\/\//;
 let isStartSlash = /^\//;
 const ruleType = {
-	host: "host",
-	localFile: "localFile",
-	localDir: "localDir",
-	remoteFile: "remoteFile",
+	host: 'host',
+	localFile: 'localFile',
+	localDir: 'localDir',
+	remoteFile: 'remoteFile',
 	redirect: 'redirect'
 };
 
 let checkRules = (branch) => {
 	let rules = branch.rules;
 	if (rules && rules.length >= 0 && typeof rules === 'object') {
-		//空数组是合法的
+		// 空数组是合法的
 		if (rules.length === 0) {
 			return true;
 		}
@@ -43,16 +43,16 @@ let checkRules = (branch) => {
 
 let checkBranch = (branchs) => {
 	if (branchs && branchs.length >= 0 && typeof branchs === 'object') {
-		//空数组是合法的
+		// 空数组是合法的
 		if (branchs.length === 0) {
 			return true;
 		}
 		for (let branch of branchs) {
-			//名字是必须得字段
+			// 名字是必须得字段
 			if (branch && branch.name !== undefined) {
-				//没定义这个字段
+				// 没定义这个字段
 				if (branch.rules === undefined || branch.rules === null) {
-					//定义一个空得
+					// 定义一个空得
 					branch.rules = [];
 				}
 				if (!checkRules(branch)) {
@@ -89,15 +89,15 @@ let checkBranch = (branchs) => {
  */
 export let checkHosts = (hosts) => {
 	if (hosts && hosts.length >= 0 && typeof hosts === 'object') {
-		//空数组是合法的
+		// 空数组是合法的
 		if (hosts.length === 0) {
 			return true;
 		}
 		for (let host of hosts) {
 			if (host && host.name !== undefined) {
-				//没定义这个字段
+				// 没定义这个字段
 				if (host.branch === undefined || host.branch === null) {
-					//定义一个空得
+					// 定义一个空得
 					host.branch = [];
 				}
 				if (!checkBranch(host.branch)) {
@@ -117,12 +117,12 @@ export let checkHosts = (hosts) => {
  */
 export let saveRules = (rules)=> {
 	if (checkHosts(rules)) {
-		//覆盖旧的rule
-		config.set("hosts",  rules);
-		//存入文件中
+		// 覆盖旧的rule
+		config.set('hosts',  rules);
+		// 存入文件中
 		config.save();
 	} else {
-		throw "存入规则文件出现错误，规则文件非法";
+		throw '存入规则文件出现错误，规则文件非法';
 	}
 };
 
@@ -131,7 +131,7 @@ export let saveRules = (rules)=> {
  * @return {[Array]} 获取到得规则对象
  */
 export let getRules =()=> {
-	return config.get("hosts") || [];
+	return config.get('hosts') || [];
 };
 
 /**
@@ -173,11 +173,11 @@ parseOneRule = (group, reqInfo) => {
 		return;
 	}
 	return execParse(branches.map(current => {
-			return {
-				fun: parseBranch,
-				param: [current, reqInfo]
-			};
-		})
+		return {
+			fun: parseBranch,
+			param: [current, reqInfo]
+		};
+	})
 	);
 };
 
@@ -187,89 +187,89 @@ parseBranch = (branch, reqInfo) => {
 		return;
 	}
 	return execParse(rules.map(current => {
-			return {
-				fun: parseOneBranch,
-				param: [current, reqInfo]
-			};
-		})
+		return {
+			fun: parseOneBranch,
+			param: [current, reqInfo]
+		};
+	})
 	);
 };
 
 parseOneBranch = (rule, reqInfo) => {
-	let {test, exec, type, virtualPath = ""} = rule;
+	let {test, exec, type, virtualPath = ''} = rule;
 	if (isStringReg.test(test)) {
 		test = test.slice(1, test.length -1);
 	} else {
 		test = isStartHttp.test(test) ? test : 'http://' + test;
-		test = "^" + test;
+		test = '^' + test;
 	}
-	//将test转换成正则
+	// 将test转换成正则
 	test = new RegExp(test);
 	let currentUrl = getUrl(reqInfo);
-	//测试没有通过
+	// 测试没有通过
 	if (!test.test(currentUrl) || rule.disable) {
 		return;
 	}
 	log.verbose(`解析规则,当前url:${currentUrl}, 规则类型:${type},规则正则${test},规则执行${exec}`);
 	switch(type){
-		//host模式下只能修改 host protocol port
-		case('host'):
-		//远程文件替换整个url路径包括参数
-		case('remoteFile'):
-			if (exec) {
-				//转换成一个url的对象
-				let execObj = standardUrl(exec, reqInfo.protocol);
-				reqInfo.host = execObj.host;
-				reqInfo.protocol = execObj.protocol.split(':')[0];
-				reqInfo.port = execObj.port ? execObj.port : (reqInfo.protocol === 'https' ? 443 : 80);
-				reqInfo.path = type === 'host' ? reqInfo.path : execObj.path;
-				log.debug("********", reqInfo.protocol, reqInfo.port, exec);
-			} else  {
-				//没有配置exec如果是 host就访问线上，如果是 remoteFile就跳过
-				if (type === 'host') {
-					return new Promise((resolve, reject) => {
-						dns.resolve(reqInfo.host.split(':')[0], function(err, addresses) {
-							if (err || !addresses || !addresses.length) {
-								log.error(`规则解析中, dns解析出现错误，规则类型:${type},规则正则${test}`);
-								reject(reqInfo);
-							} else {
-								reqInfo.host = addresses[0];
-								resolve(reqInfo);
-							}
-						});
+		// host模式下只能修改 host protocol port
+	case('host'):
+		// 远程文件替换整个url路径包括参数
+	case('remoteFile'):
+		if (exec) {
+				// 转换成一个url的对象
+			let execObj = standardUrl(exec, reqInfo.protocol);
+			reqInfo.host = execObj.host;
+			reqInfo.protocol = execObj.protocol.split(':')[0];
+			reqInfo.port = execObj.port ? execObj.port : (reqInfo.protocol === 'https' ? 443 : 80);
+			reqInfo.path = type === 'host' ? reqInfo.path : execObj.path;
+			log.debug('********', reqInfo.protocol, reqInfo.port, exec);
+		} else  {
+				// 没有配置exec如果是 host就访问线上，如果是 remoteFile就跳过
+			if (type === 'host') {
+				return new Promise((resolve, reject) => {
+					dns.resolve(reqInfo.host.split(':')[0], function(err, addresses) {
+						if (err || !addresses || !addresses.length) {
+							log.error(`规则解析中, dns解析出现错误，规则类型:${type},规则正则${test}`);
+							reject(reqInfo);
+						} else {
+							reqInfo.host = addresses[0];
+							resolve(reqInfo);
+						}
 					});
-				}
+				});
 			}
+		}
 		break;
-		case('redirect') :
-			if (exec) {
-				reqInfo.redirect = isStartHttp.test(exec) ? exec : "http://" + exec;
+	case('redirect') :
+		if (exec) {
+			reqInfo.redirect = isStartHttp.test(exec) ? exec : 'http://' + exec;
+		}
+		break;
+	case('localFile'):
+		if (exec) {
+			reqInfo.sendToFile = exec;
+		}
+		break;
+	case('localDir'):
+		if (exec) {
+				// 去掉hash和param
+			let p = reqInfo.path.split('?')[0];
+			p = reqInfo.path.split('#')[0];
+			if (!isStartSlash.test(virtualPath)) {
+				virtualPath = '/' + virtualPath;
 			}
+			p = p.replace(new RegExp('^' + virtualPath), '');
+			reqInfo.sendToFile = path.join(exec, p);
+		}
 		break;
-		case('localFile'):
-			if (exec) {
-				reqInfo.sendToFile = exec;
-			}
-		break;
-		case('localDir'):
-			if (exec) {
-				//去掉hash和param
-				let p = reqInfo.path.split('?')[0];
-				p = reqInfo.path.split('#')[0];
-				if (!isStartSlash.test(virtualPath)) {
-					virtualPath = "/" + virtualPath;
-				}
-				p = p.replace(new RegExp('^' + virtualPath), "");
-				reqInfo.sendToFile = path.join(exec, p);
-			}
-		break;
-		default:
+	default:
 	}
 	return reqInfo;
 };
-//转换url为一个标准对象
+// 转换url为一个标准对象
 standardUrl = (originalUrl, protocol) => {
-	originalUrl = isStartHttp.test(originalUrl) ? originalUrl : protocol + "://" + originalUrl;
+	originalUrl = isStartHttp.test(originalUrl) ? originalUrl : protocol + '://' + originalUrl;
 	return URL.parse(originalUrl);
 };
 
@@ -298,7 +298,7 @@ execParse = (tasks, index) => {
 	} else {
 		result = current.fun.apply(null, current.param);
 	}
-	//如果当前任务有返回结果，并且结果不是一个promise
+	// 如果当前任务有返回结果，并且结果不是一个promise
 	if (result !== null && result !== undefined && !result.then) {
 		return Promise.resolve(result);
 	}
@@ -310,7 +310,7 @@ execParse = (tasks, index) => {
 	});
 };
 
-//test===========
+// test===========
 
 // let reqInfo = {
 // 	headers: {},

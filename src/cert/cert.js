@@ -16,14 +16,14 @@ var rootCrtPath = path.resolve(certDir, './cert.crt');
 var certCachePath = path.resolve(certDir, 'certCache');
 var certCache = {};
 // console.log(log);
-//是否纯在根证书
+// 是否纯在根证书
 var isRootCertExits = () => {
 	return !!(fs.existsSync(certDir) && fs.existsSync(rootKeyPath) && fs.existsSync(rootCrtPath));
 };
 
 var setRootCert = () => {
 	fse.ensureDirSync(certDir);
-	//清除已经有的证书
+	// 清除已经有的证书
 	fse.emptyDirSync(certDir);
 	log.info('根证书生成目录: ' + certDir);
 	var result = createRootCert();
@@ -37,14 +37,14 @@ var setRootCert = () => {
 	};
 };
 
-//不存在根证书就创建
+// 不存在根证书就创建
 var getRootCert = () => {
 	var privateKey, cert;
-	//存在缓存，直接调用
+	// 存在缓存，直接调用
 	if (certCache.root) {
 		return certCache.root;
 	}
-	//确保证书目录存在
+	// 确保证书目录存在
 	fse.ensureDirSync(certDir);
 	if (!isRootCertExits()) {
 		log.error('没有生成根证书，请调用命令生成根证书 -h查看帮助');
@@ -58,17 +58,17 @@ var getRootCert = () => {
 };
 
 
-//证书是否存在
+// 证书是否存在
 var isCertExits = (keyPath, crtPath) => {
 	return fs.existsSync(keyPath) && fs.existsSync(crtPath);
 };
-//获取证书
+// 获取证书
 var getCert = (domain) => {
 	var result = {};
 	if (!domain) {
 		return result;
 	}
-	//已经存在，则从缓存中获取
+	// 已经存在，则从缓存中获取
 	if (certCache[domain]) {
 		return certCache[domain];
 	}
@@ -106,7 +106,7 @@ var setCertDir = (path) => {
 };
 var getCertDir = () => certDir;
 var getRootCertPath = () => rootCrtPath;
-//getCert('lmlc.com');
+// getCert('lmlc.com');
 // emptyCertDir();
 export {
 	isRootCertExits,

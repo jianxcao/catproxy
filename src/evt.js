@@ -1,4 +1,4 @@
-//事件触发中心
+// 事件触发中心
 import log from './log';
 import {parseRule} from './config/rule';
 import * as config from './config/config';
@@ -8,17 +8,17 @@ import zlib from 'zlib';
 import {Buffer} from 'buffer';
 import Promise from 'promise';
 import path from 'path';
-//<meta charset="gb2312">
-//<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+// <meta charset="gb2312">
+// <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 var checkMetaCharset = /<meta(?:\s)+.*charset(?:\s)*=(?:[\s'"])*([^"']+)/i;
-//自动解析类型，其他类型一律保存的是 Buffer
+// 自动解析类型，其他类型一律保存的是 Buffer
 var autoDecodeRegs = /text\/.+|(?:application\/(?:json.*|.*javascript))/i;
-//不解码的后缀格式
+// 不解码的后缀格式
 var excludeDecodeExt = ['ttf', 'eot', 'svg', 'woff']; 
-//解压数据
+// 解压数据
 let decodeCompress = function(bodyData, encode) {
 	return new Promise(function(resolve, reject) {
-		//成功的取到bodyData
+		// 成功的取到bodyData
 		if (bodyData) {
 			let isZip = /gzip/i.test(encode);
 			let isDeflate = /deflate/i.test(encode);
@@ -115,32 +115,32 @@ var beforeReq = function(reqInfo) {
 		return reqInfo;
 	});
 };
-//如果不是合法的类型，就不进行decode
+// 如果不是合法的类型，就不进行decode
 var decodeContent = function(bodyData, contentType, contentEncoding, isDecode) {
-	//先看看是否需要解压数据
+	// 先看看是否需要解压数据
 	return decodeCompress(bodyData, contentEncoding)
-	//解压后在通过编码去解码数据
+	// 解压后在通过编码去解码数据
 	.then(function(bodyData) {
-		//默认编码是utf8
+		// 默认编码是utf8
 		let charset = 'UTF-8', tmp;
 		let ext = mime.extension(contentType);
 		if (!bodyData || !isDecode) {
 			return {bodyData, charset};
 		}
 		if(contentType) {
-			//如果contenttype上又编码，则重新设置编码
+			// 如果contenttype上又编码，则重新设置编码
 			tmp = contentType.match(/charset=([^;]+)/);
 			if (tmp && tmp.length > 0) {
 				charset = tmp[1].toUpperCase();
 			}
 		}
 		if (Buffer.isBuffer(bodyData)) {
-			//其他编码先尝试用 iconv去解码
+			// 其他编码先尝试用 iconv去解码
 			if (charset !== 'UTF-8' && iconv.encodingExists(charset)) {
 				bodyData = iconv.decode(bodyData, charset);
-			} else if(contentType &&  (ext === 'html' || ext === 'htm')) {//如果是一个文档，在取一次编码
+			} else if(contentType &&  (ext === 'html' || ext === 'htm')) {// 如果是一个文档，在取一次编码
 				let strBodyData = bodyData.toString();
-				//在内容中再次找寻编码
+				// 在内容中再次找寻编码
 				let tmp = strBodyData.match(checkMetaCharset);
 				if (tmp && tmp[1]) {
 					tmp[1] = tmp[1].toUpperCase();
@@ -157,7 +157,7 @@ var decodeContent = function(bodyData, contentType, contentEncoding, isDecode) {
 				bodyData = bodyData.toString();
 			}
 		}
-		//再次加编码传递到页面
+		// 再次加编码传递到页面
 		return {
 			bodyData,
 			charset
@@ -186,7 +186,7 @@ var decodeContent = function(bodyData, contentType, contentEncoding, isDecode) {
 var beforeRes = function(resInfo) {
 	return Promise.resolve(resInfo)
 	.then(function (resInfo) {
-		//禁用缓存则删掉缓存相关的header
+		// 禁用缓存则删掉缓存相关的header
 		var disCache = config.get('disCache');
 		if (disCache) {
 			resInfo.headers['cache-control'] = "no-store";
@@ -197,14 +197,14 @@ var beforeRes = function(resInfo) {
 		return resInfo;
 	})
 	.then(function(resInfo) {
-		//禁用缓存或者用户这是监听，则需哟啊解码内容返回给用户
+		// 禁用缓存或者用户这是监听，则需哟啊解码内容返回给用户
 		var disCache = config.get('disCache');
- 		//用户监听
+ 		// 用户监听
 		var useListener = false;
 		if (disCache || useListener) {
 			let contentType = resInfo.headers['content-type'] || "";
 			let contentEncoding = resInfo.headers['content-encoding'];
-			//按照指定编码解码内容
+			// 按照指定编码解码内容
 			let ext = path.extname(resInfo.path.split('?')[0].split('#')[0]) || "";
 			ext = (ext.split('.')[1] || "").toLowerCase();
 			if (excludeDecodeExt.some(cur => cur === ext)) {
@@ -214,7 +214,7 @@ var beforeRes = function(resInfo) {
 			.then(function({charset, bodyData}) {
 				let extension = mime.extension(contentType);
 				delete resInfo.headers['content-encoding'];
-				//如果访问的是一个html,并且成功截取到这个html的内容
+				// 如果访问的是一个html,并且成功截取到这个html的内容
 				if (disCache && contentType &&  (extension === 'html' || extension === 'htm') && typeof bodyData === 'string') {
 					bodyData = bodyData.replace("<head>",
 						`<head>
@@ -231,7 +231,7 @@ var beforeRes = function(resInfo) {
 		return Promise.resolve(resInfo);
 	})
 	.then(function(resInfo) {
-		//为什么要变成buffer主要是为了让浏览器认识，根据浏览器当前的编码解析
+		// 为什么要变成buffer主要是为了让浏览器认识，根据浏览器当前的编码解析
 		if (typeof resInfo.bodyData === 'string') {
 			resInfo.bodyData = iconv.encode(resInfo.bodyData, resInfo.charset || "UTF-8");
 		}

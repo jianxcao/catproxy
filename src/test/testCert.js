@@ -27,7 +27,7 @@ server.on('connection', function(socket) {
 	socket.on('error', function(err) {
 		console.log('err', err);
 	});
-		socket.on('close', function(one) {
+	socket.on('close', function(one) {
 		console.log('close', one);
 	});
 	console.log('connection');

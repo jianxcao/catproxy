@@ -6,7 +6,7 @@ import * as cert from './cert/cert';
 import configInit from './config/config';
 import CatProxy from './app';
 import log from './log';
-//将字段变成list
+// 将字段变成list
 let numReg = /^([0-9]){2,}$/;
 let list = (val) => {
 	val = val.split(',');
@@ -15,7 +15,7 @@ let list = (val) => {
 	});
 	return val.length ? val : undefined;
 };
-//说明，注意不要改空格，否则输出到 控制台会变样
+// 说明，注意不要改空格，否则输出到 控制台会变样
 let out = `
   *****说明******：
   '-t http' 开启http服务器, 此时 '-p 80' 表示http服务器端口  
@@ -48,7 +48,7 @@ program
 	if (program[current] === true) {
 		program[current] = undefined;
 	}
-	//已经输入变量转成小写
+	// 已经输入变量转成小写
 	if (typeof program[current] === 'string') {
 		program[current] = program[current].toLowerCase();
 	}
@@ -71,7 +71,7 @@ program
 		}
 	}
 });
-//生成证书
+// 生成证书
 if (program.cert) {
 	if (cert.isRootCertExits()) {
 		prompt.start({noHandleSIGINT: true});
@@ -107,6 +107,6 @@ if (program.cert) {
 	log.info(`当前证书目录： ${certDir}`);
 	// catproxy main file
 	var catProxy = new CatProxy(opt);
-	//初始化代理服务器
+	// 初始化代理服务器
 	catProxy.init();
 }

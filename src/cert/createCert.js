@@ -1,19 +1,19 @@
 import {pki, md} from 'node-forge';
 let attrs  = [{
-  name: 'countryName',
-  value: 'CN'
+	name: 'countryName',
+	value: 'CN'
 }, {
-  shortName: 'ST',
-  value: 'CP'
+	shortName: 'ST',
+	value: 'CP'
 }, {
-  name: 'localityName',
-  value: 'BJ'
+	name: 'localityName',
+	value: 'BJ'
 }, {
-  name: 'organizationName',
-  value: 'catproxy'
+	name: 'organizationName',
+	value: 'catproxy'
 }, {
-  shortName: 'OU',
-  value: 'CP'
+	shortName: 'OU',
+	value: 'CP'
 }];
 let rootAttrs = attrs.slice(0);
 rootAttrs.push({
@@ -29,7 +29,7 @@ let createKeyandCert = ()=> {
 	let today = new Date().getTime();
 	let tenYearMin = 10 * 365 * 24 * 60 * 60 * 1000;
 	cert.publicKey = keys.publicKey;
-	cert.serialNumber = "" + new Date().getTime();
+	cert.serialNumber = '' + new Date().getTime();
 	cert.validity.notBefore = new Date(today - tenYearMin);
 	cert.validity.notAfter = new Date(today + tenYearMin);
 	return {cert, keys};
@@ -37,9 +37,9 @@ let createKeyandCert = ()=> {
 
 let createRootCert = () => {
 	let {cert, keys} = createKeyandCert();
-  cert.setSubject(rootAttrs);
-	//alternatively set subject from a csr
-	//cert.setSubject(csr.subject.attributes);
+  	cert.setSubject(rootAttrs);
+	// alternatively set subject from a csr
+	// cert.setSubject(csr.subject.attributes);
 	cert.setIssuer(rootAttrs);
 	cert.setExtensions([{
 		name: 'basicConstraints',
@@ -60,7 +60,7 @@ let createSelfCert = (domain, rootOpt) => {
 	}
 	let rootKey = pki.privateKeyFromPem(rootOpt.privateKey);
 	let {cert, keys} = createKeyandCert();
-	//rootCert.subject.attributes
+	// rootCert.subject.attributes
 	cert.setIssuer(rootAttrs);
 	cert.setSubject(attrs.concat([{
 		name: 'commonName',
