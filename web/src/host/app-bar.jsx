@@ -9,11 +9,11 @@ import { Provider,connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 import {drawerStatus} from './action/actions';
 import UploadContent from './dragUpload';
-import sendMsg from './ws/sendMsg';
+import sendMsg from '../ws/sendMsg';
 import store from './store/store';
 import {resetHosts} from './action/actions';
 import LinkItem from './LinkItem';
-import QrCode from './qrcode';
+import QrCode from '../lib/qrcode/qrcode';
 
 let getIcon = (props = {}, className ="", style = {}) => {
 	let defStyle ={

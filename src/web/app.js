@@ -1,6 +1,6 @@
 import express from 'express';
 import log from '../log';
-import main from './main';
+import host from './host';
 import err500 from './500';
 import err404 from './404';
 import path from 'path';
@@ -23,7 +23,7 @@ export default (option) => {
 	uiApp.use("/static", express.static(path.join(__dirname, '../../web/build')));
 	uiApp.use(bodyParser.json()); // for parsing application/json
 	uiApp.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
-	uiApp.use(["/", "/index.html"], main(option));
+	uiApp.use(["/", "/index.html"], host(option));
 	uiApp.use('/downloadrule.html', downloadrule());
 	uiApp.use('/downloadcert.html', downloadcert());
 	uiApp.use(err404);

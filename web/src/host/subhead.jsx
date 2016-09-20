@@ -9,7 +9,7 @@ import TextField from 'material-ui/TextField';
 import { Provider,connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 import Immutable, {OrderedMap, Map, List} from 'immutable';
-import sendMsg from './ws/sendMsg';
+import sendMsg from '../ws/sendMsg';
 import key from 'keymaster';
 import store from './store/store';
 import Checkbox from 'material-ui/Checkbox';

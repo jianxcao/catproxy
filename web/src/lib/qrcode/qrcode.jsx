@@ -1,5 +1,5 @@
 import React,{PropTypes} from 'react';
-import qrcode from './lib/qrcode';
+import qrcode from './qrcode';
 export default class QrCode extends React.Component{
 	componentDidMount() {
 		let opt = Object.assign({}, this.props.opt);

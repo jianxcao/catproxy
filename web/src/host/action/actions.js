@@ -1,5 +1,5 @@
 import actionType from "./action-type";
-import sendMsg from '../ws/sendMsg';
+import sendMsg from '../../ws/sendMsg';
 let  {
 	FETCH_FAILURE,
 	FETCH_SUCC,
