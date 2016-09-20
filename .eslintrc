@@ -13,6 +13,7 @@
     },
     "sourceType": "module"
   },
+	"parser": "babel-eslint",
 	"rules": {
 		// 允许出现alert, prompt 和 confirm
 		"no-alert": 0,
@@ -69,7 +70,7 @@
 		"no-return-assign": 1,
 
 		// 建议代码列数不能超过120行
-		"max-len": [1, 120],
+		"max-len": [1, 180],
 
 		// 建议启用严格模式
 		"global-strict": 0,

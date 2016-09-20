@@ -1,6 +1,6 @@
 import React from 'react';
 import TextField from 'material-ui/TextField';
-//可编辑字段
+// 可编辑字段
 let style = {
 	display: 'inline-block',
 	width: "56%",
@@ -8,10 +8,11 @@ let style = {
 };
 let inputStyle = {
 
-}
+};
 export default class EditField extends React.Component {
-		constructor(props) {
+	constructor(props) {
 		super(props);
+		this.handleChaneToText = this.handleChaneToText.bind(this);
 	}
 	static propTypes = {
 		valueChange: React.PropTypes.func,
@@ -24,9 +25,9 @@ export default class EditField extends React.Component {
 		isEditor: false
 	}
 
-	//组件更新过了
+	// 组件更新过了
 	componentDidUpdate(prevProps, prevState) {
-		//正在编辑
+		// 正在编辑
 		if (this.props.isEditor) {
 			this.refs.myTextInput.input.select();
 		}
@@ -47,7 +48,7 @@ export default class EditField extends React.Component {
 	
 	render(){
 		if (this.props.isEditor) {
-		 return (<TextField
+			return (<TextField
 					name="myTextInput"
 					ref="myTextInput"
 					style={style}
@@ -55,10 +56,10 @@ export default class EditField extends React.Component {
 					defaultValue={this.props.val}
 					onClick={this.handleInputClick}
 					onMouseDown={this.handleInputClick}
-					onBlur={this.handleChaneToText.bind(this)}
-			/>)
+					onBlur={this.handleChaneToText}
+			/>);
 		} else {
-			return (<div style={style}>{this.props.val}</div>)
+			return (<div style={style}>{this.props.val}</div>);
 		}
 	}
 }

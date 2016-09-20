@@ -114,20 +114,20 @@ const thunk = store => next => action =>
 		action(store.dispatch, store.getState) :
 		next(action);
 const initialState = new Immutable.fromJS({
-	//所有规则
+	// 所有规则
 	hosts: [],
-	//首次获取数据所用
+	// 首次获取数据所用
 	fetchRule: {},
-	//当前菜单打开状态
+	// 当前菜单打开状态
 	drawerStatus: true,
-	//当前选中的规则
+	// 当前选中的规则
 	selectRule: {},
 	disCache: false
 });
-//组合所有reducers
+// 组合所有reducers
 let toDo = combineReducers(reducers);
 
-//创建带有 调试和各种中间件的stroe
+// 创建带有 调试和各种中间件的stroe
 let middleware = [thunk, vanillaPromise, readyStatePromise, syncStateToSer, crashReporter];
 if (window.config.env === 'dev') {
 	middleware.push(logger);

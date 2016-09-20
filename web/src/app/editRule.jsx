@@ -8,41 +8,41 @@ import MenuItem from 'material-ui/MenuItem';
 import IconButton from 'material-ui/IconButton';
 
 import Subheader from 'material-ui/Subheader';
-//每个字段的样式
+// 每个字段的样式
 const fieldStyle = {
 	marginLeft: 20,
 	width: '350px',
 	display: "inline-block",
 	textAlign: "left"
 };
-//所有字段外围paper的样式
+// 所有字段外围paper的样式
 const paperStyle = {
 	textAlign: "center",
 	maxWidth: "800px",
 	margin: "20px auto"
 };
-//所有规则的type和值
+// 所有规则的type和值
 const rulesKeys = {
 	host: "host",
 	localFile: "本地文件",
 	localDir: "本地目录",
 	remoteFile: "远程文件",
 	redirect: "重定向"
-}
+};
 const targetTips = {
 	host: "请输入目标host或ip",
 	localFile: "请输入目标文件绝对路径",
 	localDir: "请输入目标目录绝对路径",
 	remoteFile: "请输入远程文件url地址,包括参数哦",
 	redirect: "请输入重定向的目标地址"
-}
+};
 
 const subheaderStyle = {
 	textAlign: "left",
 	fontSize: "16px",
 	fontWeight: 700
 };
-//获取icon
+// 获取icon
 const getIcon = (props = {}, className, style) => {
 	let defStyle ={
 		padding: "0px",
@@ -65,19 +65,30 @@ const getIcon = (props = {}, className, style) => {
 	);
 };
 export default class EditRule extends React.Component{
-	//删除一个规则
+	constructor(props) {
+		super(props);
+		this.handleDel = this.handleDel.bind(this);
+		this.handleDis = this.handleDis.bind(this);
+		this.handleChange = this.handleChange.bind(this);
+		this.handleTypeChange = this.handleTypeChange.bind(this);
+	}
+	shouldComponentUpdate(nextProps, nextState) {
+		let rule = nextProps.rule;
+		let currentRule = this.props.rule;
+		return !currentRule.equals(rule);
+	}
+	// 删除一个规则
 	handleDel() {
 		let {ruleId, delRule} = this.props;
 		delRule(ruleId);
-		
 	}
-	//禁止一个规则
+	// 禁止一个规则
 	handleDis() {
 		let {ruleId, disRule} = this.props;
 		disRule(ruleId);
 	}
 
-	//修改规则的字段
+	// 修改规则的字段
 	handleChange(evt, val) {
 		let target = evt.target;
 		let name = target.name;
@@ -86,7 +97,7 @@ export default class EditRule extends React.Component{
 			[name]: val
 		});
 	}
-	//修改类型
+	// 修改类型
 	handleTypeChange(evt, index, selectVal) {
 		let {ruleId, updateRule} = this.props;
 		updateRule(ruleId, {
@@ -97,13 +108,13 @@ export default class EditRule extends React.Component{
 	renderIcon() {
 		return [getIcon({
 			key: 0,
-			onClick: this.handleDel.bind(this)
+			onClick: this.handleDel
 		},'icon-del', {
 			display: "inline-block",
 		}),
 		getIcon({
 			key: 1,
-			onClick: this.handleDis.bind(this)
+			onClick: this.handleDis
 		},'icon-disable', {
 			display: "inline-block",
 			left: '24px'
@@ -111,14 +122,14 @@ export default class EditRule extends React.Component{
 	}
 
 	render() {
-		//按钮外围div样式
+		// 按钮外围div样式
 		let divStyle = Object.assign({}, fieldStyle, {
 			height: "50px",
 			lineHeight: "50px"
 		});
-		//当前的规则
+		// 当前的规则
 		let rule = this.props.rule;
-		//规则类型的下拉列表
+		// 规则类型的下拉列表
 		let menuRulesTypeList = [];
 		for(let key in rulesKeys) {
 			menuRulesTypeList.push(<MenuItem value={key} key={key} primaryText={rulesKeys[key]} />);
@@ -138,15 +149,28 @@ export default class EditRule extends React.Component{
 		}
 		let virtualPath = null;
 		if (rule.get('type') === 'localDir') {
-			virtualPath = <TextField name="virtualPath" onChange={this.handleChange.bind(this)} style={fieldStyle} underlineShow={true} fullWidth={true}  value={rule.get('virtualPath')} hintText="请输入虚拟部分路径" />
+			virtualPath = <TextField name="virtualPath" 
+			onChange={this.handleChange}
+			style={fieldStyle} underlineShow={true}
+			fullWidth={true}
+			value={rule.get('virtualPath')}
+			hintText="请输入虚拟部分路径" />;
 		}
 		return (
 			<Paper zDepth={1} style={paperStyle} {...newProps}>
 				<Subheader inset={true} style={subStyle} {...this.props.switchProps} data-id={this.props.ruleId}>规则{this.props.ruleId + 1} </Subheader>
-				<SelectField value={rule.get('type')} style={fieldStyle} onChange={this.handleTypeChange.bind(this)}>{menuRulesTypeList}</SelectField>
-				<TextField  name="test" onChange={this.handleChange.bind(this)} style={fieldStyle} underlineShow={true} fullWidth={true}  value={rule.get('test')} hintText="请输入源地址" />
-				<TextField name="exec" onChange={this.handleChange.bind(this)} style={fieldStyle} underlineShow={true} fullWidth={true}  value={rule.get('exec')} hintText={targetTips[rule.get('type')]} />
-				{virtualPath}
+				<SelectField value={rule.get('type')} style={fieldStyle} onChange={this.handleTypeChange}>{menuRulesTypeList}</SelectField>
+				<TextField  name="test" 
+					onChange={this.handleChange}
+					style={fieldStyle} underlineShow={true}
+					fullWidth={true}  value={rule.get('test')}
+					hintText="请输入源地址" />
+				<TextField name="exec"
+					onChange={this.handleChange}
+					style={fieldStyle} underlineShow={true}
+					fullWidth={true}  value={rule.get('exec')}
+					hintText={targetTips[rule.get('type')]} />
+					{virtualPath}
 				<div style={divStyle}>{this.renderIcon()}</div>
 			</Paper>
 		);

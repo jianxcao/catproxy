@@ -18,8 +18,8 @@ const innerPaperStyle = {
 	width: "100%",
 	display: 'block',
 	position: 'relative'
-}
-//右侧主要面板
+};
+// 右侧主要面板
 export default class Main extends React.Component {
 	constructor(props) {
 		super(props);
@@ -41,13 +41,13 @@ export default class Main extends React.Component {
 					<EditRules/>
 				</Paper>
 			</Paper>
-		)
+		);
 	}
 }
 function mapStateToProps(state) {
 	return {
 		drawerStatus: state.get('drawerStatus')
-	}
+	};
 }
 function mapDispatchToProps(dispatch) {
 	return {

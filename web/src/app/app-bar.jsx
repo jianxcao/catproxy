@@ -8,8 +8,8 @@ import NavigationClose from 'material-ui/svg-icons/navigation/close';
 import { Provider,connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 import {drawerStatus} from './action/actions';
-import UploadContent from './dragUpload'
-import sendMsg from './ws/sendMsg'
+import UploadContent from './dragUpload';
+import sendMsg from './ws/sendMsg';
 import store from './store/store';
 import {resetHosts} from './action/actions';
 import LinkItem from './LinkItem';
@@ -35,7 +35,7 @@ let getIcon = (props = {}, className ="", style = {}) => {
 
 class Header extends React.Component {
 	constructor(props) {
-		super(props)
+		super(props);
 	}
 	static propTypes = {
 	    
@@ -50,7 +50,7 @@ class Header extends React.Component {
 		changeDrawerStatus(!drawerStatus);
 	}
 	
-	//点击导入
+	// 点击导入
 	handleImportRule = () => {
 		let {dialog, toast} = this.context;
 		let reader;
@@ -58,7 +58,7 @@ class Header extends React.Component {
 			reader = result;
 		};
 		let getContent = (content) => {
-			return <UploadContent dialog={dialog} toast={toast} getReader={getReader} content = {content || ""}/>
+			return <UploadContent dialog={dialog} toast={toast} getReader={getReader} content = {content || ""}/>;
 		};
 		let id = dialog({
 			title: "上传配置",
@@ -89,16 +89,16 @@ class Header extends React.Component {
 									.then(message => {
 										toast(message.result);
 									}, 
-									message => com.context.toast(message.result))
+									message => toast(message.result));
 								}
 							}
-						})
+						});
 					} else {
 						toast('请先上传文件');
 					}
 				} else {
 					if (reader) {
-						//文件还在读，直接取消
+						// 文件还在读，直接取消
 						if (reader.readyState === reader.LOADING) {
 							reader.abort();
 						}
@@ -108,18 +108,18 @@ class Header extends React.Component {
 			}
 		});
 	}
-	//显示证书的二维码
+	// 显示证书的二维码
 	handleShowCertQrcode = () => {
 		let {dialog} = this.context;
 		let opt = {
-				text: 'http://' + location.host + "/downloadcert.html"
-			};
+			text: 'http://' + location.host + "/downloadcert.html"
+		};
 		dialog({
 			title: '证书二维码',
 			msg: (<QrCode opt={opt} ></QrCode>),
 			btn: ["关闭"]
 		});
-		console.log(document.getElementById('certQrCode'));
+		// console.log(document.getElementById('certQrCode'));
 	}
 	render() {
 		let host = 'http://' + location.host;
@@ -140,13 +140,13 @@ class Header extends React.Component {
 				<LinkItem primaryText="github" leftIcon={getIcon({}, "icon-github")} href="https://github.com/jianxcao/catproxy"/>
 				<LinkItem primaryText="帮助" leftIcon={getIcon({}, "icon-help")} href="https://github.com/jianxcao/catproxy"/>
 			</IconMenu>
-		}/>)
+		}/>);
 	}
 }
 function mapStateToProps(state) {
 	return {
 		drawerStatus: state.get('drawerStatus')
-	}
+	};
 }
 function mapDispatchToProps(dispatch) {
 	return {

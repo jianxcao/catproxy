@@ -13,18 +13,21 @@ const wrapStyle = {
 const bodyStyle = {
 	padding: "12px",
 	minWidth: "200px"
-}
+};
 const actionType = {
 	"CONTENT": "CONTENT"
-}
+};
 var dialgoNum = 0;
 var dialogCache = {};
 export default class DialogProvider extends React.Component {
 	constructor(props) {
-		super(props)
+		super(props);
+		this.handleBtnClick = this.handleBtnClick.bind(this);
+		this.dialog = this.dialog.bind(this);
+		this.toast = this.toast.bind(this);
 		this.state = {
 			dialogs: {}
-		}
+		};
 	}
 
 	handleBtnClick(evt){
@@ -72,11 +75,11 @@ export default class DialogProvider extends React.Component {
 		if (typeof opt === 'string') {
 			if (actionType[action] && dialogCache[opt]) {
 				switch(action) {
-					case(actionType.CONTENT):
+				case(actionType.CONTENT):
 					dialogCache[opt].msg = control;
 					this.forceUpdate();
 					break;
-					default:
+				default:
 				}
 			} else {
 				console.warn('错误的弹窗动作');
@@ -91,7 +94,7 @@ export default class DialogProvider extends React.Component {
 			layout = 1;
 		}
 		let modal = true;
-		//蒙层参数(0不显示 -1全透明 1半透明 2强制半透明)
+		// 蒙层参数(0不显示 -1全透明 1半透明 2强制半透明)
 		let type = {
 			"false": 0,
 			"true": 1,
@@ -115,7 +118,7 @@ export default class DialogProvider extends React.Component {
 		let id = 'dialog' + guid++;
 		contentStyle = Object.assign({}, wrapStyle, contentStyle);
 		bodyStyle = bodyStyle || {};
-		//将dialog配置放入缓存
+		// 将dialog配置放入缓存
 		dialogCache[id] = {
 			title,
 			msg,
@@ -126,10 +129,10 @@ export default class DialogProvider extends React.Component {
 			button: this.getBtns(btn && btn.length >= 0 ? btn : ["取消", "*确定"], id),
 			modal: modal,
 			open: true
-		}
+		};
 		let dialogs = this.state.dialogs;
 		dialogs[id] = true;
-		//从state标记这个dialog存在了
+		// 从state标记这个dialog存在了
 		this.setState(Object.assign({}, this.state, {
 			dialogs: dialogs
 		}));
@@ -153,7 +156,7 @@ export default class DialogProvider extends React.Component {
 			}
 		});
 		window.setTimeout((()=> {
-		 this.destory(id);
+			this.destory(id);
 		}).bind(this), +time || 1000);
 	}
 
@@ -168,9 +171,9 @@ export default class DialogProvider extends React.Component {
 
 	getChildContext() {
 		return {
-			dialog: this.dialog.bind(this),
-			toast: this.toast.bind(this)
-		}
+			dialog: this.dialog,
+			toast: this.toast
+		};
 	}
 
 	getBtns(btns = [], dialogId) {
@@ -185,7 +188,7 @@ export default class DialogProvider extends React.Component {
 					data-btn-id = {index}
 					data-dialog-id ={dialogId}
 					keyboardFocused={text !== current}
-					onTouchTap={this.handleBtnClick.bind(this)}
+					onTouchTap={this.handleBtnClick}
 				/>
 			);
 		});
@@ -210,7 +213,7 @@ export default class DialogProvider extends React.Component {
 					open={current.open}>
 					{current.msg}
 				</Dialog>
-			)
+			);
 		}
 		return (
 			<div>

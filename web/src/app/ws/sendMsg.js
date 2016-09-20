@@ -1,5 +1,5 @@
-//像服务器发送消息，如果有消息返回则接受
-//暴露出发送消息的各个方法
+// 像服务器发送消息，如果有消息返回则接受
+// 暴露出发送消息的各个方法
 /*
  * 
  *  所有接受到得消息是一个Object
@@ -13,12 +13,12 @@ import {send} from './ws';
 
 
 
-//获取config
+// 获取config
 export let fetchConfig = (data) => {
- return send('fetchConfig')(data);
+	return send('fetchConfig')(data);
 };
 
-//更新rule
+// 更新rule
 export let updateRule = (data) => {
 	if (data && data.length >= 0) {
 		let result = {

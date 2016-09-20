@@ -10,7 +10,7 @@ export default class LayOut extends React.Component {
 		this.state = {
 			groupId: 0,
 			branchId: 0
-		}
+		};
 	}
 
 	static contextTypes = {
@@ -20,7 +20,7 @@ export default class LayOut extends React.Component {
 	static childContextTypes = {}
 
 	getChildContext() {
-		return {}
+		return {};
 	}
 	
 	render() {

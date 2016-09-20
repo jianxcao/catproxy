@@ -1,12 +1,12 @@
 import React, {PropTypes} from 'react';
 import {render} from 'react-dom';
 import ReactDom from 'react-dom';
-import {Provider,connect } from 'react-redux'
+import {Provider,connect } from 'react-redux';
 import injectTapEventPlugin from 'react-tap-event-plugin';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import baseTheme from 'material-ui/styles/baseThemes/lightBaseTheme';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import polyfill from './polyfill';
+import polyfill from './lib/polyfill';
 import LayOut from './layout';
 // import Test from './test';
 import style from './app.less';
@@ -28,8 +28,8 @@ class App extends React.Component {
 		store.dispatch(actions.fetchRule())
 		.then((action) => {
 			if (action.type === 'FETCH_SUCC') {
-				store.dispatch(actions.resetHosts(action.result.result.hosts))
-				store.dispatch(actions.disCache(action.result.result.disCache))
+				store.dispatch(actions.resetHosts(action.result.result.hosts));
+				store.dispatch(actions.disCache(action.result.result.disCache));
 			}
 		});
 	}
@@ -43,7 +43,7 @@ class App extends React.Component {
 	};
 
 	render() {
-		return (<LayOut/>)
+		return (<LayOut/>);
 	};
 }
 
@@ -55,4 +55,4 @@ ReactDom.render(
 			</DialogProvider>
 		</Provider>
 	</MuiThemeProvider>, 
-document.getElementById('g-wrap'))
+document.getElementById('g-wrap'));

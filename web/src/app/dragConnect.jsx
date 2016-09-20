@@ -5,10 +5,10 @@ var dragEle = null;
 let guid = 10101;
 let getGuid = () => {
 	return guid++;
-}
+};
 export default (callback, getDragImage, props) => {
 	let currentId = getGuid();
-	//拖拽相关
+	// 拖拽相关
 	return {
 		...props,
 		["data-drag-id"]: currentId,
@@ -32,8 +32,8 @@ export default (callback, getDragImage, props) => {
 
 		onDragEnd (ev){
 			try {
-				ev.dataTransfer.clearData("Text");
 				dragEle = null;
+				ev.dataTransfer.clearData("Text");
 			} catch(e) {
 
 			}
@@ -65,12 +65,12 @@ export default (callback, getDragImage, props) => {
 					target = target.parentElement;
 				}
 			}
-			//父节点 相同即可以拖动
+			// 父节点 相同即可以拖动
 			if (isHaveSameParent && dragEle !== target) {
 				if (callback) {
 					callback(dragEle, target);
 				}
 			}
 		}
-	}
-}
+	};
+};

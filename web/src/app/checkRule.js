@@ -8,7 +8,7 @@ const ruleType = {
 let checkRules = (branch) => {
 	let rules = branch.rules;
 	if (rules && rules.length >= 0 && typeof rules === 'object') {
-		//空数组是合法的
+		// 空数组是合法的
 		if (rules.length === 0) {
 			return true;
 		}
@@ -28,16 +28,16 @@ let checkRules = (branch) => {
 
 let checkBranch = (branchs) => {
 	if (branchs && branchs.length >= 0 && typeof branchs === 'object') {
-		//空数组是合法的
+		// 空数组是合法的
 		if (branchs.length === 0) {
 			return true;
 		}
 		for (let branch of branchs) {
-			//名字是必须得字段
+			// 名字是必须得字段
 			if (branch && branch.name !== undefined) {
-				//没定义这个字段
+				// 没定义这个字段
 				if (branch.rules === undefined || branch.rules === null) {
-					//定义一个空得
+					// 定义一个空得
 					branch.rules = [];
 				}
 				if (!checkRules(branch)) {
@@ -74,15 +74,15 @@ let checkBranch = (branchs) => {
  */
 export default (hosts) => {
 	if (hosts && hosts.length >= 0 && typeof hosts === 'object') {
-		//空数组是合法的
+		// 空数组是合法的
 		if (hosts.length === 0) {
 			return true;
 		}
 		for (let host of hosts) {
 			if (host && host.name !== undefined) {
-				//没定义这个字段
+				// 没定义这个字段
 				if (host.branch === undefined || host.branch === null) {
-					//定义一个空得
+					// 定义一个空得
 					host.branch = [];
 				}
 				if (!checkBranch(host.branch)) {

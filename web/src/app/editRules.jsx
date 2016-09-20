@@ -24,8 +24,26 @@ const paperStyle = {
 class EditRules extends React.Component{
 	constructor(props) {
 		super(props);
+		this.newRule = this.newRule.bind(this);
+		this.delRule = this.delRule.bind(this);
+		this.disRule = this.disRule.bind(this);
+		this.updateRule = this.updateRule.bind(this);
+		this.switchRule = this.switchRule.bind(this);
+		this.switchProps = dragCon(this.switchRule, (target)=> {
+			return target.parentElement;
+		});
 	}
-	//新建一个规则
+	shouldComponentUpdate(nextProps, nextState) {
+		let rules = nextProps.rules;
+		let currentRules = this.props.rules;
+		return rules.size !== currentRules.size || 
+		rules.some((current, index) => {
+			let curRules = currentRules.get(index);
+			return curRules.get('disable') !== current.get('disable') 
+			|| curRules.get('type') !== !curRules.get('type');
+		});
+	}
+	// 新建一个规则
 	newRule() {
 		let {groupId, branchId} = this.props;
 		this.props.addRule(groupId, branchId, {
@@ -33,22 +51,22 @@ class EditRules extends React.Component{
 			test: "",
 			type: "host",
 			exec: ""
-		})
+		});
 	}
 
-	//删除一个规则
+	// 删除一个规则
 	delRule(ruleId) {
 		let {groupId, branchId} = this.props;
 		this.props.delRule(groupId, branchId, ruleId);
 	}
 
-	//禁止使用某个规则
+	// 禁止使用某个规则
 	disRule(ruleId) {
 		let {groupId, branchId} = this.props;
 		this.props.toggleRuleDis(groupId, branchId, ruleId);
 	}
 
-	//更新某个规则
+	// 更新某个规则
 	updateRule(ruleId, rule) {
 		let {groupId, branchId} = this.props;
 		this.props.updateRule(groupId, branchId, ruleId, rule);
@@ -61,6 +79,7 @@ class EditRules extends React.Component{
 		if (sourceId != null && id != null) {
 			sourceId = + sourceId;
 			id = + id;
+			// this.forceUpdate();
 			this.props.switchRule(groupId, branchId, sourceId, id);
 		}
 	}
@@ -68,20 +87,17 @@ class EditRules extends React.Component{
 	render() {
 		let {groupId, branchId} = this.props;
 		if (groupId !== null && branchId !== null && groupId >= 0 && branchId >=0) {
-				let rules = this.props.rules;
-				let switchProps = dragCon(this.switchRule.bind(this), (target)=> {
-					return target.parentElement;
-				});
-				let editRules = rules.map((current, index) => {
-					return <EditRule rule={current} key={index} ruleId={index} 
-					delRule={this.delRule.bind(this)}
-					disRule={this.disRule.bind(this)}
-					updateRule={this.updateRule.bind(this)} switchProps = {switchProps}/>
-				});
-				return (
+			let rules = this.props.rules;
+			let editRules = rules.map((current, index) => {
+				return <EditRule rule={current} key={index} ruleId={index} 
+				delRule={this.delRule}
+				disRule={this.disRule}
+				updateRule={this.updateRule} switchProps = {this.switchProps}/>;
+			});
+			return (
 					<Paper zDepth={0}>
 						<Paper zDepth={0} style={paperStyle}>
-							<RaisedButton label="新建规则" primary={true} onClick={this.newRule.bind(this)}/>
+							<RaisedButton label="新建规则" primary={true} onClick={this.newRule}/>
 						</Paper>
 						{editRules}
 					</Paper>
@@ -99,7 +115,7 @@ class EditRules extends React.Component{
 function mapStateToProps(state, owerProps) {
 	let {groupId, branchId} = state.get('selectRule').toJS();
 	let rules = state.getIn(['hosts', groupId, "branch", branchId, "rules"]);
-	//没找到对应的规则
+	// 没找到对应的规则
 	if (!rules) {
 		rules = new List();
 		groupId = null;

@@ -2,7 +2,7 @@ import React,{PropTypes} from 'react';
 import MenuItem from 'material-ui/MenuItem';
 const linkStyle ={
 	display:"block"
-}
+};
 class LinkItem extends React.Component {
 	render() {
 		let {outStyle, href} = this.props;

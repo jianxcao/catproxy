@@ -32,27 +32,31 @@ let getListItemStyles = () => {
 			display: "inline-block",
 			position: 'relative'
 		}
-	}
+	};
 };
 
-//获取菜单头样式
+// 获取菜单头样式
 let getLitTitleStyles = (props, context) => {
-		let muiTheme = context.muiTheme;
-		let {palette, spacing} = muiTheme;
-		return {
-			header: {
-				backgroundColor: palette.primary1Color,
-				color: palette.alternateTextColor,
-				height: spacing.desktopKeylineIncrement,
-				lineHeight: spacing.desktopKeylineIncrement + "px",
-				titleFontWeight: typography.fontWeightMedium,
-				paddingLeft: spacing.desktopGutter,
-				fontSize: "24px"
-			}
+	let muiTheme = context.muiTheme;
+	let {palette, spacing} = muiTheme;
+	return {
+		header: {
+			backgroundColor: palette.primary1Color,
+			color: palette.alternateTextColor,
+			height: spacing.desktopKeylineIncrement,
+			lineHeight: spacing.desktopKeylineIncrement + "px",
+			titleFontWeight: typography.fontWeightMedium,
+			paddingLeft: spacing.desktopGutter,
+			fontSize: "24px"
 		}
+	};
 };
 
 class LeftDrawer extends React.Component {
+	constructor(props) {
+		super(props);
+		this.handleExchangePos = this.handleExchangePos.bind(this);
+	}
 	static contextTypes = {
 		muiTheme: PropTypes.object.isRequired
 	}
@@ -99,10 +103,10 @@ class LeftDrawer extends React.Component {
 			toggleBranchDis,
 			updateSelectRule,
 			disableAll
-		}
+		};
 	}
 
-	//切换菜单显示隐藏
+	// 切换菜单显示隐藏
 	handleToggleDrawer = () => {
 		let {drawerStatus, changeDrawerStatus} = this.props;
 		changeDrawerStatus(!drawerStatus);
@@ -128,14 +132,14 @@ class LeftDrawer extends React.Component {
 		}
 	}
 
-	//渲染分支
+	// 渲染分支
 	renderBranch(list, groupId) {
 		let selectRule = this.props.selectRule;
 		let selectBranchId = selectRule.get('branchId');
 		let selectGroupId = selectRule.get('groupId');
 		let result = [];
 		if (list && list.size > 0) {
-			let dragProps = dragCon(this.handleExchangePos.bind(this));
+			let dragProps = dragCon(this.handleExchangePos);
 			for(let key = 0, size = list.size; key < size; key ++) {
 				let current = list.get(key);
 				let props = {
@@ -151,20 +155,20 @@ class LeftDrawer extends React.Component {
 					innerDivStyle: {
 						color: current.get('disable') ? "#999999" : "#333333",
 					}
-				}
+				};
 				props = Object.assign({}, props, dragProps);
-				result.push(<ListItem {...props}/>)
+				result.push(<ListItem {...props}/>);
 			}
 		}
 		return result;
 	}
 
-	//渲染列表
+	// 渲染列表
 	renderList() {
 		var hosts = this.props.hosts;
 		var listItem = [];
 		if (hosts) {
-			let dragProps = dragCon(this.handleExchangePos.bind(this));
+			let dragProps = dragCon(this.handleExchangePos);
 			for(let key = 0, size = hosts.size; key < size; key++) {
 				let current = hosts.get(key);
 				let props = {
@@ -181,13 +185,13 @@ class LeftDrawer extends React.Component {
 					},
 					initiallyOpen: current.get('isOpen'),
 					nestedItems: this.renderBranch(current.get('branch'), key)
-				}
-				//初始化
+				};
+				// 初始化
 				props = Object.assign({}, props, dragProps);
-				listItem.push(<ListItem {...props}></ListItem>)
+				listItem.push(<ListItem {...props}></ListItem>);
 			}
 		}
-		return (<List>{listItem}</List>)
+		return (<List>{listItem}</List>);
 	}
 
 	render() {
@@ -207,7 +211,7 @@ function mapStateToProps(state) {
 		drawerStatus: state.get('drawerStatus'),
 		hosts: state.get('hosts'),
 		selectRule: state.get('selectRule')
-	}
+	};
 }
 
 function mapDispatchToProps(dispatch) {

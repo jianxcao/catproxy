@@ -34,16 +34,16 @@ const methodMap = {
 	},
 
 	TOGGLE_RULE_DIS: (state, action) => {
- 		state = state.updateIn(
-				[action.groupId, "branch", action.branchId, "rules", action.ruleId, "disable"], 
-				val => !val);
+		state = state.updateIn(
+		[action.groupId, "branch", action.branchId, "rules", action.ruleId, "disable"], 
+		val => !val);
 		return syncDis(state, action.groupId);
 	},
 
 	UPDATE_RULE: (state, action) => {
 		let rule = action.rule;
 		if (rule) {
-				return state.updateIn(
+			return state.updateIn(
 			[action.groupId, "branch", action.branchId, "rules", action.ruleId], 
 			(rule) => rule.merge(Immutable.fromJS(action.rule))
 			); 
@@ -60,7 +60,7 @@ const methodMap = {
 				return rules.set(action.sourceId, rules.get(action.id)).set(action.id, old);
 			});
 	}
-}
+};
 
 export let rule = (state = new List(), action = {}) => {
 	if (methodMap[action.type]) {
@@ -68,9 +68,9 @@ export let rule = (state = new List(), action = {}) => {
 	} else {
 		return state;
 	}
-}
+};
 
-//同步禁止状态，会从rule下开始逐渐像外同步
+// 同步禁止状态，会从rule下开始逐渐像外同步
 export let syncDis = (state, groupId) => {
 	if (groupId >= 0) {
 		let branchs = state.getIn([groupId, "branch"]);
@@ -86,4 +86,4 @@ export let syncDis = (state, groupId) => {
 					 .updateIn([groupId, "disable"], dis => branchsStatus.every(cur=> cur === true));
 	}
 	return state;
-}
+};

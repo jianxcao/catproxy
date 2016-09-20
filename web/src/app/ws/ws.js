@@ -5,7 +5,7 @@ import * as sendType from './sendType';
 import * as status from './status';
 var ws, myMessage;
 
-//根据不同的Type转发到不同的地方处理
+// 根据不同的Type转发到不同的地方处理
 let recive = (type) => {
 	return myMessage().then(ws => {
 		ws.on(reciveType[type], message => {
@@ -19,7 +19,7 @@ let recive = (type) => {
 	});
 };
 
-//处理收到的事件
+// 处理收到的事件
 let distributeReciveMethod = () => {
 	for (let type in reciveType) {
 		recive(type);
@@ -74,7 +74,7 @@ export default myMessage = () => {
 export let send = (type) => (data) => {
 	return myMessage().then(ws => {
 		return new Promise((resolve, reject) => {
-			//服务器链接失败
+			// 服务器链接失败
 			if (ws.disconnected) {
 				return reject({
 					status: status.ERROR,
