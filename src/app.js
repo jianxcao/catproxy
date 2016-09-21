@@ -83,6 +83,11 @@ class CatProxy extends EventEmitter{
 		// 请求前 
 		this.beforeRes = beforeRes.bind(this); 
 		
+		// 请求事件方法
+		this.requestHandler = reqSer.requestHandler.bind(this);
+		this.requestConnectHandler = reqSer.requestConnectHandler.bind(this);
+		this.requestUpgradeHandler = reqSer.requestUpgradeHandler.bind(this);
+
 		return Promise.resolve()
 		.then(this.createCache.bind(this))
 		.then(this.checkParam.bind(this))
@@ -121,10 +126,7 @@ class CatProxy extends EventEmitter{
 	createServer() {
 		let opt = this.option;
 		let servers = this.servers || [];
-		// 请求事件方法
-		let requestHandler = reqSer.requestHandler.bind(this);
-		let requestConnectHandler = reqSer.requestConnectHandler.bind(this);
-		// let requestUpgradeHandler = reqSer.requestUpgradeHandler.bind(this);
+		let com = this;
 		// 可以自定义server或者用系统内置的server
 		if (opt.type === 'http' && !servers[0]) {
 			servers[0] = http.createServer();
@@ -138,12 +140,12 @@ class CatProxy extends EventEmitter{
 			servers[1] = https.createServer({key,cert, rejectUnauthorized: false, SNICallback});
 		}
 		servers.forEach(server => {
-			// server.on('upgrade', requestUpgradeHandler);
+			// server.on('upgrade', com.requestUpgradeHandler);
 			// 如果在http下代理https，则需要过度下请求
 			if (server instanceof  http.Server) {
-				server.on('connect', requestConnectHandler);
+				server.on('connect', com.requestConnectHandler);
 			}
-			server.on('request', requestMiddleware.middleWare(requestHandler));
+			server.on('request', requestMiddleware.middleWare(com.requestHandler));
 			let serverType = server instanceof  http.Server ? 'http' : 'https';
 			let port = serverType === 'http' ? opt.port : opt.httpsPort;
 			// 如果server没有被监听，则调用默认端口监听

@@ -214,8 +214,18 @@ let requestUpgradeHandler = function(req, cltSocket, head) {
 	// cltSocket.write(headersStr);
  //  cltSocket.pipe(cltSocket); // echo back
 };
+
 export default {
 	requestHandler,
 	requestConnectHandler,
 	requestUpgradeHandler
+};
+
+export default function() {
+	var context = this;
+	return {
+		requestHandler: requestHandler.bind(context),
+		requestConnectHandler: requestConnectHandler.bind(context),
+		requestUpgradeHandler: requestUpgradeHandler.bind(context)		
+	};
 };
