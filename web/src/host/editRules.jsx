@@ -39,8 +39,8 @@ class EditRules extends React.Component{
 		return rules.size !== currentRules.size || 
 		rules.some((current, index) => {
 			let curRules = currentRules.get(index);
-			return curRules.get('disable') !== current.get('disable') 
-			|| curRules.get('type') !== !curRules.get('type');
+			return curRules.get('disable') !== current.get('disable') ||
+			 curRules.get('type') !== !curRules.get('type');
 		});
 	}
 	// 新建一个规则
@@ -79,7 +79,7 @@ class EditRules extends React.Component{
 		if (sourceId != null && id != null) {
 			sourceId = + sourceId;
 			id = + id;
-			// this.forceUpdate();
+			this.forceUpdate();
 			this.props.switchRule(groupId, branchId, sourceId, id);
 		}
 	}
