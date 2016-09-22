@@ -1,4 +1,5 @@
 import log from './log';
+import childProcess from 'child_process';
 export let getUrl = ({port, path: pathname, protocol, hostname, host})=> {
 	if (protocol && (hostname || host)) {
 		hostname = hostname || host;
@@ -40,4 +41,16 @@ export let error = err => {
 	} else {
 		log.error("出现错误：" + err.stack);
 	}
+};
+
+export let openCmd = uri => {
+	var cmd;
+	if (process.platform === 'win32') {
+		cmd = 'start';
+	} else if (process.platform === 'linux') {
+		cmd = 'xdg-open';
+	} else if (process.platform === 'darwin') {
+		cmd = 'open';
+	}
+	childProcess.exec([cmd, uri].join(' '));
 };

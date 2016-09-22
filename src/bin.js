@@ -2,10 +2,9 @@ import program from 'commander';
 import pkg from '../package.json';
 import prompt from 'prompt';
 import colors from 'colors';
-import * as cert from './cert/cert';
-import configInit from './config/config';
 import CatProxy from './app';
 import log from './log';
+import * as cert from './cert/cert.js';
 // 将字段变成list
 let numReg = /^([0-9]){2,}$/;
 let list = (val) => {
@@ -102,9 +101,6 @@ if (program.cert) {
 		process.exit(0);
 	}
 } else {
-	configInit();
-	let certDir = cert.getCertDir();
-	log.info(`当前证书目录： ${certDir}`);
 	// catproxy main file
 	var catProxy = new CatProxy(opt);
 	// 初始化代理服务器

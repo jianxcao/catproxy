@@ -48,7 +48,7 @@ var getRootCert = () => {
 	fse.ensureDirSync(certDir);
 	if (!isRootCertExits()) {
 		log.error('没有生成根证书，请调用命令生成根证书 -h查看帮助');
-		process.exit(0);
+		process.exit(1);
 	} else {
 		privateKey = fs.readFileSync(rootKeyPath, {encoding: 'utf8'});
 		cert = fs.readFileSync(rootCrtPath, {encoding: 'utf8'});

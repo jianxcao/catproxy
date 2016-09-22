@@ -5,8 +5,15 @@ var requestHandlers = [];
 // 最终掉用
 var finalReq = finalCallback => (err, req, res) => {
 	if (err) {
+		var message = "";
+		var t = typeof err;
+		if (t === 'string') {
+			message = err;
+		} else if(t === 'object') {
+			message = (err.message || "") + (err.msg || "") + (err.stack || ""); 
+		}
 		res.writeHead(res.statusCode || '500', res.headers || {});
-		res.end(err);
+		res.end(message);
 	} else {
 		if (util.isFunction(finalCallback)) {
 			finalCallback(req, res);

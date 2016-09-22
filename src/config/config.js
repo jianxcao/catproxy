@@ -3,7 +3,7 @@ import path from 'path';
 import log from '../log';
 import merge from 'merge';
 var	data = {};
-	
+var saveProps = null;
 // 获取配置路径
 export let getPath = () => {
 	let dirPath, filePath;
@@ -28,20 +28,22 @@ export let getPath = () => {
 	return filePath;
 };
 
-let configInit = () => {
+let loadingData = () => {
 	let filePath = getPath();
+	let currentData = {};
 	// 判断是否存在临时文件
 	let exits = fs.existsSync(filePath);
 	log.info('配置文件加载中');
 	if (exits) {
 		var bufData = fs.readFileSync(filePath, 'utf-8');
 		try {
-			data = JSON.parse(bufData);
+			currentData = JSON.parse(bufData);
 			log.info('配置文件加载成功');
 		} catch(e) {
-			data = {};
+			currentData = {};
 		}
 	}
+	return currentData;
 };
 
 
@@ -127,9 +129,37 @@ export let del = (key) => {
 		return true;
 	}
 };
+
+export let setSaveProp = (...keys) => {
+	saveProps = keys;
+};
 // 保存到文件
-export let save = () => {
-	var myData = JSON.stringify(data);
+/**
+ * key  如果传递，则只更新对应key的数据到文件中，否则全部更新
+ * key 可以是数组或者字符串只可以更新顶级的字段，字段下面的字段不行
+ */
+export let save = (key) => {
+	key = key || saveProps;
+	var oldData = loadingData();
+	var saveData;
+	if (!key) {
+		// 全部覆盖
+		saveData = data;
+	} else {
+		saveData = oldData;
+		if (typeof key === 'string') {
+			key  = [key];
+		}
+		// 全部转换成数组处理
+		if (Object.prototype.toString.call(key) === '[object Array]') {
+			key.forEach(function(cur) {
+				if (data[cur] !== undefined) {
+					saveData[cur] = data[cur];
+				}
+			});
+		}
+	}
+	var myData = JSON.stringify(saveData);
 	var filePath = getPath();
 	log.info('规则文件路径:' + filePath);
 	try {
@@ -141,4 +171,6 @@ export let save = () => {
 	}
 };
 
-export default configInit;
+export default function() {
+	data = loadingData();
+};

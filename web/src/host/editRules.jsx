@@ -36,7 +36,7 @@ class EditRules extends React.Component{
 	shouldComponentUpdate(nextProps, nextState) {
 		let rules = nextProps.rules;
 		let currentRules = this.props.rules;
-		return rules.size !== currentRules.size || 
+		return currentRules.size === 0 || rules.size !== currentRules.size || 
 		rules.some((current, index) => {
 			let curRules = currentRules.get(index);
 			return curRules.get('disable') !== current.get('disable') ||

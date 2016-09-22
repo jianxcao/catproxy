@@ -2,7 +2,7 @@
 import http from 'http';
 import https from 'https';
 import defCfg from './config/defCfg';
-import * as config from './config/config';
+import configInit, * as config from './config/config';
 import merge from 'merge';
 import Promise from 'promise';
 import log from './log';
@@ -10,12 +10,13 @@ import reqSer from './requestSerives';
 import resSer from './responseService';
 import {beforeReq, afterRes, beforeRes} from './evt';
 import EventEmitter from 'events';
-import {getCert} from './cert/cert.js';
+import {getCert, getCertDir} from './cert/cert.js';
 import {SNICallback} from './httpsProxySer';
 import ui from './web/app';
 import {localIps} from './getLocalIps';
 import {error as errFun} from './tools';
 import * as requestMiddleware from './requestMiddleware';
+
 //	process.env.NODE_ENV
 
 class CatProxy extends EventEmitter{
@@ -36,6 +37,9 @@ class CatProxy extends EventEmitter{
 	 */
 	constructor(option, sers, isSave) {
 		super();
+		configInit();
+		let certDir = getCertDir();
+		log.info(`当前证书目录： ${certDir}`);
 		// 读取缓存配置文件
 		let fileCfg = {};
 		['port', 'httpsPort', 'uiPort', 'type', 'log']
@@ -47,6 +51,8 @@ class CatProxy extends EventEmitter{
 		});
 		// 混合三种配置
 		this.option = merge({}, defCfg, fileCfg, option);
+		// log.info(this.option);
+		this.option.isSave = isSave;
 		// 将用户当前设置保存到缓存配置文件
 		['port', 'httpsPort', 'uiPort', 'type', 'log', 'breakHttps']
 		.forEach(current => {
@@ -66,9 +72,10 @@ class CatProxy extends EventEmitter{
 				servers = sers.slice(0, 2);
 			}
 		}
-		if (isSave !== false) {
-			config.save();
+		if (isSave === false) {
+			config.setSaveProp("hosts"); 
 		}
+		config.save();
 	}
 	init() {
 		if (this.option.log) {
@@ -112,7 +119,8 @@ class CatProxy extends EventEmitter{
 		ui({
 			port : port,
 			hostname: localIps[0],
-			host: `http://${localIps[0]}:${port}`
+			host: `http://${localIps[0]}:${port}`,
+			isAutoOpen: this.option.isSave !== false
 		});
 	}
 	// 出错处理
@@ -155,13 +163,17 @@ class CatProxy extends EventEmitter{
 					log.info('proxy server start from ' + `${serverType}://${localIps[0]}:${port}`);
 				});
 			}
-			server.on('error', errFun);
+			server.on('error', function(err) {
+				errFun(err);
+				process.exit(1);
+			});
 		});
 		this.servers = servers;
 	}
 	// 想服务器添加request事件
 	use (fun) {
 		requestMiddleware.use(fun);
+		return this;
 	}
 }
 

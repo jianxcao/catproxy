@@ -6,7 +6,6 @@ export default () => (req, res, next) => {
 	res.set('Accept-Ranges', 'bytes');
 	if (rules && rules.length) {
 		res.json(rules);
-		res.download(config.getPath());
 	} else {
 		next('没有可用的配置')	;
 	}

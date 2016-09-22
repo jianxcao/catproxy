@@ -1,6 +1,7 @@
 import express from 'express';
 import log from '../log';
 import host from './host';
+import {openCmd} from '../tools';
 import err500 from './500';
 import err404 from './404';
 import path from 'path';
@@ -11,6 +12,7 @@ import downloadrule from './downloadrule';
 import downloadcert from './downloadcert';
 import merge from 'merge';
 import webCfg from '../config/webCfg';
+import {localIps} from '../getLocalIps';
 
 export default (option) => {
 	option = merge({}, webCfg, option);
@@ -34,6 +36,11 @@ export default (option) => {
 	wServer(server);
 	server.listen(option.port, function() {
 		log.info(`ui server start up:  ${option.host}`);
+		// 如果能自动打开
+		if (option.isAutoOpen) {
+			openCmd(`http://${localIps[0]}:${option.port}`);
+			log.info('管理界面打开中');
+		}
 	});
 	server.on('error', err => {
 		if (err.message && err.message.indexOf("EACCES") > -1) {

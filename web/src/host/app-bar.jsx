@@ -114,6 +114,7 @@ class Header extends React.Component {
 		let opt = {
 			text: 'http://' + location.host + "/downloadcert.html"
 		};
+		console.log(opt);
 		dialog({
 			title: '证书二维码',
 			msg: (<QrCode opt={opt} ></QrCode>),

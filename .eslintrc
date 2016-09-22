@@ -25,7 +25,7 @@
 		"no-debugger": 2,
 
 		// 禁止不写分号
-		"semi": [2, "always"],
+		"semi": [1, "always"],
 
 		// 禁止出现tab之外的缩进
 		"indent": [2, "tab"],
@@ -80,6 +80,6 @@
 		"quotes": [0, "single"],
 
 		// 建议注释符要有空白隔开
-		"spaced-comment": [2, "always"]
+		"spaced-comment": [1, "always"]
 	}
 }
