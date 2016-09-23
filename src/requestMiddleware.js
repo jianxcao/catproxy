@@ -12,6 +12,8 @@ var finalReq = finalCallback => (err, req, res) => {
 		} else if(t === 'object') {
 			message = (err.message || "") + (err.msg || "") + (err.stack || ""); 
 		}
+		res.headers = res.headers || {};
+		res.headers['Content-Type'] = 'text/html; charset=utf-8';
 		res.writeHead(res.statusCode || '500', res.headers || {});
 		res.end(message);
 	} else {

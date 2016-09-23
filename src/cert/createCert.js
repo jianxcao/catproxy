@@ -37,7 +37,7 @@ let createKeyandCert = ()=> {
 
 let createRootCert = () => {
 	let {cert, keys} = createKeyandCert();
-  	cert.setSubject(rootAttrs);
+	cert.setSubject(rootAttrs);
 	// alternatively set subject from a csr
 	// cert.setSubject(csr.subject.attributes);
 	cert.setIssuer(rootAttrs);
