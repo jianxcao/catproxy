@@ -281,7 +281,7 @@ export let remote = function(reqInfo, resInfo) {
 			headers: toHeadersFirstLetterUpercase(reqInfo.headers) // 大小写问题，是否需要转换
 		};
 		if (reqInfo.protocol === 'https') {
-			options.rejectUnauthorized = true;
+			options.rejectUnauthorized = false;
 			// 旧的协议是http-即http跳转向https--从新生成证书
 			if (oldProtocol === https) {
 				let {privateKey: key, cert} = getCert(hostname);

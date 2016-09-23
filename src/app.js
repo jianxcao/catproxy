@@ -81,6 +81,8 @@ class CatProxy extends EventEmitter{
 		if (this.option.log) {
 			log.transports.console.level = this.option.log;
 		}
+		// dangerous options
+		process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
 		// response 服务
 		this.responseService = resSer.bind(this);
 		// 请求前
