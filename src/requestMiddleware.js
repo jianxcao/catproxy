@@ -1,21 +1,12 @@
 // 一个中间件类
 import util from 'util';
 import log from './log';
+import {sendErr} from './tools';
 var requestHandlers = [];
 // 最终掉用
 var finalReq = finalCallback => (err, req, res) => {
 	if (err) {
-		var message = "";
-		var t = typeof err;
-		if (t === 'string') {
-			message = err;
-		} else if(t === 'object') {
-			message = (err.message || "") + (err.msg || "") + (err.stack || ""); 
-		}
-		res.headers = res.headers || {};
-		res.headers['Content-Type'] = 'text/html; charset=utf-8';
-		res.writeHead(res.statusCode || '500', res.headers || {});
-		res.end(message);
+		sendErr(res, err, req.url);
 	} else {
 		if (util.isFunction(finalCallback)) {
 			finalCallback(req, res);

@@ -13,7 +13,7 @@ import {localIps} from './getLocalIps';
 import {getUrl} from './tools';
 import net from 'net';
 import {getCert} from './cert/cert.js';
-import {writeErr} from './tools';
+import {writeErr, sendErr} from './tools';
 import mime from 'mime';
 import path from 'path';
 import querystring from 'querystring';
@@ -85,16 +85,7 @@ export let local = function(reqInfo, resInfo, fileAbsPath) {
 		let {headers = {}, res} = resInfo;
 		delete headers['content-encoding'];
 		delete headers['content-length'];
-		if (!headers['content-type']) {
-			headers['content-type'] = 'text/html;charset=utf-8';
-		}
-		res.writeHead(500, toHeadersFirstLetterUpercase(headers) || {});
-		err = writeErr(err);
-		res.end(err);
-		res.emit('resBodyDataReady', err, null);
-	})
-	.then(null, function(err) {
-		log.error(err);
+		return Promise.reject(err);
 	});
 };
 // 处理将 域名转换成ip
@@ -122,10 +113,7 @@ let detailHost = function(result, reqInfo, resInfo) {
 		.then(({statusCode, headers}) => {
 			delete headers['content-encoding'];
 			delete headers['content-length'];
-			res.writeHead(statusCode || 500, headers);
-			err = writeErr(err);
-			res.end(err);
-			res.emit('resBodyDataReady', err, null);
+			return Promise.reject(err);
 		});
 	});
 };
@@ -144,7 +132,6 @@ let proxyReq = function(options, reqInfo, resInfo, req) {
 				headers: proxyRes.headers || {},
 				statusCode: proxyRes.statusCode
 			});
-			// log.debug(resInfo.headers, resInfo.statusCode);
 			resolve({proxyRes, remoteUrl, reqInfo, resInfo});
 		});
 		// 向 直接请求写入数据
@@ -168,7 +155,6 @@ let proxyReq = function(options, reqInfo, resInfo, req) {
 		}
 		// 出错直接结束请求
 		proxyReq.on("error", (err) => {
-			log.error(err);
 			reject(err);
 		});
 	})
@@ -244,19 +230,6 @@ let proxyReq = function(options, reqInfo, resInfo, req) {
 				res.emit('resBodyDataReady', isError ? err : null, bodyData || []);
 			});
 		});
-	})
-	.then(null, function(err) {
-		let {headers = {}, res} = resInfo;
-		if (!res.finished) {
-			let statusCode = 500;
-			if (err && err.message && err.message.indexOf('ETIMEDOUT') > -1) {
-				statusCode = 504;
-			}
-			res.writeHead(statusCode, toHeadersFirstLetterUpercase(headers));
-			err = writeErr(err);
-			res.write(err);
-			res.end();
-		}
 	});
 };
 
@@ -265,7 +238,7 @@ export let remote = function(reqInfo, resInfo) {
 	let {res} = resInfo;
 	let com = this;
 	let oldProtocol = reqInfo.protocol;
-	Promise.resolve()
+	return Promise.resolve()
 	.then(() => {
 		let t = /^\/.*/;
 		let hostname = reqInfo.host.split(':')[0];
@@ -296,16 +269,6 @@ export let remote = function(reqInfo, resInfo) {
 	})
 	.then((options) => {
 		return proxyReq.call(com, options, reqInfo, resInfo, req);
-	})
-	.then(null, err => {
-		log.error(`proxy request err`, err);
-		if (!res.finished) {
-			res.writeHead(500);
-			err = writeErr(err);
-			res.end(err);
-			res.emit('resBodyDataReady', err, null);
-		}
-		log.error(err);
 	});
 };
 
@@ -444,9 +407,9 @@ export default function(reqInfo, resInfo){
 					res.end();
 					res.emit('resBodyDataReady', null, null);
 				}, function() {
-					res.writeHead(500, {});
-					res.end("调用内部出现错误");
-					res.emit('resBodyDataReady', "调用内部出现错误", null);
+					let err = "调用内部出现错误";
+					sendErr(res, err, req.url);
+					res.emit('resBodyDataReady', err, null);
 				});
 			} else {
 				if (reqInfo.sendToFile) {
@@ -455,13 +418,11 @@ export default function(reqInfo, resInfo){
 					return remote.call(com, reqInfo, resInfo);
 				}
 			}
-		}, function(err) {
-			if (res.finished) {
-				res.writeHead(500, {});
-				err = writeErr(err);
-				res.end(err);
-				res.emit('resBodyDataReady', err, null);				
-			}
+		})
+		.then(null, function(err) {
+			log.error(`proxy request err:  ${err}`);
+			sendErr(res, err, req.url);
+			res.emit('resBodyDataReady', err, null);
 		});
 	});
 }

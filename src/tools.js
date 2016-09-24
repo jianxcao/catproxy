@@ -54,3 +54,34 @@ export let openCmd = uri => {
 	}
 	childProcess.exec([cmd, uri].join(' '));
 };
+
+export let sendErr = (res, err, uri) => {
+	if (!res) {
+		return;
+	}
+	err = err || "";
+	log.error(err);
+	if (uri) {
+		log.error('error url: ' + uri);
+	}
+	if (res.finished) {
+		return;
+	}
+	var message = "";
+	var t = typeof err;
+	if (t === 'string') {
+		message = err;
+	} else if(t === 'object') {
+		message = (err.message || "") + (err.msg || "") + (err.stack || ""); 
+	}
+	res.headers = res.headers || {};
+	if (!res.headers['content-type']|| !res.headers['Content-Type']) {
+		res.headers['Content-Type'] = "text/html; charset=utf-8";
+	}
+	let statusCode = '500';
+	if (err.message && err.message.indexOf('ETIMEDOUT') > -1) {
+		statusCode = '504';
+	}
+	res.writeHead(statusCode, res.headers);
+	res.end(message);
+};
