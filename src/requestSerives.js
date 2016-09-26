@@ -135,10 +135,9 @@ let requestConnectHandler = function(req, cltSocket, head) {
 		}
 	}
 	// log.debug(opt.breakHttps, crackHttps, srvUrl.hostname);
-
 	// 如果需要捕获https的请求
 	// 访问地址直接是ip，跳过不代理  
-	if (crackHttps && !net.isIP(srvUrl.hostname)) {
+	if (crackHttps) {
 		log.verbose(`crack https ${reqUrl}`);
 		getSer(this.requestHandler)
 			.then(({
