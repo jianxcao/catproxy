@@ -25,7 +25,7 @@ let decodeCompress = function(bodyData, encode) {
 			if (isZip) {
 				zlib.gunzip(bodyData, function(err, buff) {
 					if (err) {
-						reject(err.message);
+						reject(bodyData);
 						log.error('decompress err: ', err.message);
 					} else {
 						resolve(buff);
@@ -34,17 +34,17 @@ let decodeCompress = function(bodyData, encode) {
 			} else if(isDeflate) {
 				zlib.inflateRaw(bodyData, function(err, buff) {
 					if (err) {
-						reject(err.message);
+						reject(bodyData);
 						log.error('decompress err: ', err.message);
 					} else {
 						resolve(buff);
 					}
 				});
 			} else {
-				resolve(bodyData);
+				reject(bodyData);
 			}
 		} else {
-			resolve(new Buffer(""));
+			reject(bodyData);
 		}
 	});
 };
@@ -116,9 +116,17 @@ var beforeReq = function(reqInfo) {
 	});
 };
 // 如果不是合法的类型，就不进行decode
-var decodeContent = function(bodyData, contentType, contentEncoding, isDecode) {
+var decodeContent = function(resInfo, isDecode) {
+	let contentEncoding = resInfo.headers['content-encoding'];
+	let bodyData = resInfo.bodyData;
+	let contentType = resInfo.headers['content-type'] || "";
+
 	// 先看看是否需要解压数据
 	return decodeCompress(bodyData, contentEncoding)
+	.then(function(bodyData) {
+		delete resInfo.headers['content-encoding'];
+		return bodyData;
+	})
 	// 解压后在通过编码去解码数据
 	.then(function(bodyData) {
 		// 默认编码是utf8
@@ -158,6 +166,23 @@ var decodeContent = function(bodyData, contentType, contentEncoding, isDecode) {
 			}
 		}
 		// 再次加编码传递到页面
+		return {
+			bodyData,
+			charset
+		};
+	}, function(bodyData) {// 出错，编码错误，直接返回
+		// 默认编码是utf8
+		let charset = 'UTF-8', tmp;
+		if (!bodyData || !isDecode) {
+			return {bodyData, charset};
+		}
+		if(contentType) {
+			// 如果contenttype上又编码，则重新设置编码
+			tmp = contentType.match(/charset=([^;]+)/);
+			if (tmp && tmp.length > 0) {
+				charset = tmp[1].toUpperCase();
+			}
+		}
 		return {
 			bodyData,
 			charset
@@ -203,19 +228,18 @@ var beforeRes = function(resInfo) {
 		var useListener = false;
 		if (disCache || useListener) {
 			let contentType = resInfo.headers['content-type'] || "";
-			let contentEncoding = resInfo.headers['content-encoding'];
 			// 按照指定编码解码内容
 			let ext = path.extname(resInfo.path.split('?')[0].split('#')[0]) || "";
 			ext = (ext.split('.')[1] || "").toLowerCase();
 			if (excludeDecodeExt.some(cur => cur === ext)) {
 				ext  = "";
 			}
-			return decodeContent(resInfo.bodyData, contentType, contentEncoding, autoDecodeRegs.test(contentType) && !!ext)
+			return decodeContent(resInfo, autoDecodeRegs.test(contentType) && !!ext)
 			.then(function({charset, bodyData}) {
 				let extension = mime.extension(contentType);
-				delete resInfo.headers['content-encoding'];
+				let isType = typeof bodyData === 'string';
 				// 如果访问的是一个html,并且成功截取到这个html的内容
-				if (disCache && contentType &&  (extension === 'html' || extension === 'htm') && typeof bodyData === 'string') {
+				if (disCache && contentType &&  (extension === 'html' || extension === 'htm') && isType) {
 					bodyData = bodyData.replace("<head>",
 						`<head>
 						<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />

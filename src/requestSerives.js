@@ -220,12 +220,3 @@ export default {
 	requestConnectHandler,
 	requestUpgradeHandler
 };
-
-export default function() {
-	var context = this;
-	return {
-		requestHandler: requestHandler.bind(context),
-		requestConnectHandler: requestConnectHandler.bind(context),
-		requestUpgradeHandler: requestUpgradeHandler.bind(context)		
-	};
-};
