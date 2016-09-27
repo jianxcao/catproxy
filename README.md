@@ -21,14 +21,14 @@
 2. 全局安装  `npm install catproxy -g`
 3. 运行命令 catproxy  mac,linux 需要sudo
 4. 将需要映射到本地的**host改成127.0.0.1** 如 `127.0.0.1 baidu.com`
-5. https 请求需要生成 并且安装证书 [wiki/ttps.md](https)
+5. https 请求需要生成 并且安装证书 [https](wiki/https.md)
 6. 运行后会自动打开管理界面，在未配置任何cdn或者规则的情况下，会直接指向在线的资源
 ### 使用参数说明
 
 - ` catproxy -t http -p 80`   表示只启动 http代理，在80端口
 - `catproxy -t https -p 443`   表示只启动https代理，在 443端口
 - `catproxy -t all -p 80,443` 表示同时启动http和https代理在   80，443端口下
-- `catproxy -c` 表示生成https的根证书 [wiki/https.md](https)
+- `catproxy -c` 表示生成https的根证书 [https](wiki/https.md)
 - `catproxy -h` 可以查看具体的说明适用
 
 ### 界面操作说明
@@ -67,14 +67,24 @@
 
 #### host列表区域
 > ![host列表区域](wiki/img/ui_6.jpg)
+>  
+>
 > host列表区域可以 设置具体的规则
+
 > 通过新建 按钮可以新建一个规则
+
 > 所有得规则 源地址 可以是一个正则表达式，也可以是一个 url， **注意的是如果是 https协议则必须以 https开头否则会默认处理成http**
+
 > 规则类型总共有  4个类型 host, 本地文件，本地目录，远程文件，重定向
+
 > 1. host，即将一个host地址指定到一个固定的ip下   如  源地址填写  http://163.com/test  目标地址填写  86.86.86.86  将会将 163.com/test目录下地都指定到86.86.86.86 的ip下，其他目录下还是会访问在线
+
 > 2. 本地文件  如 源地址填写  http://163.com/test.js 目标地址填写  d:\\test\\test.js 将会将 http://163.com/test.js定位到本地 test的文件
+
 > 3. 本地目录  如源地址填写  http://pimg1.126.net/cnd1/ 目标地址填写  d:\\test 将会在本地磁盘  test目录下寻找cdn1目录下对应目录对应的资源文件, 这里为了防止文件夹不匹配 引入虚拟路径的字段，虚拟路径配置表示本地不存在的一个路径，但是cdn路径中又使必须得完成匹配
+
 > 4. 远程文件  如 源地址填写  http://163.com/test.js 目标地址填写  http://126.net/test.js 将会将 地址http://126.net/test.js的内容加载到 http://163.com/test.js下
+
 > 5. 重定向 如源地址填写  http://qq.com  目标地址填写 http://163.com 将会将qq.com重定向到 163.com
 
 ## License
