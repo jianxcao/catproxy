@@ -21,26 +21,26 @@
 2. 全局安装  `npm install catproxy -g`
 3. 运行命令 catproxy  mac,linux 需要sudo
 4. 将需要映射到本地的**host改成127.0.0.1** 如 `127.0.0.1 baidu.com`
-5. https 请求需要生成 并且安装证书 [./wiki/ttps.md](https)
+5. https 请求需要生成 并且安装证书 [wiki/ttps.md](https)
 6. 运行后会自动打开管理界面，在未配置任何cdn或者规则的情况下，会直接指向在线的资源
 ### 使用参数说明
 
 - ` catproxy -t http -p 80`   表示只启动 http代理，在80端口
 - `catproxy -t https -p 443`   表示只启动https代理，在 443端口
 - `catproxy -t all -p 80,443` 表示同时启动http和https代理在   80，443端口下
-- `catproxy -c` 表示生成https的根证书 [./wiki/https.md](https)
+- `catproxy -c` 表示生成https的根证书 [wiki/https.md](https)
 - `catproxy -h` 可以查看具体的说明适用
 
 ### 界面操作说明
 > 打开后得界面
 
-> ![./wiki/img/ui_1.jpg](step1)
+> ![wiki/img/ui_1.jpg](step1)
 
 >  整个界面分为  导航菜单区域， 分组区域， 操作菜单， host列表区域
 
 #### 导航区域
 
-> ![./wiki/img/ui_2.jpg](step2)
+> ![wiki/img/ui_2.jpg](step2)
 >
 > 1. 下载host文件，即host的配置文件
 > 2. 导入host配置文件，下载后得配置文件可以通过整个导入 
@@ -49,7 +49,7 @@
 > 5. 帮助
 
 #### 分组区域
-> ![./wiki/img/ui_3.jpg](step3)
+> ![wiki/img/ui_3.jpg](step3)
 > 分组区域是一个二级树列表，一级表示分组 二级表示分组下地host配置， 可以通过操作菜单中得 **新建** 创建新的分组 
 > 分组 在鼠标悬浮状态下，会有三个 icon 按钮 分别表示 删除， 禁止使用， 编辑
 > 编辑将会 编辑当前分组的名称，禁止使用将会禁止当前分组下的所有规则, 删除将会删除当前分组
@@ -57,16 +57,16 @@
 > 所有分组规则  **先匹配先执行**
 
 #### 操作菜单
-> ![./wiki/img/ui_4.jpg](step3)
+> ![wiki/img/ui_4.jpg](step3)
 > 操作菜单主要有新建分组，禁止所有分组  禁止缓存的功能
 > 1. 禁止所有分组，即将所有分组都禁止，这个时候所有的 资源将会定位到在线
 > 2. 禁止缓存，所有请求将会去掉缓存
 > 3. 新建分组，新建一个分组菜单,可以选择一个分组的名称，和二级分组的名称
->    ![./wiki/img/ui_5.jpg](step5)
-> **所有修改必须点击保存，才能生效**
+>    ![wiki/img/ui_5.jpg](step5)
+>    **所有修改必须点击保存，才能生效**
 
 #### host列表区域
-> ![./wiki/img/ui_6.jpg](step6)
+> ![wiki/img/ui_6.jpg](step6)
 > host列表区域可以 设置具体的规则
 > 通过新建 按钮可以新建一个规则
 > 所有得规则 源地址 可以是一个正则表达式，也可以是一个 url， **注意的是如果是 https协议则必须以 https开头否则会默认处理成http**
