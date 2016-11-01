@@ -17,8 +17,8 @@ import {writeErr, sendErr} from './tools';
 import mime from 'mime';
 import path from 'path';
 import querystring from 'querystring';
+import * as config from './config/config';
 let isStartHttps = /https/;
-
 // 发送代理请求钱触发
 let triggerBeforeRes = (resInfo, com) => {
 	return new Promise.resolve(resInfo)
@@ -92,7 +92,7 @@ export let local = function(reqInfo, resInfo, fileAbsPath) {
 let detailHost = function(result, reqInfo, resInfo) {
 	// 取当前启动的port
 	let com = this;
-	let {port, httpsPort} = com.option;
+	let {port, httpsPort} = config.get();
 	let isServerPort = +port === +result.port;
 	if (isStartHttps.test(reqInfo.protocol)) {
 		isServerPort = +httpsPort === +result.port;
@@ -127,7 +127,7 @@ let proxyReq = function(options, reqInfo, resInfo, req) {
 		let proxyReq = (isStartHttps.test(reqInfo.protocol) ? https : http)
 		.request(options, proxyRes => {
 			let remoteUrl = getUrl(merge({}, options, {protocol: reqInfo.protocol}));
-			log.verbose(`received request from : ${remoteUrl}`);
+			log.verbose(`received request from : ${remoteUrl}, statusCode ${proxyRes.statusCode}`);
 			resInfo = merge(resInfo, {
 				headers: proxyRes.headers || {},
 				statusCode: proxyRes.statusCode

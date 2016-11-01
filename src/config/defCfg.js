@@ -10,6 +10,8 @@ export const DEFAULT_UI_PORT = 8001;
 export const  DEFAULT_CERT_HOST = 'localhost';
 export const DEFAULT_BREAK_HTTPS = true;
 export const LIMIT_SIZE = 1024 * 1024 * 5;
+// 自动打开管理界面
+export const AUTO_OPEN = true;
 export const STATUS = {
 	// request错误
 	LIMIT_ERROR: 1
@@ -21,6 +23,7 @@ export default {
 	httpsPort: DEFAULT_HTTPS_PORT,
 	certHost: DEFAULT_CERT_HOST,
 	breakHttps: DEFAULT_BREAK_HTTPS,
-	uiPort: DEFAULT_UI_PORT
+	uiPort: DEFAULT_UI_PORT,
+	autoOpen: AUTO_OPEN
 };
 

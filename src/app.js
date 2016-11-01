@@ -16,6 +16,7 @@ import ui from './web/app';
 import {localIps} from './getLocalIps';
 import {error as errFun} from './tools';
 import * as requestMiddleware from './requestMiddleware';
+import configProps from './config/configProps';
 
 //	process.env.NODE_ENV
 
@@ -32,38 +33,51 @@ class CatProxy extends EventEmitter{
 	 *		log: '日志级别',
 	 *		uiPort 端口
 	 *	}
-	 *	@param servers 自定义服务器,最多同时开启2个服务器，一个http一个https, 2个服务器的时候顺序是http,https 
-	 *	如果只有一个则没有顺序问题
+	 *	@param servers 自定义服务器,最多同时开启2个服务器，一个http一个https, 2个服务器的时候顺序是http,https  	如果只有一个则没有顺序问题
+	 *
+	 *  @param saveProps 要同步到文件的字段 为空则全部同步
+	 *
 	 */
-	constructor(option, sers, isSave) {
+	constructor(opt, sers, saveProps) {
 		super();
+		this.option = {};
+		// 初始化配置文件
 		configInit();
 		let certDir = getCertDir();
 		log.info(`当前证书目录： ${certDir}`);
 		// 读取缓存配置文件
 		let fileCfg = {};
-		['port', 'httpsPort', 'uiPort', 'type', 'log']
+		configProps
 		.forEach(current => {
 			let val = config.get(current);
 			if ( val !== undefined && val !== null) {
 				fileCfg[current] = val;
 			}
 		});
+		if (saveProps === false) {
+			saveProps = ['hosts', "log", 'breakHttps', 'excludeHttps'];
+		}
 		// 混合三种配置
-		this.option = merge({}, defCfg, fileCfg, option);
-		// log.info(this.option);
-		this.option.isSave = isSave;
+		let cfg = merge({}, defCfg, fileCfg, opt);
+		if (saveProps && saveProps.length) {
+			this.option.saveProps = saveProps;
+		}
 		// 将用户当前设置保存到缓存配置文件
-		['port', 'httpsPort', 'uiPort', 'type', 'log', 'breakHttps']
+		configProps
 		.forEach(current => {
-			if (option[current] !== null && option[current] !== undefined) {
-				config.set(current, option[current]);
+			if (cfg[current] !== null && cfg[current] !== undefined) {
+				// 为‘’表示要删除这个字段
+				if (cfg[current] === '' && config.get(current)) {
+					config.del(current);
+				} else {
+					config.set(current, cfg[current]);
+				}
 			}
 		});
 		// 如果存在自定义sever
 		if (sers && sers.length) {
 			let servers = [];
-			let type = this.option.type;
+			let type = config.get(type);
 			if (type === 'http' && sers[0] instanceof http) {
 				servers[0] = sers[0];
 			} else if (type === 'https' && sers[0] instanceof https) {
@@ -72,15 +86,16 @@ class CatProxy extends EventEmitter{
 				servers = sers.slice(0, 2);
 			}
 		}
-		if (isSave === false) {
-			config.setSaveProp("hosts"); 
+		if (saveProps && saveProps.length) {
+			config.setSaveProp(saveProps); 
+		} else {
+			config.save();
 		}
-		config.save();
+		console.log(config.get());
 	}
 	init() {
-		if (this.option.log) {
-			log.transports.console.level = this.option.log;
-		}
+		
+		this.setLogLevel();
 		// dangerous options
 		process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
 		// response 服务
@@ -110,11 +125,14 @@ class CatProxy extends EventEmitter{
 	}
 	checkParam() {
 	}
+	setLogLevel(logLevel) {
+		log.transports.console.level = config.get('log');
+	}
 	// 环境检测
 	checkEnv() {
 	}
 	uiInit() {
-		let port = this.option.uiPort;
+		let port = config.get('uiPort');
 		if (+port === 0) {
 			return;
 		}
@@ -122,7 +140,7 @@ class CatProxy extends EventEmitter{
 			port : port,
 			hostname: localIps[0],
 			host: `http://${localIps[0]}:${port}`,
-			isAutoOpen: this.option.isSave !== false
+			isAutoOpen: !(this.option.saveProps && this.option.saveProps.length) && config.get('autoOpen')
 		});
 	}
 	// 出错处理
@@ -134,16 +152,16 @@ class CatProxy extends EventEmitter{
 	}
 	// 根据配置创建服务器
 	createServer() {
-		let opt = this.option;
+		let opt = config.get();
 		let servers = this.servers || [];
 		let com = this;
 		// 可以自定义server或者用系统内置的server
 		if (opt.type === 'http' && !servers[0]) {
 			servers[0] = http.createServer();
-		} else  if (opt.type === 'https' && !servers[0]){
+		} else if (opt.type === 'https' && !servers[0]){
 			// 找到证书，创建https的服务器
 			let {privateKey: key, cert} = getCert(opt.certHost);
-			servers.push[0] = https.createServer({key,cert, rejectUnauthorized: false, SNICallback});
+			servers[0] = https.createServer({key,cert, rejectUnauthorized: false, SNICallback});
 		} else if (opt.type === 'all' && !servers[0]  && !servers[1]) {
 			servers[0] = http.createServer();
 			let {privateKey: key, cert} = getCert(opt.certHost);

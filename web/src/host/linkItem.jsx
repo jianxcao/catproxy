@@ -6,11 +6,11 @@ const linkStyle ={
 class LinkItem extends React.Component {
 	render() {
 		let {outStyle, href} = this.props;
-		let props = Object.assign({}, this.props);
+		let myProps = Object.assign({}, this.props);
 		outStyle = Object.assign({}, linkStyle, outStyle);
-		delete props.outStyle;
-		delete  props.href;
-		return <a style={outStyle} href={href} target="_blank"><MenuItem {...props}/></a>;
+		delete myProps.outStyle;
+		delete  myProps.href;
+		return <a style={outStyle} href={href} target="_blank"><MenuItem {...myProps}/></a>;
 	}
 }
 export default LinkItem;

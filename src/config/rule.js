@@ -120,7 +120,7 @@ export let saveRules = (rules)=> {
 		// 覆盖旧的rule
 		config.set('hosts',  rules);
 		// 存入文件中
-		config.save();
+		config.setSaveProp('hosts');
 	} else {
 		throw '存入规则文件出现错误，规则文件非法';
 	}
@@ -200,7 +200,7 @@ parseOneBranch = (rule, reqInfo) => {
 	if (isStringReg.test(test)) {
 		test = test.slice(1, test.length -1);
 	} else {
-		test = isStartHttp.test(test) ? test : 'http://' + test;
+		test = isStartHttp.test(test) ? test : (reqInfo.protocol === 'https' ? "https://" + test : "http://" + test);
 		test = '^' + test;
 	}
 	// 将test转换成正则

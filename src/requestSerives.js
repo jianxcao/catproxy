@@ -5,6 +5,7 @@ import log from './log';
 import net from 'net';
 import getHttpsSer from './httpsProxySer';
 import {STATUS, LIMIT_SIZE} from './config/defCfg';
+import * as config from './config/config';
 // 请求到后的解析
 let requestHandler = function(req, res) {
 	var com = this;
@@ -120,19 +121,18 @@ let getSer = requestHandler => {
  * @param head
  */
 let requestConnectHandler = function(req, cltSocket, head) {
-	let opt = this.option;
+	let opt = config.get();
 	let reqUrl = `https://${req.url}`;
 	let srvUrl = url.parse(reqUrl);
-	let crackHttps = true;
-	if (opt.breakHttps === false) {
-		crackHttps = false;
+	let crackHttps;
+	if (typeof opt.breakHttps === 'boolean') {
+		crackHttps = opt.breakHttps;
 	} else if (typeof opt.breakHttps === 'object' && opt.breakHttps.length) {
-		for(let current of opt.breakHttps) {
-			if (current === srvUrl.hostname) {
-				crackHttps =  false;
-				break;
-			}
-		}
+		crackHttps = opt.breakHttps.some((current) => new RegExp(current).test(srvUrl.hostname));
+	}
+	// 如果当前状态是 破解状态  并且有排除列表
+	if (crackHttps && typeof opt.excludeHttps === 'object' && opt.excludeHttps) {
+		crackHttps = !opt.excludeHttps.some((current) => new RegExp(current).test(srvUrl.hostname));
 	}
 	// log.debug(opt.breakHttps, crackHttps, srvUrl.hostname);
 	// 如果需要捕获https的请求

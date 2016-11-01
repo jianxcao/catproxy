@@ -78,7 +78,7 @@ let updateRule = (rules, ws) => {
 let disCache = (status, ws) => {
 	try {
 		config.set('disCache', status);
-		config.save();
+		config.setSaveProp('disCache');
 		return success('更新配置成功');
 	} catch(e) {
 		log.error(e);
