@@ -127,7 +127,6 @@ if (program.cert) {
 			}
 		}
 	});
-	console.log(opt);
 	// catproxy main file
 	var catProxy = new CatProxy(opt);
 	// 初始化代理服务器

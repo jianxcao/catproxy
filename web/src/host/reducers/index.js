@@ -20,7 +20,8 @@ let  {
 	SWITCH_BRANCH,
 	SWITCH_GROUP,
 	UPDATE_CURRENT_RULE,
-	DIS_CACHE
+	DIS_CACHE,
+	REMOTE_UPDATE_RULE_URL
 } = actionType;
 
 let group = (state = new List(), action = {}) => {
@@ -193,6 +194,16 @@ export let disCache = (state, action = {}) => {
 	switch (action.type) {
 	case DIS_CACHE:
 		return !!action.status;
+	default:
+		return state;
+	}
+};
+
+// 远程url
+export let remoteUpdateRuleUrl = (state, action = {}) => {
+	switch (action.type) {
+	case REMOTE_UPDATE_RULE_URL:
+		return action.url;
 	default:
 		return state;
 	}

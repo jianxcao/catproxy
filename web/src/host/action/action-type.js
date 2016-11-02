@@ -25,4 +25,5 @@ export default keyMirror({
 	SWITCH_RULE: null,
 	UPDATE_CURRENT_RULE: null,
 	DIS_CACHE: null,
+	REMOTE_UPDATE_RULE_URL: null
 });

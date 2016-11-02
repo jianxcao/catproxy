@@ -120,7 +120,7 @@ export let saveRules = (rules)=> {
 		// 覆盖旧的rule
 		config.set('hosts',  rules);
 		// 存入文件中
-		config.setSaveProp('hosts');
+		config.save('hosts');
 	} else {
 		throw '存入规则文件出现错误，规则文件非法';
 	}

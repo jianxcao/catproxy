@@ -24,7 +24,8 @@ let  {
 	SWITCH_GROUP,
 	SWITCH_RULE,
 	UPDATE_CURRENT_RULE,
-	DIS_CACHE
+	DIS_CACHE,
+	REMOTE_UPDATE_RULE_URL
 } = actionType;
 
 // ------分支控制相关开始-----//
@@ -121,7 +122,7 @@ export let fetchFail = (error) => {
 };
 // ------分支控制相关结束-----//
 
-//初次获取数据
+// 初次获取数据
 export let fetchRule = () => {
 	return {
 		type: FETCH,
@@ -129,7 +130,7 @@ export let fetchRule = () => {
 	};
 };
 
-//切换左侧列表的显示状态
+// 切换左侧列表的显示状态
 export let drawerStatus = (status) => {
 	return {
 		type: DRAWERSTATUS,
@@ -138,8 +139,8 @@ export let drawerStatus = (status) => {
 };
 
 
-//规则相关 -----------------------
-//新增规则
+// 规则相关 -----------------------
+// 新增规则
 export let addRule = (groupId, branchId, rule) => {
 	return {
 		type: ADD_RULE,
@@ -149,7 +150,7 @@ export let addRule = (groupId, branchId, rule) => {
 	};
 };
 
-//删除规则
+// 删除规则
 export let delRule = (groupId, branchId, ruleId) => {
 	return {
 		type: DEL_RULE,
@@ -159,7 +160,7 @@ export let delRule = (groupId, branchId, ruleId) => {
 	};
 };
 
-//禁止使用规则
+// 禁止使用规则
 export let toggleRuleDis = (groupId, branchId, ruleId) => {
 	return {
 		type: TOGGLE_RULE_DIS,
@@ -169,7 +170,7 @@ export let toggleRuleDis = (groupId, branchId, ruleId) => {
 	};
 };
 
-//更新规则
+// 更新规则
 export let updateRule = (groupId, branchId, ruleId, rule) => {
 	return {
 		type: UPDATE_RULE,
@@ -180,8 +181,7 @@ export let updateRule = (groupId, branchId, ruleId, rule) => {
 	};
 };
 
-//切换 折叠
-//
+// 切换 折叠
 export let toggleFlod = (groupId) => {
 	return {
 		type: TOGGLE_FLOD,
@@ -189,7 +189,7 @@ export let toggleFlod = (groupId) => {
 	};
 };
 
-//换组或者 分支的顺序
+// 换组或者 分支的顺序
 export let switchBranch = (groupId, sourceBranchId, branchId) => {
 	return {
 		type: SWITCH_BRANCH,
@@ -199,7 +199,7 @@ export let switchBranch = (groupId, sourceBranchId, branchId) => {
 	};
 };
 
-//只能是同一个分组下的顺序
+// 只能是同一个分组下的顺序
 export let switchGroup = (sourceGroupId, groupId) => {
 	return {
 		type: SWITCH_GROUP,
@@ -208,7 +208,7 @@ export let switchGroup = (sourceGroupId, groupId) => {
 	};
 };
 
-//切换规则
+// 切换规则
 export let switchRule = (groupId, branchId, sourceId, id) => {
 	return {
 		type: SWITCH_RULE,
@@ -219,7 +219,7 @@ export let switchRule = (groupId, branchId, sourceId, id) => {
 	};
 };
 
-//更新当前选中的规则
+// 更新当前选中的规则
 export let updateSelectRule = (groupId, branchId) => {
 	return {
 		type: UPDATE_CURRENT_RULE,
@@ -229,10 +229,15 @@ export let updateSelectRule = (groupId, branchId) => {
 };
 
 
-//禁止缓存
+// 禁止缓存
 export let disCache = (status) => {
 	return {
 		type: DIS_CACHE,
 		status
 	};
+};
+
+// 远程url
+export let remoteUpdateRuleUrl = (url) => {
+	return {url, type: REMOTE_UPDATE_RULE_URL};
 };

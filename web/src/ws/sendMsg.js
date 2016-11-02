@@ -31,6 +31,18 @@ export let updateRule = (data) => {
 	}
 };
 
+export let remoteUpdateRule = (url) => {
+	if (url) {
+		let result = {
+			param: {
+				url: url
+			},
+			path: "remoteUpdateRule"
+		};
+		return send('remoteUpdateRule')(result);
+	}
+};
+
 export let disCache =(status) => {
 	status = !!status;
 	let result = {
@@ -45,5 +57,6 @@ export let disCache =(status) => {
 export default {
 	fetchConfig,
 	updateRule,
-	disCache
+	disCache,
+	remoteUpdateRule
 };

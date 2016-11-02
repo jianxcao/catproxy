@@ -237,7 +237,8 @@ export let remote = function(reqInfo, resInfo) {
 	let {req} = reqInfo;
 	let {res} = resInfo;
 	let com = this;
-	let oldProtocol = reqInfo.protocol;
+	let isSecure = req.connection.encrypted || req.connection.pai;
+	let oldProtocol = !!isSecure ? "https" : 'http';
 	return Promise.resolve()
 	.then(() => {
 		let t = /^\/.*/;
@@ -256,7 +257,7 @@ export let remote = function(reqInfo, resInfo) {
 		if (reqInfo.protocol === 'https') {
 			options.rejectUnauthorized = false;
 			// 旧的协议是http-即http跳转向https--从新生成证书
-			if (oldProtocol === https) {
+			if (oldProtocol === 'http') {
 				let {privateKey: key, cert} = getCert(hostname);
 				options.key = key;
 				options.cert = cert;

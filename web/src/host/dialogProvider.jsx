@@ -44,7 +44,7 @@ export default class DialogProvider extends React.Component {
 		let dialogConfig = dialogCache[dialogId];
 		let result;
 		if (dialogConfig.onBtnClick) {
-			result = dialogConfig.onBtnClick(btnId, dialogId);
+			result = dialogConfig.onBtnClick.call(this, btnId, dialogId);
 		}
 		if (result !== false) {
 			this.destory(dialogId);
@@ -200,7 +200,7 @@ export default class DialogProvider extends React.Component {
 		for(let one in dialogs) {
 			let current = dialogCache[one];
 			content.push(
-				<Dialog
+				<Dialog ref={one}
 					title={current.title}
 					id={one}
 					key={one}
@@ -211,9 +211,10 @@ export default class DialogProvider extends React.Component {
 					bodyStyle={current.bodyStyle}
 					autoDetectWindowHeight={false}
 					open={current.open}>
-					{current.msg}
+					{typeof current.msg === 'function' ? current.msg.call(this) : current.msg}
 				</Dialog>
 			);
+			
 		}
 		return (
 			<div>

@@ -87,11 +87,10 @@ class CatProxy extends EventEmitter{
 			}
 		}
 		if (saveProps && saveProps.length) {
-			config.setSaveProp(saveProps); 
+			config.save(saveProps); 
 		} else {
 			config.save();
 		}
-		console.log(config.get());
 	}
 	init() {
 		

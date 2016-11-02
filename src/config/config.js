@@ -33,13 +33,12 @@ let loadingData = () => {
 	let currentData = {};
 	// 判断是否存在临时文件
 	let exits = fs.existsSync(filePath);
-	log.info('配置文件加载中');
 	if (exits) {
 		var bufData = fs.readFileSync(filePath, 'utf-8');
 		try {
 			currentData = JSON.parse(bufData);
-			log.info('配置文件加载成功');
 		} catch(e) {
+			log.error(e);
 			currentData = {};
 		}
 	}
@@ -172,5 +171,7 @@ export let save = (key) => {
 };
 
 export default function() {
+	log.info('配置文件加载中');
 	data = loadingData();
+	log.info('配置文件加载成功');
 };

@@ -3,3 +3,5 @@
 export const fetchConfig = "fetch_config";
 // 出错的处理
 export const saveConfig = "save_config";
+// 远程上传
+export const remoteUpdateRule = "remote_update_rule";

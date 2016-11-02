@@ -3,6 +3,12 @@ import log from '../log';
 import * as config from '../config/config';
 import * as rule from '../config/rule';
 import * as sendType from './sendType';
+import url from 'url';
+import http from 'http';
+import https from 'https';
+import Promise from 'promise';
+import {Buffer} from 'buffer';
+import {checkHosts} from '../config/rule';
 /*
  * 
  *  所有接受到得消息是一个Object
@@ -78,7 +84,7 @@ let updateRule = (rules, ws) => {
 let disCache = (status, ws) => {
 	try {
 		config.set('disCache', status);
-		config.setSaveProp('disCache');
+		config.save('disCache');
 		return success('更新配置成功');
 	} catch(e) {
 		log.error(e);
@@ -106,3 +112,53 @@ export let saveConfig = (msg = {}, ws = {}) => {
 	}
 };
 
+// 通过远程地址更新文档
+export let remoteUpdateRule = (msg = {}, ws = {}) => {
+	let {url: visUrl} = msg.param;
+	return new Promise((resolve, reject) => {
+		config.set('remoteRuleUrl', visUrl);
+		visUrl = url.parse(visUrl);
+		let req = (visUrl.protocol === 'http:' ? http : https)
+		.request({
+			hostname: visUrl.hostname,
+			port: visUrl.port ? visUrl.port : (visUrl.protocol === 'http:' ? 80 : 443),
+			path: visUrl.path,
+			method: 'GET',
+			headers: {}
+		}, (res) => {
+			if (+res.statusCode !== 200) {
+				return reject(error('服务器获取数据错误'));
+			}
+			res.setEncoding('utf8');
+			let data = [];
+			
+			res.on('data', (chunk) => {
+				data.push(chunk);
+			});
+			res.on('end', () => {
+				let isBuffer = Buffer.isBuffer(data[0]);
+				let result = isBuffer ? Buffer.concat(data) : data.join('');
+				try {
+					result = JSON.parse(result);
+					if (!checkHosts(result)) {
+						return reject(error('数据格式错误'));
+					}
+					config.set("hosts", result);
+					config.save(["hosts", "remoteRuleUrl"]);
+					return resolve(success({
+						data: result,
+						msg: "更新数据成功"
+					}));
+				} catch(e) {
+					log.error(e.message);
+					return reject(error('数据格式错误'));
+				}
+			});
+		});
+		req.on('error', (e) => {
+			log.error(e.message);
+			reject(error(e.message));
+		});
+		req.end();
+	});
+};

@@ -122,7 +122,9 @@ const initialState = new Immutable.fromJS({
 	drawerStatus: true,
 	// 当前选中的规则
 	selectRule: {},
-	disCache: false
+	disCache: false,
+	// 更新远程数据的url
+	remoteUpdateRuleUrl: ""
 });
 // 组合所有reducers
 let toDo = combineReducers(reducers);
