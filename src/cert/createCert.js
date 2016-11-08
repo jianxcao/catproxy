@@ -54,17 +54,30 @@ let createRootCert = () => {
 	};
 };
 
-let createSelfCert = (domain, rootOpt) => {
-	if (!domain) {
+let createSelfCert = (domains, rootOpt) => {
+	if (!domains) {
 		return {};
+	}
+	if (typeof domains === 'string') {
+		domains = [domains];
 	}
 	let rootKey = pki.privateKeyFromPem(rootOpt.privateKey);
 	let {cert, keys} = createKeyandCert();
 	// rootCert.subject.attributes
 	cert.setIssuer(rootAttrs);
+
+// ,{
+// 		name: 'subjectAltName',
+// 		altNames: domains.map(function(host) {
+// 			if (host.match(/^[\d\.]+$/)) {
+// 				return {type: 7, ip: host};
+// 			}
+// 			return {type: 2, value: host};
+// 		})
+// 	}
 	cert.setSubject(attrs.concat([{
 		name: 'commonName',
-		value: domain
+		value: domains[0]
 	}]));
 	cert.sign(rootKey, md.sha256.create());
 	return {

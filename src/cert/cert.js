@@ -72,11 +72,12 @@ var getCert = (domain) => {
 	if (certCache[domain]) {
 		return certCache[domain];
 	}
-	var mc = md.md5.create();
-	mc.update(domain);
-	var domainMd5 = mc.digest().toHex();
-	var keyPath = path.join(certCachePath, domainMd5 + ".key");
-	var certPath = path.join(certCachePath, domainMd5 + ".crt");
+	// var mc = md.md5.create();
+	// mc.update(domain);
+	// var domainMd5 = mc.digest().toHex();
+	var domainC = domain.replace(/\./g, "_"); 
+	var keyPath = path.join(certCachePath, domainC + ".key");
+	var certPath = path.join(certCachePath, domainC + ".crt");
 	var cert, privateKey;
 	if (isCertExits(keyPath, certPath)) {
 		privateKey = fs.readFileSync(keyPath, {encoding: 'utf8'});

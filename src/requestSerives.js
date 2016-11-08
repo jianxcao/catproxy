@@ -3,17 +3,108 @@ import Promise from 'promise';
 import {Buffer} from 'buffer';
 import log from './log';
 import net from 'net';
-import getHttpsSer from './httpsProxySer';
+import getServer from './serverManager';
 import {STATUS, LIMIT_SIZE} from './config/defCfg';
 import * as config from './config/config';
+import http from 'http';
+import https from 'https';
+import changeHost from './changeHost';
+import {getCert} from './cert/cert.js';
+
+// 升级到 ws wss
+let upgradeToWebSocket = (req, cltSocket, head) => {
+	// 不是upgrade websocket请求 直接放弃
+	if (req.headers.upgrade.toLowerCase() !== 'websocket') {
+		cltSocket.destroy();
+		return;
+	}
+	// 禁止超时
+	cltSocket.setTimeout(0);
+	// 禁止纳格（Nagle）算法。默认情况下TCP连接使用纳格算法，这些连接在发送数据之前对数据进行缓冲处理。 将noDelay设成true会在每次socket.write()被调用时立刻发送数据。noDelay默认为true。
+	cltSocket.setNoDelay(true);
+	// 启用长连接
+	cltSocket.setKeepAlive(true, 0);
+	let isSecure = req.connection.encrypted || req.connection.pai;
+	let url = req.url;
+	let hostname = req.headers.host.split(':');
+	let port = hostname[1] ? hostname[1] : isSecure ? 443 : 80;
+	hostname =  hostname[0];
+	let options = {
+		port,
+		path: url,
+		method: req.method,
+		headers: req.headers
+	};
+	if(isSecure) {
+		let {privateKey: key, cert} = getCert(hostname);
+		options.key = key;
+		options.cert = cert;
+		options.rejectUnauthorized = false;
+	}
+	let {port: p, httpsPort: hp} = config.get();
+	let isServerPort = +port === +p;
+	if (isSecure) {
+		isServerPort = +hp === +port;
+	}
+	changeHost(hostname, isServerPort).then(ip => {
+		options.hostname = ip;
+		var proxyReq = (isSecure ? https : http)
+		.request(options, (proxyRes) => {
+			if (!proxyRes.upgrade) {
+				proxyRes.end && proxyRes.end();
+			}
+		});
+		proxyReq.on('upgrade', (proxyRes, proxySocket, proxyHead) => {
+			proxySocket.on('error', (err)=> log.error(err));
+			proxySocket.on('end', function () {
+				cltSocket.end();
+			});
+			proxySocket.setTimeout(0);
+			proxySocket.setNoDelay(true);
+			proxySocket.setKeepAlive(true, 0);
+			cltSocket.on('error', (err) => {
+				proxySocket.end();
+				log.error(err);
+			});
+			if (proxyHead && proxyHead.length) {
+				proxySocket.unshift(proxyHead);
+			}
+			let headers = Object.keys(proxyRes.headers)
+			.reduce(function (head, key) {
+				var value = proxyRes.headers[key];
+				if (!Array.isArray(value)) {
+					head.push(key + ': ' + value);
+					return head;
+				}
+				for (var i = 0; i < value.length; i++) {
+					head.push(key + ': ' + value[i]);
+				}
+				return head;
+			}, ['HTTP/1.1 101 Switching Protocols'])
+			.join('\r\n') + '\r\n\r\n';
+			// 写入头文件
+			cltSocket.write(headers);
+			proxySocket.pipe(cltSocket).pipe(proxySocket);
+		});
+		proxyReq.on('error', (err) => {
+			log.error(err);
+			cltSocket.end();
+		});
+		req.pipe(proxyReq);
+	}, (error) => {
+		log.error(error);
+		cltSocket.end();
+	});
+};
+
 // 请求到后的解析
-let requestHandler = function(req, res) {
+export let requestHandler = function(req, res) {
 	var com = this;
 	// build  req info object
 	let isSecure = req.connection.encrypted || req.connection.pai,
 		headers = req.headers,
 		method = req.method,
-		host = req.headers.host,
+		host = headers.host,
 		protocol = !!isSecure ? "https" : 'http',
 		fullUrl = /^http.*/.test(req.url) ? req.url : (protocol + '://' + host + req.url),
 		urlObject = url.parse(fullUrl),
@@ -102,116 +193,110 @@ let requestHandler = function(req, res) {
 	});
 };
 
-let httpsSerInfo = null;
-let getSer = requestHandler => {
-	if (httpsSerInfo) {
-		return Promise.resolve(httpsSerInfo);
-	} else {
-		return getHttpsSer('localhost', requestHandler)
-			.then((info) => {
-				httpsSerInfo = info;
-				return info;
-			});
-	}
-};
 /**
  * connect转发请求处理
  * @param req
  * @param cltSocket
  * @param head
  */
-let requestConnectHandler = function(req, cltSocket, head) {
-	let opt = config.get();
-	let reqUrl = `https://${req.url}`;
-	let srvUrl = url.parse(reqUrl);
-	let crackHttps;
-	if (typeof opt.breakHttps === 'boolean') {
-		crackHttps = opt.breakHttps;
-	} else if (typeof opt.breakHttps === 'object' && opt.breakHttps.length) {
-		crackHttps = opt.breakHttps.some((current) => new RegExp(current).test(srvUrl.hostname));
-	}
-	// 如果当前状态是 破解状态  并且有排除列表
-	if (crackHttps && typeof opt.excludeHttps === 'object' && opt.excludeHttps) {
-		crackHttps = !opt.excludeHttps.some((current) => new RegExp(current).test(srvUrl.hostname));
-	}
-	// log.debug(opt.breakHttps, crackHttps, srvUrl.hostname);
-	// 如果需要捕获https的请求
-	// 访问地址直接是ip，跳过不代理  
-	if (crackHttps) {
-		log.verbose(`crack https ${reqUrl}`);
-		getSer(this.requestHandler)
-			.then(({
-				port
-			}) => {
-				let srvSocket = net.connect(port, "localhost", () => {
-					cltSocket.write('HTTP/' + req.httpVersion +' 200 Connection Established\r\n' +
-					'Proxy-agent: Node-CatProxy\r\n' +
-					'\r\n');
-					srvSocket.pipe(cltSocket).pipe(srvSocket);
-				});
-				srvSocket.on('error', (err) => {
-					cltSocket.write("HTTP/" + req.httpVersion + " 500 Connection error\r\n\r\n");
-					cltSocket.end();
-					log.error(`crack https请求出现错误: ${err}`);
-				});
-				cltSocket.on('error', err => {
-					log.error(`crack https请求出现错误: ${err}`);
-					srvSocket.end();
-				});
+export let requestConnectHandler = function(req, cltSocket, head) {
+	var com = this;
+	return new Promise(function(resolve, reject) {
+		if (!head || head.length === 0) {
+			cltSocket.once('data', (chunk) => {
+				resolve(chunk);
 			});
-	} else {
-		log.verbose(`through https connect ${reqUrl}`);
-		// connect to an origin server
-		let srvSocket = net.connect(srvUrl.port, srvUrl.hostname, () => {
-			cltSocket.write('HTTP/' + req.httpVersion +' 200 Connection Established\r\n' +
-				'Proxy-agent: Node-CatProxy\r\n' +
-				'\r\n');
-			srvSocket.pipe(cltSocket).pipe(srvSocket);
-		});
-		cltSocket.on('error', err => {
-			log.error(`转发https请求出现错误: ${err}`);
-			srvSocket.end();
-		});
-		srvSocket.on('error',  (err) => {
-			cltSocket.write("HTTP/" + req.httpVersion + " 500 Connection error\r\n\r\n");
-			cltSocket.end();
-			log.error(`转发https请求出现错误: ${err}`);
-		});
-	}
+		} else {
+			resolve(head);
+		}
+		cltSocket.write('HTTP/' + req.httpVersion +' 200 Connection Established\r\n' +
+			'Proxy-agent: Node-CatProxy\r\n'
+		);
+		if (req.headers['proxy-connection'] === 'keep-alive') {
+			cltSocket.write('Proxy-Connection: keep-alive\r\n');
+			cltSocket.write('Connection: keep-alive\r\n');
+		}
+		cltSocket.write('\r\n');
+	})
+	.then(first => {
+		cltSocket.pause();
+		// cltSocket.resume();
+		log.debug("first data", first[0]);
+		let opt = config.get();
+		let reqUrl = `http://${req.url}`;
+		let srvUrl = url.parse(reqUrl);
+		let crackHttps;
+		if (typeof opt.breakHttps === 'boolean') {
+			crackHttps = opt.breakHttps;
+		} else if (typeof opt.breakHttps === 'object' && opt.breakHttps.length) {
+			crackHttps = opt.breakHttps.some((current) => new RegExp(current).test(srvUrl.hostname));
+		}
+		// 如果当前状态是 破解状态  并且有排除列表
+		if (crackHttps && typeof opt.excludeHttps === 'object' && opt.excludeHttps) {
+			crackHttps = !opt.excludeHttps.some((current) => new RegExp(current).test(srvUrl.hostname));
+		}
+		// * - an incoming connection using SSLv3/TLSv1 records should start with 0x16
+		// * - an incoming connection using SSLv2 records should start with the record size
+		// *   and as the first record should not be very big we can expect 0x80 or 0x00 (the MSB is a flag)
+		// 如果需要捕获https的请求
+		// 访问地址直接是ip，跳过不代理  
+		if (crackHttps && (first[0] == 0x16 || first[0] == 0x80 || first[0] == 0x00)) {
+			log.verbose(`crack https ${reqUrl}`);
+			getServer(srvUrl.hostname, com.requestHandler)
+				.then(({
+					port,
+					server
+				}) => {
+					let {privateKey: key, cert} = getCert(srvUrl.hostname);
+					server.setOptions({key, cert});
+					let srvSocket = net.connect(port, "localhost", () => {
+						srvSocket.pipe(cltSocket).pipe(srvSocket);
+						cltSocket.emit('data', first);
+						cltSocket.resume();
+					});
+					srvSocket.on('error', (err) => {
+						cltSocket.end();
+						log.error(`crack https请求出现错误: ${err}`);
+					});
+					cltSocket.on('error', err => {
+						log.error(`crack https请求出现错误: ${err}`);
+						srvSocket.end();
+					});
+				});
+		} else {
+			// 不认识的协议或者 不破解的https直接连接对应的服务器
+			log.verbose(`through https connect ${reqUrl}`);
+			// connect to an origin server
+			let srvSocket = net.connect(srvUrl.port, srvUrl.hostname, () => {
+				srvSocket.pipe(cltSocket).pipe(srvSocket);
+				cltSocket.emit('data', first);
+				cltSocket.resume();
+			});
+			cltSocket.on('error', err => {
+				log.error(`转发https请求出现错误: ${err}`);
+				srvSocket.end();
+			});
+			srvSocket.on('error',  (err) => {
+				// cltSocket.write("through proxy error: " + err + "\r\n\r\n");
+				cltSocket.end();
+				log.error(`转发https请求出现错误: ${err}`);
+			});
+		}
+	})
+	.then(null, err => log.error(err));
 };
 /**
  * upgrade ws转发请求处理
  * @param req
  * @param socket
  */
-let requestUpgradeHandler = function(req, cltSocket, head) {
-	let {headers} = req; 
-	let headersStr = '';
-	let host = headers.host;
-	headersStr += 'HTTP/1.1 101 Web Socket Protocol Handshake\r\n';
-	headersStr +=  'Upgrade:WebSocket\r\n';
-	headersStr += 'Connection:Upgrade\r\n';
-	for(let key in headers) {
-		if (key !== "Upgrade" && key !== 'Connection') {
-			headersStr += key + ":" + headers[key] + "\r\n";
-		}
+export let requestUpgradeHandler = function(req, cltSocket, head) {
+	// 不是get 取不到 upgrade就放弃
+	if (req.method === 'GET' && req.headers.upgrade) {
+		upgradeToWebSocket(req, cltSocket, head);
+	} else {
+		cltSocket.destroy();
 	}
-	headersStr + '\r\n';
-	host = host.split(':')[0];
-	let reqSocket = net.connect({
-		host: host,
-		port: 443
-	}, () => {
-		reqSocket.write(headersStr);
-		cltSocket.pipe(reqSocket);
-		reqSocket.pipe(cltSocket);
-	});
-	// log.debug('********************');
-	// log.debug(req.url);
-	// log.debug('********************');
-	// socket请求直接转发吧
-	// cltSocket.write(headersStr);
- //  cltSocket.pipe(cltSocket); // echo back
 };
 
 export default {

@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import log from '../log';
 import merge from 'merge';
+// 数据对象直接require后直接返回一个对象，init方法只能调用一次，一个进程公用一个config
 var	data = {};
 var saveProps = null;
 // 获取配置路径
@@ -44,7 +45,6 @@ let loadingData = () => {
 	}
 	return currentData;
 };
-
 
 // 获取一个值
 export let get = (key) => {

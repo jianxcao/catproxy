@@ -166,13 +166,19 @@ class CatProxy extends EventEmitter{
 			let {privateKey: key, cert} = getCert(opt.certHost);
 			servers[1] = https.createServer({key,cert, rejectUnauthorized: false, SNICallback});
 		}
+		let requestFun = requestMiddleware.middleWare(com.requestHandler);
 		servers.forEach(server => {
-			// server.on('upgrade', com.requestUpgradeHandler);
 			// 如果在http下代理https，则需要过度下请求
 			if (server instanceof  http.Server) {
 				server.on('connect', com.requestConnectHandler);
 			}
-			server.on('request', requestMiddleware.middleWare(com.requestHandler));
+			server.on('upgrade', com.requestUpgradeHandler);
+			server.on('request', function(req, res) {
+				if (req.headers.upgrade) {
+					return;
+				}
+				requestFun(req, res);
+			});
 			let serverType = server instanceof  http.Server ? 'http' : 'https';
 			let port = serverType === 'http' ? opt.port : opt.httpsPort;
 			// 如果server没有被监听，则调用默认端口监听

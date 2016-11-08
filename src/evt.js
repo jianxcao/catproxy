@@ -294,8 +294,22 @@ var afterRes = function(result) {
 	return result;
 };
 
+// 中转请求
+var pipRequest = function() {
+
+};
+
 export {
 	beforeReq,
 	afterRes,
 	beforeRes
 };
+
+// class Evt  {
+// 	constructor (){
+
+// 	}
+// 	beforeReq = beforeReq
+// }
+
+// export default 
