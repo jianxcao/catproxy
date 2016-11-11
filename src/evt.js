@@ -109,6 +109,7 @@ var beforeReq = function(reqInfo) {
 	// if (reqInfo.host.indexOf('pimg1.126.net') > -1) {
 	// 	reqInfo.host = '114.113.198.187';
 	// }
+	log.debug('beforeReq', this.catProxy.setLogLevel.toString());
 	return parseRule(reqInfo)
 	.then(result => result || reqInfo)
 	.then(reqInfo => {
@@ -125,6 +126,7 @@ var decodeContent = function(resInfo, isDecode) {
 	return decodeCompress(bodyData, contentEncoding)
 	.then(function(bodyData) {
 		delete resInfo.headers['content-encoding'];
+		delete resInfo.headers['content-length'];
 		return bodyData;
 	})
 	// 解压后在通过编码去解码数据
@@ -209,6 +211,7 @@ var decodeContent = function(resInfo, isDecode) {
  * @return {[type]}         [description]
  */
 var beforeRes = function(resInfo) {
+	log.debug('beforeRes', this.catProxy.setLogLevel.toString());
 	return Promise.resolve(resInfo)
 	.then(function (resInfo) {
 		// 禁用缓存则删掉缓存相关的header
@@ -291,6 +294,7 @@ var beforeRes = function(resInfo) {
  * @returns {*}
  */
 var afterRes = function(result) {
+	log.debug('beforeReq', this.catProxy.setLogLevel.toString());
 	return result;
 };
 
@@ -302,14 +306,6 @@ var pipRequest = function() {
 export {
 	beforeReq,
 	afterRes,
-	beforeRes
+	beforeRes,
+	pipRequest
 };
-
-// class Evt  {
-// 	constructor (){
-
-// 	}
-// 	beforeReq = beforeReq
-// }
-
-// export default 

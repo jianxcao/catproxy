@@ -6,7 +6,7 @@ import Promise from 'promise';
 import log from './log';
 import tls from 'tls';
 import util from 'util';
-import {requestUpgradeHandler} from './requestSerives';
+import {requestHandler, requestUpgradeHandler} from './requestSerives';
 let SNICallback = (servername, callback) => {
 	try {
 		let {privateKey: key, cert} = getCert(servername);
@@ -18,10 +18,9 @@ let SNICallback = (servername, callback) => {
 	}
 };
 export {SNICallback};
-export default (host, port, callback) => {
-	if (util.isFunction(port)) {
-		callback = port;
-		port = null;
+export default (host, port) => {
+	if (!host) {
+		throw new Error('host is must');
 	}
 	return Promise.resolve(port)
 	.then(p => {
@@ -49,17 +48,13 @@ export default (host, port, callback) => {
 			cert,
 			SNICallback,
 			rejectUnauthorized: false
-		}, (req, res) => {
+		}, function(req, res) {
 			if (req.headers.upgrade) {
 				return;
 			}
-			if (util.isFunction(callback)) {
-				callback(req, res);
-			}
+			requestHandler.call(this, req, res);
 		});
-		server.on('upgrade', function(req, socket, head) {
-			requestUpgradeHandler(req, socket, head);
-		});
+		server.on('upgrade', requestUpgradeHandler);
 		server.listen(port);
 		server.on('error', err => log.error(err + 'inner https prxoy server err:' + err));
 		return {server, port};

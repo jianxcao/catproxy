@@ -5,7 +5,7 @@ import {md} from 'node-forge';
 import log from '../log';
 import {createRootCert, createSelfCert} from './createCert';
 var certDir = process.env.APPDATA;
-
+var heartReg = /\*/g;
 if (!certDir || certDir === 'undefined') {
 	certDir = (process.platform === 'darwin' ? path.join(process.env.HOME, 'Library/Preferences') : '/var/local');
 }
@@ -75,7 +75,7 @@ var getCert = (domain) => {
 	// var mc = md.md5.create();
 	// mc.update(domain);
 	// var domainMd5 = mc.digest().toHex();
-	var domainC = domain.replace(/\./g, "_"); 
+	var domainC = domain.replace(heartReg, "_"); 
 	var keyPath = path.join(certCachePath, domainC + ".key");
 	var certPath = path.join(certCachePath, domainC + ".crt");
 	var cert, privateKey;

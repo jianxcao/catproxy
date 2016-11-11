@@ -34,6 +34,7 @@ let out = `
 
   '-b' 表示破解http true表示破解，false表示不破解(注意不破解的话就不走proxy，会直接穿越到在线或者本机host配置的那个地址)，默认true, 也可以配置 host，不同的host用,分割 如： baidu.com,uc.com,test.com, 表示这些host需要破解
 	'-e' 在设置拦截https的情况下，是否需要排除某些host, 不破解，多个host请以，分割, 可以使用正则, '' 重置所有列表为默认， -e优先级高于 -b
+	'-s' sni 设置，该参数在将服务器当做代理使用时有效，  1表示采用nodejs的 snicallback方式（某些浏览器不支持，比如ie6，低版本androi）2 表示采用多台服务器去代理（全支持，但是性能低）
 `;
 let opt = {};
 program
@@ -46,6 +47,7 @@ program
 	.option('-c, --cert', '生成根证书')
 	.option('-b, --break-https [value]', "是否破解https,破解https前请先安装证书， 可以是host，多个host以 , 分割")
 	.option('-e, --exclude-https [value]', "在设置拦截https的情况下，是否需要排除某些host，多个host请以，分割, 可以使用正则, '' 重置所有列表为默认， -e优先级高于 -b")
+	.option('-s, --sni [value]', "sni 设置，该参数在将服务器当做代理使用时有效，  1表示采用nodejs的 snicallback方式（某些浏览器不支持，比如ie6，低版本androi）2 表示采用多台服务器去代理（全支持，但是性能低）", /^(1|2)$/i)
 	.on('--help', () => console.log(colors.green(out)))
 	.option('-l, --log [item]', 
 		'设置日志级别error, warn, info, verbose, debug, silly', 

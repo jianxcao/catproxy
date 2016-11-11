@@ -6,9 +6,7 @@ import configInit, * as config from './config/config';
 import merge from 'merge';
 import Promise from 'promise';
 import log from './log';
-import reqSer from './requestSerives';
-import resSer from './responseService';
-import {beforeReq, afterRes, beforeRes} from './evt';
+import {requestHandler, requestConnectHandler, requestUpgradeHandler} from './requestSerives';
 import EventEmitter from 'events';
 import {getCert, getCertDir} from './cert/cert.js';
 import {SNICallback} from './httpsProxySer';
@@ -93,24 +91,15 @@ class CatProxy extends EventEmitter{
 		}
 	}
 	init() {
-		
 		this.setLogLevel();
 		// dangerous options
 		process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
-		// response 服务
-		this.responseService = resSer.bind(this);
-		// 请求前
-		this.beforeReq = beforeReq.bind(this); 
-		// 请求后
-		this.afterRes = afterRes.bind(this);
-		// 请求前 
-		this.beforeRes = beforeRes.bind(this); 
-		
-		// 请求事件方法
-		this.requestHandler = reqSer.requestHandler.bind(this);
-		this.requestConnectHandler = reqSer.requestConnectHandler.bind(this);
-		this.requestUpgradeHandler = reqSer.requestUpgradeHandler.bind(this);
-
+		// // 请求前
+		// this.beforeReq = beforeReq.bind(this); 
+		// // 请求后
+		// this.afterRes = afterRes.bind(this);
+		// // 请求前 
+		// this.beforeRes = beforeRes.bind(this); 
 		return Promise.resolve()
 		.then(this.createCache.bind(this))
 		.then(this.checkParam.bind(this))
@@ -166,18 +155,19 @@ class CatProxy extends EventEmitter{
 			let {privateKey: key, cert} = getCert(opt.certHost);
 			servers[1] = https.createServer({key,cert, rejectUnauthorized: false, SNICallback});
 		}
-		let requestFun = requestMiddleware.middleWare(com.requestHandler);
+		let requestFun = requestMiddleware.middleWare(requestHandler);
 		servers.forEach(server => {
+			server.catProxy = com;
 			// 如果在http下代理https，则需要过度下请求
 			if (server instanceof  http.Server) {
-				server.on('connect', com.requestConnectHandler);
+				server.on('connect', requestConnectHandler);
 			}
-			server.on('upgrade', com.requestUpgradeHandler);
+			server.on('upgrade', requestUpgradeHandler);
 			server.on('request', function(req, res) {
 				if (req.headers.upgrade) {
 					return;
 				}
-				requestFun(req, res);
+				requestFun.call(this, req, res);
 			});
 			let serverType = server instanceof  http.Server ? 'http' : 'https';
 			let port = serverType === 'http' ? opt.port : opt.httpsPort;

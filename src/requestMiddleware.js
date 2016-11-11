@@ -4,46 +4,52 @@ import log from './log';
 import {sendErr} from './tools';
 var requestHandlers = [];
 // 最终掉用
-var finalReq = finalCallback => (err, req, res) => {
-	if (err) {
-		sendErr(res, err, req.url);
-	} else {
-		if (util.isFunction(finalCallback)) {
-			finalCallback(req, res);
+var finalReq = finalCallback => {
+	return function	(err, req, res){
+		var com  = this;
+		if (err) {
+			sendErr(res, err, req.url);
+		} else {
+			if (util.isFunction(finalCallback)) {
+				finalCallback.call(com, req, res);
+			}
 		}
-	}
+	};
 };
 
 // request请求调用
-var requestFun = finalCallback => (req, res) => {
-	requestHandlers.reduceRight((next, current) => {
-		return function my(err) {
-			// 参数为4个，如果当前有错就调用，没有错误，就跳过
-			if (current.length === 4) {
-				if (err) {
-					try {
-						current(err, req, res, next);
-					} catch(e) {
-						next(e);
+var requestFun = finalCallback => {
+	return function(req, res) {
+		var com  = this;
+		requestHandlers.reduceRight((next, current) => {
+			return function my(err) {
+				// 参数为4个，如果当前有错就调用，没有错误，就跳过
+				if (current.length === 4) {
+					if (err) {
+						try {
+							current.call(com, err, req, res, next);
+						} catch(e) {
+							next(e);
+						}
+					} else {
+						next(err);
 					}
 				} else {
-					next(err);
-				}
-			} else {
-				if (err) {
-					next(err);
-				} else {
-					try {
-						current(req, res, next);
-					} catch(e) {
-						next(e);
+					if (err) {
+						next(err);
+					} else {
+						try {
+							current.call(com, req, res, next);
+						} catch(e) {
+							next(e);
+						}
 					}
 				}
-			}
-		};
-	}, err => {
-		finalReq(finalCallback)(err, req, res);
-	})();
+			};
+		}, err => {
+			finalReq(finalCallback).call(com, err, req, res);
+		})();
+	};
 };
 
 // 添加一个中间件

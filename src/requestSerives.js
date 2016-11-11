@@ -10,9 +10,10 @@ import http from 'http';
 import https from 'https';
 import changeHost from './changeHost';
 import {getCert} from './cert/cert.js';
+import responseService from './responseService';
 
 // 升级到 ws wss
-let upgradeToWebSocket = (req, cltSocket, head) => {
+let upgradeToWebSocket = function(req, cltSocket, head) {
 	// 不是upgrade websocket请求 直接放弃
 	if (req.headers.upgrade.toLowerCase() !== 'websocket') {
 		cltSocket.destroy();
@@ -100,7 +101,6 @@ let upgradeToWebSocket = (req, cltSocket, head) => {
 // 请求到后的解析
 export let requestHandler = function(req, res) {
 	var com = this;
-	// build  req info object
 	let isSecure = req.connection.encrypted || req.connection.pai,
 		headers = req.headers,
 		method = req.method,
@@ -163,8 +163,8 @@ export let requestHandler = function(req, res) {
 			enumerable: true
 		}
 	});
-
-	com.responseService(reqInfo, resInfo);
+	// 调用相应模块
+	responseService.call(com, reqInfo, resInfo);
 	let reqBodyData = [];
 	let l = 0;
 	let end = () => {
@@ -220,8 +220,7 @@ export let requestConnectHandler = function(req, cltSocket, head) {
 	})
 	.then(first => {
 		cltSocket.pause();
-		// cltSocket.resume();
-		log.debug("first data", first[0]);
+		// log.debug("first data", first[0]);
 		let opt = config.get();
 		let reqUrl = `http://${req.url}`;
 		let srvUrl = url.parse(reqUrl);
@@ -242,13 +241,13 @@ export let requestConnectHandler = function(req, cltSocket, head) {
 		// 访问地址直接是ip，跳过不代理  
 		if (crackHttps && (first[0] == 0x16 || first[0] == 0x80 || first[0] == 0x00)) {
 			log.verbose(`crack https ${reqUrl}`);
-			getServer(srvUrl.hostname, com.requestHandler)
+			getServer(srvUrl.hostname)
 				.then(({
 					port,
 					server
 				}) => {
-					let {privateKey: key, cert} = getCert(srvUrl.hostname);
-					server.setOptions({key, cert});
+					// 与服务器绑定
+					server.catProxy = com.catProxy;
 					let srvSocket = net.connect(port, "localhost", () => {
 						srvSocket.pipe(cltSocket).pipe(srvSocket);
 						cltSocket.emit('data', first);
@@ -266,7 +265,6 @@ export let requestConnectHandler = function(req, cltSocket, head) {
 		} else {
 			// 不认识的协议或者 不破解的https直接连接对应的服务器
 			log.verbose(`through https connect ${reqUrl}`);
-			// connect to an origin server
 			let srvSocket = net.connect(srvUrl.port, srvUrl.hostname, () => {
 				srvSocket.pipe(cltSocket).pipe(srvSocket);
 				cltSocket.emit('data', first);
@@ -277,7 +275,6 @@ export let requestConnectHandler = function(req, cltSocket, head) {
 				srvSocket.end();
 			});
 			srvSocket.on('error',  (err) => {
-				// cltSocket.write("through proxy error: " + err + "\r\n\r\n");
 				cltSocket.end();
 				log.error(`转发https请求出现错误: ${err}`);
 			});
@@ -293,7 +290,7 @@ export let requestConnectHandler = function(req, cltSocket, head) {
 export let requestUpgradeHandler = function(req, cltSocket, head) {
 	// 不是get 取不到 upgrade就放弃
 	if (req.method === 'GET' && req.headers.upgrade) {
-		upgradeToWebSocket(req, cltSocket, head);
+		upgradeToWebSocket.call(this, req, cltSocket, head);
 	} else {
 		cltSocket.destroy();
 	}

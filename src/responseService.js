@@ -19,33 +19,18 @@ import path from 'path';
 import querystring from 'querystring';
 import * as config from './config/config';
 let isStartHttps = /https/;
+import {beforeReq, afterRes, beforeRes} from './evt';
 // 发送代理请求钱触发
-let triggerBeforeRes = (resInfo, com) => {
-	return new Promise.resolve(resInfo)
-	.then((resInfo) => {
-		let info = merge({}, resInfo);
-		delete info.res;
-		return com.beforeRes(info).then(result => {
-			return merge(resInfo, result);
-		});
+let triggerBeforeRes = function(resInfo) {
+	let info = merge({}, resInfo);
+	delete info.res;
+	return beforeRes.call(this, info).then(result => {
+		return merge(resInfo, result);
 	});
 };
 
-// 转换headers头部的大小写
-let toHeadersFirstLetterUpercase = (headers = {})=>{
-	let reg = /(?:^\w)|-\w/g;
-	let result = {};
-	if(headers) {
-		for (let key in headers) {
-			result[key.replace(reg, current => current ? current.toUpperCase() : current)] = headers[key];
-		}
-		return result;
-	}
-	return headers;
-};
-
 // 处理本地数据
-export let local = function(reqInfo, resInfo, fileAbsPath) {
+let local = function(reqInfo, resInfo, fileAbsPath) {
 	var com = this;
 	resInfo.headers = resInfo.headers || {};
 	return new Promise(resolve => {
@@ -64,7 +49,7 @@ export let local = function(reqInfo, resInfo, fileAbsPath) {
 		});
 	})
 	.then(resInfo => {
-		return triggerBeforeRes(resInfo, com);
+		return triggerBeforeRes.call(com, resInfo);
 	})
 	.then(resInfo => {
 		let {bodyData, headers = {}, statusCode, res} = resInfo;
@@ -75,7 +60,7 @@ export let local = function(reqInfo, resInfo, fileAbsPath) {
 			let mimeType = mime.lookup((path.extname(fileAbsPath) || "").slice(1));
 			headers['content-type'] = mimeType;
 		}
-		res.writeHead(statusCode, toHeadersFirstLetterUpercase(headers) || {});
+		res.writeHead(statusCode, headers || {});
 		if (!res.headers) {
 			res.headers = headers || {};
 		}
@@ -109,7 +94,7 @@ let detailHost = function(result, reqInfo, resInfo) {
 		});
 	}, err => {
 		let {res} = resInfo;
-		return triggerBeforeRes(merge({}, resInfo, {bodyDataErr: err, headers: {}}), com)
+		return triggerBeforeRes.call(com, merge({}, resInfo, {bodyDataErr: err, headers: {}}))
 		.then(({statusCode, headers}) => {
 			delete headers['content-encoding'];
 			delete headers['content-length'];
@@ -178,7 +163,7 @@ let proxyReq = function(options, reqInfo, resInfo, req) {
 					let {statusCode, headers} = resInfo;
 					delete headers['content-length'];
 					headers['remote-url'] = querystring.escape(remoteUrl);
-					res.writeHead(statusCode || 200, toHeadersFirstLetterUpercase(headers));
+					res.writeHead(statusCode || 200, headers);
 					res.write(Buffer.concat(resBodyData));
 					res.write(chunk);	
 					resBodyData = [];
@@ -196,20 +181,17 @@ let proxyReq = function(options, reqInfo, resInfo, req) {
 			.then((bodyData) => {
 				// 文件大小没有出错的情况下
 				if (!isError) {
-					return triggerBeforeRes(merge({}, resInfo, {bodyData}), com)
+					return triggerBeforeRes.call(com, merge({}, resInfo, {bodyData}))
 						.then((resInfo) => {
 							let {statusCode, headers, bodyData} = resInfo;
-							// log.debug(headers, statusCode);
-							delete headers['content-length'];
 							headers['remote-url'] = querystring.escape(remoteUrl);
-							res.writeHead(statusCode || 200, toHeadersFirstLetterUpercase(headers));
+							res.writeHead(statusCode || 200, headers);
 							res.write(bodyData);
 							return resInfo;
 						}, (err) => {
 							let headers = resInfo.headers;
-							delete headers['content-length'];
 							headers['remote-url'] = querystring.escape(remoteUrl);
-							res.writeHead(500, toHeadersFirstLetterUpercase(headers));
+							res.writeHead(500, headers);
 							err = writeErr(err);
 							res.write(err);
 							log.error(err);
@@ -228,12 +210,14 @@ let proxyReq = function(options, reqInfo, resInfo, req) {
 				}
 				res.end();
 				res.emit('resBodyDataReady', isError ? err : null, bodyData || []);
+			}, function(err) {
+				log.error(err);
 			});
 		});
 	});
 };
 
-export let remote = function(reqInfo, resInfo) {
+let remote = function(reqInfo, resInfo) {
 	let {req} = reqInfo;
 	let {res} = resInfo;
 	let com = this;
@@ -252,7 +236,7 @@ export let remote = function(reqInfo, resInfo) {
 			port: reqInfo.port || (reqInfo.protocol === 'http' ? 80 : 443),
 			path: t.test(reqInfo.path) ? reqInfo.path : "/" + reqInfo.path,
 			method: reqInfo.method,
-			headers: toHeadersFirstLetterUpercase(reqInfo.headers) // 大小写问题，是否需要转换
+			headers: reqInfo.headers // 大小写问题，是否需要转换
 		};
 		if (reqInfo.protocol === 'https') {
 			options.rejectUnauthorized = false;
@@ -274,7 +258,7 @@ export let remote = function(reqInfo, resInfo) {
 };
 
 export default function(reqInfo, resInfo){
-	let com = this;
+	let self = this;
 	let res = resInfo.res;
 	let req = reqInfo.req;
 	// 当bodyData缓存处理完毕就触发事件告诉用户数据
@@ -351,13 +335,13 @@ export default function(reqInfo, resInfo){
 				enumerable: true
 			}
 		});
-		return com.afterRes(result);
+		return afterRes.call(self, result);
 	});
 	req.on('reqBodyDataReady', (err, reqBodyData) => {
 		reqInfo.bodyData = reqBodyData || [];
 		reqInfo.bodyDataErr = err;
 		// 请求前拦截一次--所有的拦截都在evt.js中处理
-		Promise.resolve(com.beforeReq(reqInfo))
+		Promise.resolve(beforeReq.call(self, reqInfo))
 		.then((result) => {
 			if (result && result.res) {
 				reqInfo = result;
@@ -402,7 +386,7 @@ export default function(reqInfo, resInfo){
 				};
 				resInfo.statusCode = 302;
 				resInfo.bodyData = "";
-				triggerBeforeRes(resInfo, com)
+				triggerBeforeRes.call(self, resInfo)
 				.then(function() {
 					res.writeHead(resInfo.statusCode, resInfo.headers);
 					res.end();
@@ -414,9 +398,9 @@ export default function(reqInfo, resInfo){
 				});
 			} else {
 				if (reqInfo.sendToFile) {
-					return local.call(com, reqInfo, resInfo, reqInfo.sendToFile);
+					return local.call(self, reqInfo, resInfo, reqInfo.sendToFile);
 				} else {
-					return remote.call(com, reqInfo, resInfo);
+					return remote.call(self, reqInfo, resInfo);
 				}
 			}
 		})

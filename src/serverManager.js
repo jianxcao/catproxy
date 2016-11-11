@@ -5,11 +5,7 @@ import log from './log';
 let servers = {length: 0};
 let serversPromise = {};
 
-export default (serverName, callBack) => {
-	if (util.isFunction(serverName)) {
-		callBack = serverName;
-		serverName = undefined;
-	}
+export default (serverName) => {
 	// 不传递servername则用sni
 	if (!serverName) {
 		serverName = 'localhost';
@@ -17,7 +13,7 @@ export default (serverName, callBack) => {
 	if (servers[serverName]) {
 		return Promise.resolve(servers[serverName]);
 	} else {
-		serversPromise[serverName] = serversPromise[serverName] || getHttpsSer(serverName, callBack)
+		serversPromise[serverName] = serversPromise[serverName] || getHttpsSer(serverName)
 		.then((info) => {
 			servers[serverName] = info;
 			servers['length'] += 1;
