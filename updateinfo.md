@@ -35,14 +35,18 @@
 1. use方法优化
 2. 修复promise作用链的bug
 
-## V0.0.6版本 (2016年09月29日)
+## V0.0.7版本 (2016年09月29日)
 1. 解压出错后，直接返回原数据
 2. 增加说明文档
 
-## V0.1.0版本 (2016年10月31日)
+## V1.0.0版本 (2016年10月31日)
 1. 增加 catproxy --autoOpen false 参数可以默认不打开管理界面
 2. 增加 catproxy -e "baidu.com" 可以在打开 破解https请求的时候，匹配的url不破解
 3. 修改默认配置，在不配置协议的情况下，2种协议(http, https)都支持
 4. 修改 config初始化位置
 5. 增加远程上传配置文件的功能
 6. 对ws和wss请求做转发处理
+7. 增加 catproxy -s 1 (值可以是1或者2),表示是采用多台服务器代理https请求还是用sni代理
+8. 修改CatProxy的构造函数
+9. catproxy 增加onBeforeReq, onAfterRes, onBeforeRes , onPipeRequest事件
+10. 增加进程消息函数，认识数据格式 `{type: "config", result: "配置函数"}`

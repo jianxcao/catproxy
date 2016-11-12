@@ -1,9 +1,8 @@
 import winston from 'winston';
 var logger = new (winston.Logger)({
-	transports: [
-	  	new (winston.transports.Console)({
+	transports: [new (winston.transports.Console)({
 		levels: winston.config.npm.levels,
-		level: process.env.NODE_ENV === 'dev'? 'debug' : "info",
+		level: "debug",
 		stripColors: true,
 		colorize: 'all'
 	}),

@@ -15,6 +15,7 @@ import {localIps} from './getLocalIps';
 import {error as errFun} from './tools';
 import * as requestMiddleware from './requestMiddleware';
 import configProps from './config/configProps';
+import util from 'util';
 
 //	process.env.NODE_ENV
 
@@ -36,7 +37,7 @@ class CatProxy extends EventEmitter{
 	 *  @param saveProps 要同步到文件的字段 为空则全部同步
 	 *
 	 */
-	constructor(opt, sers, saveProps) {
+	constructor(opt, saveProps) {
 		super();
 		this.option = {};
 		// 初始化配置文件
@@ -72,25 +73,28 @@ class CatProxy extends EventEmitter{
 				}
 			}
 		});
-		// 如果存在自定义sever
-		if (sers && sers.length) {
-			let servers = [];
-			let type = config.get(type);
-			if (type === 'http' && sers[0] instanceof http) {
-				servers[0] = sers[0];
-			} else if (type === 'https' && sers[0] instanceof https) {
-				servers[0] = sers[0];
-			} else if (type === 'all' && sers[0] instanceof http && sers[1] instanceof https) {
-				servers = sers.slice(0, 2);
-			}
-		}
 		if (saveProps && saveProps.length) {
 			config.save(saveProps); 
 		} else {
 			config.save();
 		}
+		this._beforeReqEvt = [];
+		this._beforeResEvt = [];
+		this._afterResEvt = [];
+		this._pipeRequestEvt = [];
 	}
 	init() {
+		// 别的进程发送的消息
+		process.on('message', function(message) {
+			if (message.type) {
+				switch(message.type) {
+				case "config":
+					config.set(message.result || {});
+					break;
+				}
+			}
+			log.error('收到未知的消息', message);
+		});
 		this.setLogLevel();
 		// dangerous options
 		process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
@@ -128,7 +132,7 @@ class CatProxy extends EventEmitter{
 			port : port,
 			hostname: localIps[0],
 			host: `http://${localIps[0]}:${port}`,
-			isAutoOpen: !(this.option.saveProps && this.option.saveProps.length) && config.get('autoOpen')
+			isAutoOpen: config.get('autoOpen')
 		});
 	}
 	// 出错处理
@@ -175,7 +179,7 @@ class CatProxy extends EventEmitter{
 			if (!server.listening) {
 				// 根据server的类型调用不同的端口
 				server.listen(port, function () {
-					log.info('proxy server start from ' + `${serverType}://${localIps[0]}:${port}`);
+					log.info('代理服务器启动于：' + `${serverType}://${localIps[0]}:${port}`);
 				});
 			}
 			server.on('error', function(err) {
@@ -189,6 +193,21 @@ class CatProxy extends EventEmitter{
 	use (fun) {
 		requestMiddleware.use(fun);
 		return this;
+	}
+	// 在中转请求前，可以用于修改reqInfo
+	onBeforeReq(...fun) {
+		fun.forEach(f => util.isFunction(f) && this._beforeReqEvt.push(f));
+	}
+	// 请求结束，可以用于产看请求结果
+	onAfterRes(...fun) {
+		fun.forEach(f => util.isFunction(f) && this._afterResEvt.push(f));
+	}
+	// 获得中转请求前，可以用于修改resInfo
+	onBeforeRes(...fun) {
+		fun.forEach(f => util.isFunction(f) && this._beforeResEvt.push(f));
+	}
+	onPipeRequest(...fun) {
+		fun.forEach(f => util.isFunction(f) && this._pipeRequestEvt.push(f));
 	}
 }
 

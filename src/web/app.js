@@ -35,11 +35,11 @@ export default (option) => {
 	// 链接ws 服务器
 	wServer(server);
 	server.listen(option.port, function() {
-		log.info(`ui server start up:  ${option.host}`);
+		let address = `http://${localIps[0]}:${option.port}`;
+		log.info(`catproxy界面打开地址:  ${address}`);
 		// 如果能自动打开
 		if (option.isAutoOpen) {
-			openCmd(`http://${localIps[0]}:${option.port}`);
-			log.info('管理界面打开中');
+			openCmd(address);
 		}
 	});
 	server.on('error', err => {

@@ -210,7 +210,7 @@ parseOneBranch = (rule, reqInfo) => {
 	if (!test.test(currentUrl) || rule.disable) {
 		return;
 	}
-	log.verbose(`解析规则,当前url:${currentUrl}, 规则类型:${type},规则正则${test},规则执行${exec}`);
+	log.info(`解析规则,当前url:${currentUrl}, 规则类型:${type},规则正则${test},规则执行${exec}`);
 	switch(type){
 		// host模式下只能修改 host protocol port
 	case('host'):
@@ -223,7 +223,7 @@ parseOneBranch = (rule, reqInfo) => {
 			reqInfo.protocol = execObj.protocol.split(':')[0];
 			reqInfo.port = execObj.port ? execObj.port : (reqInfo.protocol === 'https' ? 443 : 80);
 			reqInfo.path = type === 'host' ? reqInfo.path : execObj.path;
-			log.debug('********', reqInfo.protocol, reqInfo.port, exec);
+			// log.debug('', reqInfo.protocol, reqInfo.port, exec);
 		} else  {
 				// 没有配置exec如果是 host就访问线上，如果是 remoteFile就跳过
 			if (type === 'host') {

@@ -109,10 +109,30 @@ var beforeReq = function(reqInfo) {
 	// if (reqInfo.host.indexOf('pimg1.126.net') > -1) {
 	// 	reqInfo.host = '114.113.198.187';
 	// }
-	log.debug('beforeReq', this.catProxy.setLogLevel.toString());
+	let catProxy = this.catProxy;
+	let com = this;
 	return parseRule(reqInfo)
 	.then(result => result || reqInfo)
 	.then(reqInfo => {
+		return reqInfo;
+	})
+	.then(function(reqInfo) {
+		let arr = catProxy._beforeReqEvt;
+		if (!arr.length) {
+			return reqInfo;
+		}
+		var p = Promise.resolve(arr[0].call(com, reqInfo));
+		for (let i = 1; i < arr.length; i++) {
+			p.then(function() {
+				return arr[i].call(com, reqInfo);
+			});
+		}
+		return p;
+	})
+	.then(function(result) {
+		return result || reqInfo;
+	}, (err) => {
+		log.error(err);
 		return reqInfo;
 	});
 };
@@ -211,7 +231,8 @@ var decodeContent = function(resInfo, isDecode) {
  * @return {[type]}         [description]
  */
 var beforeRes = function(resInfo) {
-	log.debug('beforeRes', this.catProxy.setLogLevel.toString());
+	let catProxy = this.catProxy;
+	let com = this;
 	return Promise.resolve(resInfo)
 	.then(function (resInfo) {
 		// 禁用缓存则删掉缓存相关的header
@@ -263,6 +284,25 @@ var beforeRes = function(resInfo) {
 			resInfo.bodyData = iconv.encode(resInfo.bodyData, resInfo.charset || "UTF-8");
 		}
 		return resInfo;
+	})
+	.then(function(resInfo) {
+		let arr = catProxy._beforeResEvt;
+		if (!arr.length) {
+			return resInfo;
+		}
+		var p = Promise.resolve(arr[0].call(com, resInfo));
+		for (let i = 1; i < arr.length; i++) {
+			p.then(function() {
+				return arr[i].call(com, resInfo);
+			});
+		}
+		return p;
+	})
+	.then(function(result) {
+		return result || resInfo;
+	}, (err) => {
+		log.debug('err', err);
+		return resInfo;
 	});
 	// resInfo.statusCode = 302;
 	// resInfo.headers['test-cjx'] = 111;
@@ -294,18 +334,24 @@ var beforeRes = function(resInfo) {
  * @returns {*}
  */
 var afterRes = function(result) {
-	log.debug('beforeReq', this.catProxy.setLogLevel.toString());
+	let catProxy = this.catProxy;
+	if (catProxy && catProxy._afterResEvt.length) {
+		catProxy._afterResEvt.forEach(current => current.call(this, result));
+	}
 	return result;
 };
 
 // 中转请求
-var pipRequest = function() {
-
+var pipeRequest = function(result) {
+	let catProxy = this.catProxy;
+	if (catProxy && catProxy._pipeRequestEvt.length) {
+		catProxy._pipeRequestEvt.forEach(current => current.call(this, result));
+	}
 };
 
 export {
 	beforeReq,
 	afterRes,
 	beforeRes,
-	pipRequest
+	pipeRequest
 };
