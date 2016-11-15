@@ -84,12 +84,17 @@ class CatProxy extends EventEmitter{
 		this._pipeRequestEvt = [];
 	}
 	init() {
+		let com = this;
 		// 别的进程发送的消息
 		process.on('message', function(message) {
+			log.debug('receive message');
 			if (message.type) {
 				switch(message.type) {
 				case "config":
 					config.set(message.result || {});
+					// 每次服务变动都重新设置下log
+					config.save();
+					com.setLogLevel();
 					break;
 				}
 			}

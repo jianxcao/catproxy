@@ -68,6 +68,7 @@ let upgradeToWebSocket = function(req, cltSocket, head) {
 					value: port,
 					enumerable: true
 				},
+				headers: req.headers,
 				protocol: {
 					value: isSecure ? "wss" : "ws",
 					enumerable: true
@@ -289,6 +290,7 @@ export let requestConnectHandler = function(req, cltSocket, head) {
 					value: srvUrl.host,
 					enumerable: true
 				},
+				headers: req.headers,
 				port : {
 					value: srvUrl.port,
 					enumerable: true
