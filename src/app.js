@@ -17,6 +17,8 @@ import * as requestMiddleware from './requestMiddleware';
 import configProps from './config/configProps';
 import util from 'util';
 
+// 只有这些字段可以被保存到配置文件，如果设置了这个 只有这些字段会保存到配置文件，其他字段只能在内存中，不能保存到文件中
+const defSaveProps =  ['hosts', "log", 'breakHttps', 'excludeHttps', 'sni'];
 //	process.env.NODE_ENV
 
 class CatProxy extends EventEmitter{
@@ -54,7 +56,7 @@ class CatProxy extends EventEmitter{
 			}
 		});
 		if (saveProps === false) {
-			saveProps = ['hosts', "log", 'breakHttps', 'excludeHttps'];
+			saveProps = defSaveProps;
 		}
 		// 混合三种配置
 		let cfg = merge({}, defCfg, fileCfg, opt);
@@ -85,30 +87,35 @@ class CatProxy extends EventEmitter{
 	}
 	init() {
 		let com = this;
+		// 'hosts', "log", 'breakHttps', 'excludeHttps', 'sni' 可以通过 进程修改的字段
 		// 别的进程发送的消息
 		process.on('message', function(message) {
+			if (!message.result || !typeof message.result === 'object') {
+				return;
+			}
 			log.debug('receive message');
 			if (message.type) {
 				switch(message.type) {
 				case "config":
-					config.set(message.result || {});
+					let data = {};
+					defSaveProps.forEach(function(current) {
+						if (message.result[current] !== undefined && message.result[current] !== null) {
+							data[current] = message.result[current];
+						}
+					});
+					config.set(data);
 					// 每次服务变动都重新设置下log
-					config.save();
+					config.save(defSaveProps);
 					com.setLogLevel();
 					break;
+				default:
+					log.error('收到未知的消息', message);
 				}
 			}
-			log.error('收到未知的消息', message);
 		});
 		this.setLogLevel();
 		// dangerous options
 		process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
-		// // 请求前
-		// this.beforeReq = beforeReq.bind(this); 
-		// // 请求后
-		// this.afterRes = afterRes.bind(this);
-		// // 请求前 
-		// this.beforeRes = beforeRes.bind(this); 
 		return Promise.resolve()
 		.then(this.createCache.bind(this))
 		.then(this.checkParam.bind(this))
@@ -122,9 +129,93 @@ class CatProxy extends EventEmitter{
 	}
 	checkParam() {
 	}
+	// 设置 日志级别
 	setLogLevel(logLevel) {
-		log.transports.console.level = config.get('log');
+		if (logLevel) {
+			let status = ["error", "warn", "info", "verbose", "debug", "silly"].some(current => current === logLevel);
+			if (status) {
+				config.set('log', logLevel);
+				log.transports.console.level = logLevel;
+				config.save();
+			}
+		} else {
+			log.transports.console.level = config.get('log');
+		}
 	}
+	// 设置服务器类别
+	setServerType(type) {
+		if(type === 'http' || type === 'https') {
+			config.set('type', type);
+			config.save();
+		}
+	}
+	// 设置服务器端口
+	setHttpPort(port) {
+		port = + port;
+		if (port > 1) {
+			config.set('port', port);
+			config.save();
+		}
+	}
+	setHttpsPort(port) {
+		port = + port;
+		if (port > 1) {
+			config.set('httpsPort', port);
+			config.save();
+		}		
+	}
+	// 设置ui端口
+	setUiPort(port) {
+		port = + port;
+		if (port > 1) {
+			config.set('uiPort', port);
+			config.save();
+		}
+	}
+	// 设置sni类型
+	setSniType(type) {
+		type = + type;
+		if (type === 1 || type === 2) {
+			config.set("sni", type);
+			config.save();
+		}
+	}
+	// 设置破解https
+	setBreakHttps(list) {
+		if (Array.isArray(list)) {
+			let result = list.reduce((all, current) => {
+				if (typeof current === 'string' || Object.prototype.toString.call(current) === '[object RegExp]'){
+					all.push(current.toString().replace(/^\/|\/$/g, ""));
+					return all;
+				}
+			}, []);
+			if (result && result.length) {
+				config.set('breakHttps', result);
+				config.save();
+			}
+		}	else if(typeof list === 'boolean') {
+			config.set('breakHttps', list);
+			config.save();
+		}
+	}
+	// 设置排除https列表
+	setExcludeHttps(list) {
+		if (Array.isArray(list)) {
+			let result = list.reduce((all, current) => {
+				if (typeof current === 'string' || Object.prototype.toString.call(current) === '[object RegExp]'){
+					all.push(current.toString().replace(/^\/|\/$/g, ""));
+					return all;
+				}
+			}, []);
+			if (result && result.length) {
+				config.set('excludeHttps', result);
+				config.save();
+			}
+		} else if (list === '') {
+			config.set('excludeHttps', "");
+			config.save();			
+		}
+	} 
 	// 环境检测
 	checkEnv() {
 	}

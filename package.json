@@ -1,6 +1,6 @@
 {
   "name": "catproxy",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "a node proxy or host change tools",
   "main": "index.js",
   "scripts": {
@@ -74,7 +74,7 @@
     "webpack": "^1.12.9"
   },
   "engines": {
-    "node": ">=0.12"
+    "node": ">=0.12.16"
   },
   "repository": {
     "type": "git",

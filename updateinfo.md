@@ -50,3 +50,5 @@
 8. 修改CatProxy的构造函数
 9. catproxy 增加onBeforeReq, onAfterRes, onBeforeRes , onPipeRequest事件
 10. 增加进程消息函数，认识数据格式 `{type: "config", result: "配置函数"}`
+## V1.1.0版本 (2016年11月16日)
+1. catproxy对象初始化后增加方法 `setServerType , setHttpPort, setHttpsPort, setUiPort, setSniType, setBreakHttps, setExcludeHttps`

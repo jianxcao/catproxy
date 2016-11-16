@@ -13,6 +13,7 @@ import {getCert} from './cert/cert.js';
 import responseService from './responseService';
 let headerWsTest = /upgrade\s*:\s*websocket\s*\n/i;
 import {pipeRequest} from './evt';
+let rep = /^\/|\/$/g;
 // 升级到 ws wss
 let upgradeToWebSocket = function(req, cltSocket, head) {
 	var com = this;
@@ -247,11 +248,11 @@ export let requestConnectHandler = function(req, cltSocket, head) {
 		if (typeof opt.breakHttps === 'boolean') {
 			crackHttps = opt.breakHttps;
 		} else if (typeof opt.breakHttps === 'object' && opt.breakHttps.length) {
-			crackHttps = opt.breakHttps.some((current) => new RegExp(current).test(srvUrl.hostname));
+			crackHttps = opt.breakHttps.some((current) => new RegExp(current.replace(rep, "")).test(srvUrl.hostname));
 		}
 		// 如果当前状态是 破解状态  并且有排除列表
 		if (crackHttps && typeof opt.excludeHttps === 'object' && opt.excludeHttps) {
-			crackHttps = !opt.excludeHttps.some((current) => new RegExp(current).test(srvUrl.hostname));
+			crackHttps = !opt.excludeHttps.some((current) => new RegExp(current.replace(rep, "")).test(srvUrl.hostname));
 		}
 		// * - an incoming connection using SSLv3/TLSv1 records should start with 0x16
 		// * - an incoming connection using SSLv2 records should start with the record size
