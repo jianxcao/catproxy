@@ -1,7 +1,7 @@
 "use strict";
 var gulp = require('gulp');
 var babel = require('gulp-babel');
-var webpack = require('gulp-webpack');
+var webpack = require('webpack-stream');
 var plumber = require('gulp-plumber');
 var fse = require('fs-extra');
 var webpackCfg = require('./webpack.config');

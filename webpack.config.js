@@ -32,7 +32,7 @@ const config = {
 		},{
 				// React-hot loader and
 			test: /(\.jsx|\.js)$/, // All .js files
-			loaders: ['react-hot', 'babel-loader'], // react-hot is like browser sync and babel loads jsx and es6-7
+			loaders: ['react-hot-loader/webpack', 'babel-loader'], // react-hot is like browser sync and babel loads jsx and es6-7
 			exclude: [nodeModulesPath],
 		},{
 			test: /\.(eot|woff|woff2|ttf|svg|png|jpg)$/,

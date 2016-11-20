@@ -20,7 +20,7 @@ const innerPaperStyle = {
 	position: 'relative'
 };
 // 右侧主要面板
-export default class Main extends React.Component {
+class Main extends React.Component {
 	constructor(props) {
 		super(props);
 	}
