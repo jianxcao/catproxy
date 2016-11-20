@@ -1,12 +1,9 @@
 # 更新日志
 
-
-
 ## V0.0.1版本 (2016年08月26日)
 1. 首个版本发布
 
 ## V0.0.2版本 (2016年09月07日)
-
 1. 错误处理修改
 2. 修改发布脚本
 3. 修改编码问题
@@ -52,3 +49,6 @@
 10. 增加进程消息函数，认识数据格式 `{type: "config", result: "配置函数"}`
 ## V1.1.0版本 (2016年11月16日)
 1. catproxy对象初始化后增加方法 `setServerType , setHttpPort, setHttpsPort, setUiPort, setSniType, setBreakHttps, setExcludeHttps`
+
+## V1.1.1版本 (2016年11月18日)
+1. 增强数据保存时候的校验

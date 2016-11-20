@@ -94,6 +94,7 @@
 > 4. 远程文件  如 源地址填写  http://163.com/test.js 目标地址填写  http://126.net/test.js 将会将 地址http://126.net/test.js的内容加载到 http://163.com/test.js下
 
 > 5. 重定向 如源地址填写  http://qq.com  目标地址填写 http://163.com 将会将qq.com重定向到 163.com
+## ![版本更新](updateinfo.md)
 
 ## License
 **MIT**

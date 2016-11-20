@@ -16,7 +16,7 @@ import {error as errFun} from './tools';
 import * as requestMiddleware from './requestMiddleware';
 import configProps from './config/configProps';
 import util from 'util';
-
+import * as rule from './config/rule';
 // 只有这些字段可以被保存到配置文件，如果设置了这个 只有这些字段会保存到配置文件，其他字段只能在内存中，不能保存到文件中
 const defSaveProps =  ['hosts', "log", 'breakHttps', 'excludeHttps', 'sni'];
 //	process.env.NODE_ENV
@@ -132,90 +132,64 @@ class CatProxy extends EventEmitter{
 	// 设置 日志级别
 	setLogLevel(logLevel) {
 		if (logLevel) {
-			let status = ["error", "warn", "info", "verbose", "debug", "silly"].some(current => current === logLevel);
-			if (status) {
-				config.set('log', logLevel);
-				log.transports.console.level = logLevel;
-				config.save();
-			}
+			config.set('log', logLevel);
+			log.transports.console.level = config.get('log');
+			config.save('log');
 		} else {
 			log.transports.console.level = config.get('log');
 		}
 	}
 	// 设置服务器类别
 	setServerType(type) {
-		if(type === 'http' || type === 'https') {
-			config.set('type', type);
-			config.save();
-		}
+		config.set('type', type);
+		config.save('type');
 	}
 	// 设置服务器端口
 	setHttpPort(port) {
 		port = + port;
-		if (port > 1) {
-			config.set('port', port);
-			config.save();
-		}
+		config.set('port', port);
+		config.save('port');
 	}
 	setHttpsPort(port) {
 		port = + port;
-		if (port > 1) {
-			config.set('httpsPort', port);
-			config.save();
-		}		
+		config.set('httpsPort', port);
+		config.save('httpsPort');
 	}
 	// 设置ui端口
 	setUiPort(port) {
 		port = + port;
-		if (port > 1) {
-			config.set('uiPort', port);
-			config.save();
-		}
+		config.set('uiPort', port);
+		config.save('uiPort');
 	}
 	// 设置sni类型
 	setSniType(type) {
-		type = + type;
-		if (type === 1 || type === 2) {
-			config.set("sni", type);
-			config.save();
-		}
+		config.set("sni", type);
+		config.save('sni');
 	}
 	// 设置破解https
 	setBreakHttps(list) {
-		if (Array.isArray(list)) {
-			let result = list.reduce((all, current) => {
-				if (typeof current === 'string' || Object.prototype.toString.call(current) === '[object RegExp]'){
-					all.push(current.toString().replace(/^\/|\/$/g, ""));
-					return all;
-				}
-			}, []);
-			if (result && result.length) {
-				config.set('breakHttps', result);
-				config.save();
-			}
-		}	else if(typeof list === 'boolean') {
-			config.set('breakHttps', list);
-			config.save();
-		}
+		config.set('breakHttps', list);
+		config.save('breakHttps');
 	}
 	// 设置排除https列表
 	setExcludeHttps(list) {
-		if (Array.isArray(list)) {
-			let result = list.reduce((all, current) => {
-				if (typeof current === 'string' || Object.prototype.toString.call(current) === '[object RegExp]'){
-					all.push(current.toString().replace(/^\/|\/$/g, ""));
-					return all;
-				}
-			}, []);
-			if (result && result.length) {
-				config.set('excludeHttps', result);
-				config.save();
-			}
-		} else if (list === '') {
-			config.set('excludeHttps', "");
-			config.save();			
+		config.set('excludeHttps', list);
+		config.save('excludeHttps');
+	}
+	setRules(rules) {
+		rule.saveRules(rules);
+	}
+	// 获取配置
+	getConfig(key) {
+		if (typeof key === 'string') {
+			return config.get(key);
 		}
-	} 
+		return config.get();
+	}
+	setConfig(...arg) {
+		config.set(...arg);	
+		config.save();
+	}
 	// 环境检测
 	checkEnv() {
 	}

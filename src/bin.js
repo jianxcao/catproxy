@@ -42,11 +42,11 @@ program
 	.option('-v, --version', '版本号码')
 	.option('-t, --type [value]', 'http或者https服务器类型, 同时开启2种服务器用all表示', /^(http|https|all)$/i)
 	.option('-p, --port [list]', '代理端口 默认  http: 80, https: 443, 多个端口用，分割第一个表示http，第二个表示https', list)
-	.option('-u, --ui [port]' , '界面端口 8001, 0表示没有后台管理界面', convertToInt)
+	.option('-u, --uiPort [port]' , '界面端口 8001, 0表示没有后台管理界面', convertToInt)
 	.option('--autoOpen [ui]', "自动打开图形界面", /^(true|false)$/)
 	.option('-c, --cert', '生成根证书')
-	.option('-b, --break-https [value]', "是否破解https,破解https前请先安装证书， 可以是host，多个host以 , 分割")
-	.option('-e, --exclude-https [value]', "在设置拦截https的情况下，是否需要排除某些host，多个host请以，分割, 可以使用正则, '' 重置所有列表为默认， -e优先级高于 -b")
+	.option('-b, --breakHttps [value]', "是否破解https,破解https前请先安装证书， 可以是host，多个host以 , 分割")
+	.option('-e, --excludeHttps [value]', "在设置拦截https的情况下，是否需要排除某些host，多个host请以，分割, 可以使用正则, '' 重置所有列表为默认， -e优先级高于 -b")
 	.option('-s, --sni [value]', "sni 设置，该参数在将服务器当做代理使用时有效，  1表示采用nodejs的 snicallback方式（某些浏览器不支持，比如ie6，低版本androi, 默认）2 表示采用多台服务器去代理（全支持，但是性能低）", /^(1|2)$/i)
 	.on('--help', () => console.log(colors.green(out)))
 	.option('-l, --log [item]', 
@@ -108,7 +108,7 @@ if (program.cert) {
 					}
 				}
 
-			} else if (current === 'ui') {
+			} else if (current === 'uiPort') {
 				opt.uiPort = program[current];
 			} else if (current === 'breakHttps') {
 				if (typeof program[current] === 'string') {
@@ -135,6 +135,11 @@ if (program.cert) {
 	var catProxy = new CatProxy(opt);
 	// 初始化代理服务器
 	catProxy.init();
+	var config = require('./config/config');
+
+	catProxy.setExcludeHttps(["baidu.com", "newapp.com", /test.com/]);
+	catProxy.setExcludeHttps("");
+
 	// catProxy.onPipeRequest(function(result) {
 	// 	return new Promise(function(resolve, reject) {
 	// 		setTimeout(function() {

@@ -2,9 +2,14 @@ import fs from 'fs';
 import path from 'path';
 import log from '../log';
 import merge from 'merge';
+import checkConfig from './checkConfig';
+import isEqual from 'is-equal';
+import clone from 'clone';
 // 数据对象直接require后直接返回一个对象，init方法只能调用一次，一个进程公用一个config
 var	data = {};
+var oldData = null;
 var saveProps = null;
+var isInit = false;
 // 获取配置路径
 export let getPath = () => {
 	let dirPath, filePath;
@@ -48,6 +53,9 @@ let loadingData = () => {
 
 // 获取一个值
 export let get = (key) => {
+	if (!isInit) {
+		throw new Error('请先初始化配置');
+	}
 	var tmp = data;
 	if (!key) {
 		return data;
@@ -66,37 +74,29 @@ export let get = (key) => {
 
 // 设置一个直接
 export let set = (key, val) => {
+	if (!isInit) {
+		throw new Error('请先初始化配置');
+	}
 	if (!key) {
 		return false;
 	}
-	if (typeof key === 'object') {
-		data = merge(data, key);
-		return true;
+	let current;
+	let type = typeof key;
+	if (type === 'string') {
+		current = {[key]: val};
+	} else if (type === 'object') {
+		current = key;
 	}
-	var tmp = data, keys;
-	keys = key.split(':');
-	key = keys[keys.length - 1];
-	if (keys.length > 1) {
-		for(var i = 0; i < keys.length - 1; i++) {
-			if (typeof tmp === 'object') {
-				if (tmp[keys[i]]) {
-					tmp = tmp[keys[i]];
-				} else  {
-					tmp = null;
-					return false;
-				}
-			} else {
-				tmp = null;
-				return false;
-			}
-		}
-	}
-	if (tmp) {
-		tmp[key] = val;
+	if (current) {
+		current = checkConfig(current);
+		data = merge(data, current);
 		return true;
 	}
 };
 export let del = (key) => {
+	if (!isInit) {
+		throw new Error('请先初始化配置');
+	}
 	// 不传递key删除所有
 	if (!key) {
 		data = {};
@@ -132,20 +132,23 @@ export let del = (key) => {
 export let setSaveProp = (...keys) => {
 	saveProps = keys;
 };
+
 // 保存到文件
 /**
  * key  如果传递，则只更新对应key的数据到文件中，否则全部更新
  * key 可以是数组或者字符串只可以更新顶级的字段，字段下面的字段不行
  */
 export let save = (key) => {
+	if (!isInit) {
+		throw new Error('请先初始化配置');
+	}
 	key = key || saveProps;
-	var oldData = loadingData();
 	var saveData;
 	if (!key) {
 		// 全部覆盖
-		saveData = data;
+		saveData = clone(data);
 	} else {
-		saveData = oldData;
+		saveData = clone(oldData);
 		if (typeof key === 'string') {
 			key  = [key];
 		}
@@ -158,20 +161,28 @@ export let save = (key) => {
 			});
 		}
 	}
+	// 如果数据完全一样，不调用
+	if (isEqual(saveData, oldData)) {
+		return;
+	}
 	var myData = JSON.stringify(saveData);
 	var filePath = getPath();
-	log.info('规则文件路径:' + filePath);
+	log.debug('保存规则文件路径:' + filePath);
 	try {
 		var fd = fs.openSync(filePath, 'w+', '777');
 		fs.writeSync(fd, myData, null, 'utf-8');
 		fs.closeSync(fd);
+		oldData = saveData;
 	} catch(e) {
 		throw e;
 	}
 };
 
 export default function() {
-	log.info('配置文件加载中');
+	isInit = true;
+	log.info('配置文件加载中, 加载路径: ' + getPath());
 	data = loadingData();
+	// 浅拷贝数据
+	oldData = clone(data);
 	log.info('配置文件加载成功');
 };

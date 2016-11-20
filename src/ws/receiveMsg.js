@@ -8,7 +8,6 @@ import http from 'http';
 import https from 'https';
 import Promise from 'promise';
 import {Buffer} from 'buffer';
-import {checkHosts} from '../config/rule';
 /*
  * 
  *  所有接受到得消息是一个Object
@@ -140,9 +139,6 @@ export let remoteUpdateRule = (msg = {}, ws = {}) => {
 				let result = isBuffer ? Buffer.concat(data) : data.join('');
 				try {
 					result = JSON.parse(result);
-					if (!checkHosts(result)) {
-						return reject(error('数据格式错误'));
-					}
 					config.set("hosts", result);
 					config.save(["hosts", "remoteRuleUrl"]);
 					return resolve(success({
