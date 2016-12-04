@@ -33,7 +33,6 @@ export default myMessage = () => {
 	var host = location.host.replace(/:.*/, '');
 	ws = io.connect(host + ":" + location.port);
 
-	window.ws = ws;
 	return new Promise((resolve)=> {
 		ws.on('connect', function () {
 			distributeReciveMethod(ws);

@@ -14,8 +14,8 @@ import {send} from './ws';
 
 
 // 获取config
-export let fetchConfig = (data) => {
-	return send('fetchConfig')(data);
+export let fetchConfig = () => {
+	return send('fetchConfig')();
 };
 
 // 更新rule

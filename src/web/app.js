@@ -13,7 +13,7 @@ import downloadcert from './downloadcert';
 import merge from 'merge';
 import webCfg from '../config/webCfg';
 import {localIps} from '../getLocalIps';
-
+import monitor from './monitor';
 export default (option) => {
 	option = merge({}, webCfg, option);
 	var server = http.createServer();
@@ -25,9 +25,10 @@ export default (option) => {
 	uiApp.use("/static", express.static(path.join(__dirname, '../../web/build')));
 	uiApp.use(bodyParser.json()); // for parsing application/json
 	uiApp.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
-	uiApp.use(["/", "/index.html"], host(option));
+	uiApp.use(["/m", "/m.html"], monitor(option));
 	uiApp.use('/downloadrule.html', downloadrule());
 	uiApp.use('/downloadcert.html', downloadcert());
+	uiApp.use(["/", "/index.html"], host(option));
 	uiApp.use(err404);
 	uiApp.use(err500);
 	server.on('request', uiApp);

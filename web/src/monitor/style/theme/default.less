@@ -1,0 +1,15 @@
+.themes (@theme) when (@theme=light) {
+	@bgColor: #fff;
+	@baseFontColor: #343434;
+	@baseFontHoverColor: #000;
+	@baseBorderColor:#dadada;
+	.@{theme} {
+		.splitColor(@theme);
+		.navBtnColor(@theme);
+		.filterBarColor(@theme);
+		.dataListColor(@theme);
+		.myToolTipColor(@theme);
+		.rightMenuWrapColor(@theme);
+		.loadingColor(@theme);
+	}
+}

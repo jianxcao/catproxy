@@ -22,14 +22,15 @@ gulp.task('src', function() {
 
 // 前端代码编译
 gulp.task('webpack:watch', function() {
-	return gulp.src('web/src/host/app.jsx')
+	return gulp.src(['web/src/host/app.jsx', 'web/src/monitor/monitor.jsx'])
+		.pipe(plumber()) // plumber给pipe打补丁
 		.pipe(webpack(webpackCfg))
-		.pipe(gulp.dest('web/build/host'));
+		.pipe(gulp.dest('web/build'));
 });
 gulp.task('webpack:publish', function() {
-	return gulp.src('web/src/host/app.jsx')
+	return gulp.src(['web/src/host/app.jsx', 'web/src/monitor/monitor.jsx'])
 		.pipe(webpack(webpackPubCfg))
-		.pipe(gulp.dest('web/build/host'));
+		.pipe(gulp.dest('web/build'));
 });
 
 gulp.task('web-dest', function() {

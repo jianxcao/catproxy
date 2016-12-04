@@ -1,0 +1,74 @@
+.rightMenuWrap{
+	li a {
+		outline: none;
+	}
+	.filterColumMenu{
+		input[type="checkbox"] {
+			display: none;
+		}
+		label{
+			font-weight: normal;
+			width:100%;
+			display: block;
+			margin-bottom: 0px;
+			padding:3px 20px;
+		}
+		li a {
+			padding: 0px;
+		}
+	}
+}
+.rightMenuWrapTheme() {
+	.rightMenuWrap{
+		.dropdown-menu{
+			background-color: @rightMenuBgColor;
+			color: @rightMenuColor;
+			box-shadow: @rightMenuBoxShadow;
+			.divider{
+				background-color: @rightMenuDividerColor;
+			}
+			a{
+				&:hover{
+					background-color: @rightMenuHoverBgColor;
+					color:@rightMenuHoverColor;
+				}
+			}
+		}
+		.filterColumMenu {
+			input[type="checkbox"] {
+				&:checked+label{
+					&:before{
+						color: inherit;
+					}
+				}
+				&+label {
+					&:before{
+						content: "√";
+						color:rgba(0, 0, 0, 0);
+						font-weight: 500;
+						font-family: "Microsoft YaHei",arial,simsun,SimHei;
+						display: inline-block;
+						padding-right:8px;
+					}
+				}
+			}			
+		}
+	}
+}
+
+//分割线颜色
+.rightMenuWrapColor(@theme) when (@theme=light) {
+	// 背景颜色
+	@rightMenuBgColor: #f0f0f0;
+	// 字体颜色
+	@rightMenuColor: #3d3d3d;
+	// 悬浮背景色
+	@rightMenuHoverBgColor: #549dfb;
+	// 悬浮字体颜色
+	@rightMenuHoverColor: #fff;
+	// 阴影
+	@rightMenuBoxShadow: 0px 0px 11px 0px rgba(0, 0, 0, 0.6); 
+	// 分割线颜色
+	@rightMenuDividerColor: #dfdfdf;
+	.rightMenuWrapTheme();
+}

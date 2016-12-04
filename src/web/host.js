@@ -1,6 +1,6 @@
 export default (option) => {
 	return (req, res, next)=> {
-		if (req.path === '/' || req.path === '/index.html') {
+		if (req.url == "/" || req.url == "/index.html") {
 			res.render("host/app", option);
 		} else {
 			next();

@@ -1,0 +1,25 @@
+//分割线
+.split{
+		transform: translate(0px, 8px);
+		height: 16px;
+		width: 1px;
+		margin: 0 10px;
+		display: block;
+		float: left;
+		a{
+			height: 16px;
+			width: 1px;
+			padding: 0px;
+		}
+}
+.splitTheme(){
+	.split{
+		color: @splitBgColor;
+		background-color: @splitBgColor;
+	}
+}
+//分割线颜色
+.splitColor(@theme) when (@theme=light) {
+	@splitBgColor: #777;
+	.splitTheme();
+}

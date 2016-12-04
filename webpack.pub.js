@@ -5,9 +5,10 @@ const nodeModulesPath = path.resolve(__dirname, 'node_modules');
 console.log(process.env.BABEL_ENV);
 const config = {
 		// Entry points to the project
-	entry: [
-		path.join(__dirname, './web/src/host/app.jsx'),
-	],
+	entry: {
+		"host/app": path.join(__dirname, './web/src/host/app.jsx'),
+		"monitor/monitor": path.join(__dirname, './web/src/monitor/monitor.jsx')
+	},
 	resolve: {
 		extensions: ['', '.js', '.jsx']
 	},

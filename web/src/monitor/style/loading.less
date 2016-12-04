@@ -1,0 +1,65 @@
+.loading{
+	height: 100%;
+	width: 100%;
+	position: fixed;
+	z-index: 1;
+	margin-top: 0px;
+	top: 0px;
+	min-height: 84px;
+	min-width: 40px;
+	.loading-center{
+		position: absolute;
+		left: 50%;
+		top: 50%;
+		height: 84px;
+		width: 40px;
+		transform: translate(-50%, -50%);
+	}
+	.ani{
+		width: 40px;
+		height: 8px;
+		margin-bottom:20px;
+		-webkit-animation: animate 0.8s infinite;
+		animation: animate 0.8s infinite;
+	}
+	.two { 
+		-webkit-animation-delay: 0.2s; 
+			animation-delay: 0.2s;
+	}
+	.three {	
+		-webkit-animation-delay: 0.4s; 
+			animation-delay: 0.4s; 
+	}
+}
+
+@-webkit-keyframes animate {
+  50% {
+		-ms-transform: scale(1.5); 
+   	-webkit-transform: scale(1.5);   
+    transform: scale(1.5);  
+	}
+}
+
+@keyframes animate {
+  50% {
+		-ms-transform: scale(1.5); 
+   	-webkit-transform: scale(1.5);   
+    transform: scale(1.5);  
+	}
+}
+
+.loadingTheme() {
+	.loading{
+		background-color: @baseLoadingBgColor;
+		.ani{
+			background-color:@baseLoadingAniColor;
+		}
+	}
+}
+
+//分割线颜色
+.loadingColor(@theme) when (@theme=light) {
+	@baseLoadingBgColor:transparent;
+	@baseLoadingAniColor: rgba(0,0,0, 0.7);
+	.loadingTheme();
+}

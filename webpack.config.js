@@ -4,9 +4,10 @@ const buildPath = path.resolve(__dirname, './web/build');
 const nodeModulesPath = path.resolve(__dirname, 'node_modules');
 const config = {
 	// Entry points to the project
-	entry: [
-		path.join(__dirname, './web/src/host/app.jsx'),
-	],
+	entry: {
+		// "host/app": path.join(__dirname, './web/src/host/app.jsx'),
+		"monitor/monitor": path.join(__dirname, './web/src/monitor/monitor.jsx')
+	},
 	resolve: {
 		extensions: ['', '.js', '.jsx']
 	},
@@ -14,7 +15,7 @@ const config = {
 	devtool: 'sourcemap',
 	output: {
 		path: path.resolve(buildPath, "app"), // Path of output file
-		filename: 'app.js',
+		filename: '[name].js',
 	},
 	plugins: [
 		// Enables Hot Modules Replacement

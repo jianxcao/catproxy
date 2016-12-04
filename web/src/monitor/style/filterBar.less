@@ -1,0 +1,102 @@
+.filterBar{
+	-moz-user-select:none;
+	-webkit-user-select:none;
+	user-select:none;    
+	height: 32px;
+ -webkit-display: flex;
+ display: flex;
+ padding-left: 10px;
+ align-items: center;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+ > div{
+	 display: inline-block;
+	 font-size:14px;
+ }
+ label{
+	 font-weight: normal;
+	 margin-bottom: 0px;
+ }
+ // 过滤文本
+ .filter{
+	 margin-right: 10px;
+	 input{
+		-moz-user-select:text;
+		-webkit-user-select:text;
+		user-select:text;   
+		width: 200px;
+		outline: none;
+		border:1px solid transparent;
+		border-radius: 2px;
+		&::-webkit-input-placeholder{
+			padding-left: 4px;
+		}
+	 }
+ }
+ //隐藏dataurl
+ .hideDataUrl{
+	 label{
+		 padding-left: 8px;
+	 }
+ }
+ //过滤条件
+ .filterTypes{
+	 display: flex;
+	 flex: 1;
+	 align-items: center;
+	 padding-left: 10px;
+	 span{
+		 display: inline-block;
+	 }
+	.split{
+		transform: translate(0px, 0px);
+	}
+	.type{
+		input{
+			display: none;
+		}
+		label{
+			margin: 0px 2px;
+			padding: 1px 3px;
+			border-radius: 7px;
+		}
+	}
+ }
+}
+
+.filterBarTheme(){
+	.filterBar{
+		background-color: @filterBarBgColor;
+		border-color:@baseBorderColor;
+		.filter{
+			input{
+				border-color: @filterBorderColor;
+			}
+		}
+		 .filterTypes{
+			 .type{
+				 input{
+					&:checked+label{
+						background: @typeSelectBgColor;
+						color:@typeSelectColor;
+					}
+				 }
+				 label{
+					&:hover{
+						background: @typeHoverBgColor;
+						color:@typeSelectColor;				
+					}				 
+				 }
+			 }
+		 }
+	}
+}
+
+.filterBarColor(@theme) when (@theme=light) {
+	@filterBarBgColor: #f3f3f3;
+	@filterBorderColor: #a3a3a3;
+	@typeSelectBgColor: #ababab;
+	@typeSelectColor: #fff;
+	@typeHoverBgColor: #c2c2c2;
+	.filterBarTheme();
+}

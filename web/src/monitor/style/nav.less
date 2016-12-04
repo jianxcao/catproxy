@@ -1,0 +1,207 @@
+
+// navbar 相关
+.navbar {
+	-moz-user-select:none;
+	-webkit-user-select:none;
+	user-select:none;    
+	border-radius: 0px;
+	min-height: 32px;
+	margin-bottom: 0;
+	.container{
+		margin-left: 0;
+		margin-right: 0;
+		padding-right: 0;
+		padding-left: 10px;
+	}
+	.navbar-brand{
+		height: 32px;
+		padding:6px 6px 6px 10px;
+		line-height: 18px;
+	}
+	.navbar-header{
+		float: left;
+	}
+	.navbar-nav{
+		.nav;
+		margin: 0px;
+		float: left;
+		li{
+			float: left;
+		}
+		font-size: 14px;
+		.dropdown > a{
+			padding: 0px;
+			height: 32px;
+			line-height: 32px;
+			&.open{
+				&, &:hover, &:active, &::focus{
+					background-color: transparent!important;
+				}
+			}
+		}
+		.dropdown-menu{
+			a{
+				outline: none;
+			}
+			font-size: 14px;
+		}
+	}
+	.nav () {
+		.navBtn {
+			transform: translate(0px, 8px);
+			border-radius: 15px;
+			height: 15px;
+			width: 15px;
+			a{
+				height: 15px;
+				width: 15px;
+				padding: 0px;
+				border-radius: 15px;
+			}
+			&.record{
+				margin-left: 10px;
+				margin-right: 18px;
+			}
+			&.clear a{
+				border-width: 1px;
+				border-style: solid;
+			}
+			&.clear{
+				& a:before{
+					height: 1px;
+					width: 0px;
+					display: block;
+					content: "";
+					height: 0px;
+					width: 15px;
+					position: absolute;
+					top: 50%;
+					border-width: 1px;
+					border-style: solid;
+					transform: translateY(-50%) rotateZ(45deg);
+				}
+			}
+			&.filter a{
+				border-radius: 0px;
+				-webkit-mask-image: url(../img/filter.png);
+				-webkit-mask-size: 100%;
+				width: 18px;
+			}
+		}
+	}
+	// 禁止缓存
+	.selfNav{
+ 		display: -webkit-flex; /* Safari */
+  	display: flex;
+		align-items:center;
+		float: left;
+		height: 32px;
+		.disCache{
+			label{
+				padding-left: 8px;
+				font-weight: normal;
+				font-size: 14px;
+				margin-bottom:0px;
+			}
+		}
+		.split{
+			transform: translate(0px, 0px);
+		}
+	}
+}
+
+.navbarTheme() {
+	.navbar{
+		background: @bgColor;
+		border-color:@baseBorderColor;
+		color:@baseFontColor;
+		// logo
+		.navbar-brand{
+			color:@baseFontColor;
+			a::hover, a::visited{
+				color:@baseFontColor;
+			}
+		}
+		// 按钮组  录制按钮 日志清除 分割线 过滤按钮  禁止缓存按钮  证书菜单按钮 帮助按钮
+		.navbar-nav{
+			.navBtn;
+		}
+		.dropdown > a{
+			color:@baseFontColor;
+			&:hover{
+				color: @baseFontHoverColor;
+			}
+		}
+	}
+	// 导航按钮样式
+	.navBtn(){
+		.record {
+			a{
+				background-color: @recordColor;
+				box-shadow: 0px 0px 2px@recordColor;
+			}
+			&.disable a{
+				background-color: @baseIconColor;
+				box-shadow: 0px 0px 2px@baseIconColor;
+				&:hover{
+					background-color: @hoverColor;
+					box-shadow: 0px 0px 2px@hoverColor;
+				}
+			}
+		}
+		// 清除按钮
+		.clear {
+			a{
+				border-color: @baseIconColor;
+				box-shadow: 0px 0px 0px 1px @baseIconColor;
+				&:hover{
+					&:before{
+						background: @hoverColor;
+						border-color:@hoverColor;
+					}
+					box-shadow: 0px 0px 0px 1px @hoverColor;
+					border-color:@hoverColor;
+				}
+				&:active{
+					&:before{
+						background: @baseIconColor;
+						border-color:@baseIconColor;
+					}
+					box-shadow: 0px 0px 0px 1px @baseIconColor;
+					border-color: @baseIconColor;
+				}
+				&:before{
+					background: @baseFontColor;
+					border-color:@baseFontColor;
+				}
+			}
+		}
+		.filter{
+			 a {
+				 background-color:@filterColor ;
+				 &:hover{
+					 background-color: @filterHoverColor;
+				 }
+			 }
+			 &.disable a{
+				  background-color: @baseIconColor;
+					&:hover{
+						background-color: @hoverColor;
+						box-shadow: 0px 0px 2px@hoverColor;						
+					}
+			 }
+		}
+	}
+}
+
+//分割线颜色
+.navBtnColor(@theme) when (@theme=light) {
+	@baseIconColor:#343434;
+	@hoverColor: #000;
+	// 录制按钮颜色
+	@recordColor: #d80000;
+	@filterColor: #4380ec;
+	@filterHoverColor:darken(@filterColor, 10%);
+	.navbarTheme();
+}
+
