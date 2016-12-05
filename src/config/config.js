@@ -73,7 +73,7 @@ export let get = (key) => {
 };
 
 // 设置一个直接
-export let set = (key, val) => {
+export let set = (key, val, isRecursive) => {
 	if (!isInit) {
 		throw new Error('请先初始化配置');
 	}
@@ -89,7 +89,11 @@ export let set = (key, val) => {
 	}
 	if (current) {
 		current = checkConfig(current);
-		data = merge(data, current);
+		if (isRecursive) {
+			data = merge.recursive(data, current);
+		} else {
+			data = merge(data, current);
+		}
 		return true;
 	}
 };
@@ -129,6 +133,10 @@ export let del = (key) => {
 	}
 };
 
+export let setRecursive = (key, val) => {
+	set(key, val, true);
+};
+
 export let setSaveProp = (...keys) => {
 	saveProps = keys;
 };
@@ -156,7 +164,7 @@ export let save = (key) => {
 		if (Object.prototype.toString.call(key) === '[object Array]') {
 			key.forEach(function(cur) {
 				if (data[cur] !== undefined) {
-					saveData[cur] = data[cur];
+					saveData[cur] = clone(data[cur]);
 				}
 			});
 		}

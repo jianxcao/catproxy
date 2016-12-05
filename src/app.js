@@ -59,7 +59,7 @@ class CatProxy extends EventEmitter{
 			saveProps = defSaveProps;
 		}
 		// 混合三种配置
-		let cfg = merge({}, defCfg, fileCfg, opt);
+		let cfg = merge.recursive({}, defCfg, fileCfg, opt);
 		if (saveProps && saveProps.length) {
 			this.option.saveProps = saveProps;
 		}

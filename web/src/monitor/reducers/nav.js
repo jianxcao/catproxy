@@ -17,6 +17,6 @@ let booleanReducer = (state, action) => {
  * }
  */
 export default keys(navType).reduce((map, type)=> {
-	map[camelCase(type)] = handleAction(type, booleanReducer, false);
+	map[camelCase(type)] = handleAction(type, booleanReducer, true);
 	return map;
 }, {});

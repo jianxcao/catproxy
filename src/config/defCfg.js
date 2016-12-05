@@ -17,6 +17,14 @@ export const STATUS = {
 	// request错误
 	LIMIT_ERROR: 1
 };
+// 录制状态
+export const MONITOR_STATUS = true;
+// 录制过滤状态
+export const MONITOR_FILTER_STATUS = true;
+// 录制类型
+export const MONITOR_FILTER_TYPE =  "all";
+// 隐藏显示 dataurl
+export const HIDDEN_DATA_URL = false;
 // 默认配置
 export default {
 	type: DEFAULT_TYPE,
@@ -26,6 +34,12 @@ export default {
 	breakHttps: DEFAULT_BREAK_HTTPS,
 	uiPort: DEFAULT_UI_PORT,
 	autoOpen: AUTO_OPEN,
-	sni: SIN
+	sni: SIN,
+	monitor: {
+		monitorStatus: MONITOR_STATUS,
+		monitorFilterStatus: MONITOR_FILTER_STATUS,
+		monitorFilterType: MONITOR_FILTER_TYPE,
+		hiddenDataUrl: HIDDEN_DATA_URL		
+	}
 };
 

@@ -1,19 +1,25 @@
 // 收到数据后从这里处理
-import store from '../host/store/store';
 import * as status from './status';
+import hostStore from '../host/store/store';
 import {resetHosts} from '../host/action/actions';
-export let monitorData = (message)=> {
+
+// 增加监控数据
+export let addMonitorData = (message)=> {
+
+};
+
+// 更新数据
+export let updateMonitorData = (message)=> {
 
 };
 
 export let updateRule = (message)=> {
-	// console.log(message);
 	if (message && message.status === status.SUCC) {
-		store.dispatch(resetHosts(message.result.hosts));
+		hostStore.dispatch(resetHosts(message.result.hosts));
 	}
 };
 
 export default {
-	monitorData,
+	addMonitorData,
 	updateRule
 };

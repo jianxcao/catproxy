@@ -9,6 +9,7 @@ import {clearMonitorList} from './action/monitorListAction';
 import reduce from 'lodash/reduce';
 import {upperFirstLetter} from './util';
 import cs from 'classnames';
+import * as sendMsg from "../ws/sendMsg";
 class MyNav extends Component{
 	static propTypes = {
 		monitorStatus: PropTypes.bool.isRequired,
@@ -30,6 +31,9 @@ class MyNav extends Component{
 	changeMonitorStatus (e) {
 		let {sendMonitorStatus, monitorStatus} = this.props;
 		sendMonitorStatus(!monitorStatus);
+		// 直接保存后台
+		sendMsg.monitorStatus(!monitorStatus)
+		.then(null, (err) => console.log(err));
 	}
 	// 清除掉所有得监控数据
 	clearMonitorList(e) {
@@ -40,11 +44,17 @@ class MyNav extends Component{
 	changeMonitorFilterStatus(e) {
 		let {sendMonitorFilterStatus, monitorFilterStatus} = this.props;
 		sendMonitorFilterStatus(!monitorFilterStatus);
+		// 后台保存
+		sendMsg.monitorFilterStatus(!monitorFilterStatus)
+		.then(null, (err) => console.log(err));
 	}
 	// 切换 缓存
 	changeDisCache(e) {
 		let {sendDisCache, disCache} = this.props;
 		sendDisCache(!disCache);
+		// 后台保存
+		sendMsg.disCache(!disCache)
+		.then(null, (err) => console.log(err));
 	}
 	render() {
 		let pageUrl = window.config.host + "/m";

@@ -90,6 +90,16 @@ let disCache = (status, ws) => {
 		return error('更新配置失败');
 	}
 };
+let monitor = (monitor, ws) => {
+	try {
+		config.setRecursive('monitor', monitor);
+		config.save('monitor');
+		return success('更新配置成功');
+	} catch(e) {
+		log.error(e);
+		return error('更新配置失败');
+	}
+};
 
 export let saveConfig = (msg = {}, ws = {}) => {
 	let {path, param} = msg;
@@ -103,6 +113,8 @@ export let saveConfig = (msg = {}, ws = {}) => {
 			}
 		case('disCache'):
 			return disCache(!!param.status, ws);
+		case('monitor'):
+			return monitor(param, ws);
 		default:
 			return error('未知的保存数据');
 		}

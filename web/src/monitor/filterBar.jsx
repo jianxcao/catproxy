@@ -8,6 +8,7 @@ import filterBarReducer from './reducers/filterBar';
 import reduce from 'lodash/reduce';
 import {upperFirstLetter} from './util';
 import {MONITOR_FILTER_TYPES} from './constant';
+import * as sendMsg from "../ws/sendMsg";
 import cs from 'classnames';
 class FilterBar extends Component{
 	constructor(...arg) {
@@ -33,6 +34,7 @@ class FilterBar extends Component{
 	changeMonitorFilterType(e) {
 		let {sendMonitorFilterType} = this.props;
 		sendMonitorFilterType(e.target.value);
+		sendMsg.monitorFilterType(e.target.value);
 	}
 	// 改变监控的条件
 	changeMonitorFilterCondition(e) {
@@ -49,6 +51,7 @@ class FilterBar extends Component{
 	changeHiddenDataUrl() {
 		let {sendHiddenDataUrl, hiddenDataUrl} = this.props;
 		sendHiddenDataUrl(!hiddenDataUrl);
+		sendMsg.hiddenDataUrl(!hiddenDataUrl);
 	}
 	render() {
 		let {	

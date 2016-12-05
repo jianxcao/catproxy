@@ -31,6 +31,7 @@ export let updateRule = (data) => {
 	}
 };
 
+// 更新远程地址
 export let remoteUpdateRule = (url) => {
 	if (url) {
 		let result = {
@@ -43,6 +44,7 @@ export let remoteUpdateRule = (url) => {
 	}
 };
 
+// 更新缓存
 export let disCache =(status) => {
 	status = !!status;
 	let result = {
@@ -54,9 +56,58 @@ export let disCache =(status) => {
 	return send('saveConfig')(result);
 };
 
+export let monitorStatus = (status) => {
+	status = !!status;
+	let result = {
+		param: {
+			monitorStatus: status
+		},
+		path: "monitor"
+	};
+	return send('saveConfig')(result);
+};
+
+export let monitorFilterStatus = (status) => {
+	status = !!status;
+	let result = {
+		param: {
+			monitorFilterStatus: status
+		},
+		path: "monitor"
+	};
+	return send('saveConfig')(result);
+};
+
+export let monitorFilterType = (type) => {
+	status = !!status;
+	let result = {
+		param: {
+			monitorFilterType: type
+		},
+		path: "monitor"
+	};
+	return send('saveConfig')(result);
+};
+
+export let hiddenDataUrl = (status) => {
+	status = !!status;
+	let result = {
+		param: {
+			hiddenDataUrl: status
+		},
+		path: "monitor"
+	};
+	return send('saveConfig')(result);
+};
+
+
 export default {
 	fetchConfig,
 	updateRule,
 	disCache,
-	remoteUpdateRule
+	remoteUpdateRule,
+	monitorStatus,
+	monitorFilterStatus,
+	monitorFilterType,
+	hiddenDataUrl
 };

@@ -135,10 +135,6 @@ if (program.cert) {
 	var catProxy = new CatProxy(opt);
 	// 初始化代理服务器
 	catProxy.init();
-	var config = require('./config/config');
-
-	catProxy.setExcludeHttps(["baidu.com", "newapp.com", /test.com/]);
-	catProxy.setExcludeHttps("");
 
 	// catProxy.onPipeRequest(function(result) {
 	// 	return new Promise(function(resolve, reject) {

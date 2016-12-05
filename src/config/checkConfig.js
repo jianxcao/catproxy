@@ -1,4 +1,4 @@
-import configProps from './configProps';
+import configProps, {monitorType} from './configProps';
 import log from '../log';
 const isUrl = /^https?:\/\/.+/
 const ruleType = {
@@ -118,6 +118,28 @@ const valCheck = {
 		silly: true
 	}
 };
+let checkMonitor = (monitor) => {
+	let keys = {
+		monitorStatus: true,
+		monitorFilterStatus: true,
+		monitorFilterType: true,
+		hiddenDataUrl: true	
+	};
+	if (typeof monitor === 'object') {
+		for(var m in monitor) {
+			if (!keys[m]) {
+				delete monitor[m];
+			}
+			if (m == 'monitorFilterType') {
+				if (!monitorType.some(c => c === monitor[m])) {
+					delete monitor[m];
+				}
+			}
+		}
+		return true;
+	}
+	return false;
+};
 
 // 检测配置字段是否合法
 export default function(cfg) {
@@ -172,6 +194,8 @@ export default function(cfg) {
 					if (cfg[cur] && isUrl.test(cfg[cur])) {
 						status = true;
 					}
+				} else if (cur === 'monitor') { // 检测监控数据
+					status = checkMonitor(cfg[cur]);
 				}
 				if (status) {
 					data[cur] = cfg[cur];
