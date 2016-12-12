@@ -81,7 +81,7 @@ class MyNav extends Component{
 					<span className="disCache">
 						<input type="checkbox"
 							checked={disCache} 
-							onChange={this.changeDisCache}/><label htmlFor="disCache">禁止缓存</label></span>
+							onChange={this.changeDisCache} id="disCache"/><label htmlFor="disCache"></label>禁止缓存</span>
 					<div className="split"></div>
 				</div>
 				<Nav>

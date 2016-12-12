@@ -98,11 +98,25 @@
 		height: 32px;
 		.disCache{
 			label{
-				padding-left: 8px;
+				margin-left: 8px;
 				font-weight: normal;
 				font-size: 14px;
 				margin-bottom:0px;
+				margin-right: 8px;
+				padding: 6px;
+				border-radius: 3px;
+				position: relative;
 			}
+			input {
+				display: none;
+			}
+			input:checked + label:after	 {
+				content: '\2714';
+				font-size: 12px;
+				position: absolute;
+				top: -2px;
+				left: 1px;
+			}		
 		}
 		.split{
 			transform: translate(0px, 0px);
@@ -130,6 +144,18 @@
 			color:@baseFontColor;
 			&:hover{
 				color: @baseFontHoverColor;
+			}
+		}
+		.selfNav{
+			.disCache{
+				label{
+					border: 1px solid @disCacheBorderColor;
+					box-shadow: @disCacheBoxShadow;
+					background-color: @disCacheBgColor;
+				}
+				input:checked + label:after{
+					color: @disCacheCheckColor;
+				}
 			}
 		}
 	}
@@ -200,8 +226,15 @@
 	@hoverColor: #000;
 	// 录制按钮颜色
 	@recordColor: #d80000;
+	// 过滤按钮
 	@filterColor: #4380ec;
 	@filterHoverColor:darken(@filterColor, 10%);
+
+	// 禁止缓存按钮 复写
+	@disCacheBorderColor: #a5a5a5;
+	@disCacheBoxShadow: 0px 0px 2px 0px #a5a5a5;
+	@disCacheBgColor: #e7e7e7;
+	@disCacheCheckColor: #444444;
 	.navbarTheme();
 }
 
