@@ -56,8 +56,10 @@ class Monitor extends Component{
 		monitorFilterCondition = monitorFilterCondition.map((current) => {
 			return isRegStr.test(current) ? new RegExp(current.slice(1,current.length - 1)) : new RegExp(current);
 		});
-		if (monitorList && monitorList.size) {
-			return monitorList.reduce((result, one) => {
+		let mySeq = monitorList.get('mySeq');
+		if (mySeq && mySeq.size) {
+			return mySeq.reduce((result, id) => {
+				let one = monitorList.get(id);
 				let name = one.get('name');
 				let type = one.get('type');
 				let status =  !(hiddenDataUrl && isDataUrl.test(name)) && 
@@ -67,7 +69,7 @@ class Monitor extends Component{
 					result = result.push(one);
 				}
 				return result;
-			}, new List());
+			}, new List());			
 		}
 		return new List();
 	}

@@ -1,7 +1,7 @@
 // 创建一个https的代理服务器
 import https from 'https';
 import {getCert} from './cert/cert.js';
-import getPort from 'empty-port';
+import {getPort} from './tools';
 import Promise from 'promise';
 import log from './log';
 import tls from 'tls';
@@ -27,17 +27,7 @@ export default (host, port) => {
 		if (p) {
 			return p;
 		} else {
-			return new Promise((resolve, reject) => {
-				getPort({
-					startPort: 10001
-				}, (err, port) => {
-					if (err) {
-						reject(err);
-					} else {
-						resolve(port);
-					}
-				});				
-			});
+			return getPort();
 		}
 	})
 	// 不支持sni的请求可能点了就没反应,SNICallback在客户端不支持的情况下，不会报错，会直接返回

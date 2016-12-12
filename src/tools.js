@@ -1,5 +1,7 @@
 import log from './log';
 import childProcess from 'child_process';
+import myPort from 'empty-port';
+import Promise from 'promise';
 export let getUrl = ({port, path: pathname, protocol, hostname, host})=> {
 	if (protocol && (hostname || host)) {
 		hostname = hostname || host;
@@ -78,6 +80,12 @@ export let sendErr = (res, err, uri) => {
 	if (!res.headers['content-type']|| !res.headers['Content-Type']) {
 		res.headers['Content-Type'] = "text/html; charset=utf-8";
 	}
+	if (res.headers['content-length']) {
+		delete res.headers['content-length'];
+	}
+	if (res.headers['content-encoding']) {
+		delete res.headers['content-encoding'];
+	}
 	let statusCode = '500';
 	if (err.message && err.message.indexOf('ETIMEDOUT') > -1) {
 		statusCode = '504';
@@ -85,3 +93,26 @@ export let sendErr = (res, err, uri) => {
 	res.writeHead(statusCode, res.headers);
 	res.end(message);
 };
+
+export let getPort =  function(startPort) {
+	return new Promise(function(resolve, reject) {
+		myPort({
+			startPort: startPort || 10001
+		}, (err, port) => {
+			if (err) {
+				reject(err);
+			} else {
+				resolve(port);
+			}
+		});		
+	});
+};
+
+export let getGuids = (start) => {
+	start = +start || 1;
+	return () => {
+		return start++;
+	};
+};
+
+export let getMonitorId = getGuids(+new Date());

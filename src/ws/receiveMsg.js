@@ -68,12 +68,6 @@ export let fetchConfig = ()=> {
 let updateRule = (rules, ws) => {
 	try {
 		rule.saveRules(rules);
-		// ws.broadcast.emit(sendType.updateRule, {
-		// 	status: status.SUCC,
-		// 	result: {
-		// 		hosts: rules
-		// 	}
-		// });
 		return success('更新规则成功');
 	} catch(e) {
 		log.error(e);

@@ -1,6 +1,6 @@
 import configProps, {monitorType} from './configProps';
 import log from '../log';
-const isUrl = /^https?:\/\/.+/
+const isUrl = /^https?:\/\/.+/;
 const ruleType = {
 	host: 'host',
 	localFile: 'localFile',

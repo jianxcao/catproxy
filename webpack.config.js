@@ -5,7 +5,7 @@ const nodeModulesPath = path.resolve(__dirname, 'node_modules');
 const config = {
 	// Entry points to the project
 	entry: {
-		// "host/app": path.join(__dirname, './web/src/host/app.jsx'),
+		"host/app": path.join(__dirname, './web/src/host/app.jsx'),
 		"monitor/monitor": path.join(__dirname, './web/src/monitor/monitor.jsx')
 	},
 	resolve: {

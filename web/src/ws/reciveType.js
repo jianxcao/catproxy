@@ -3,7 +3,7 @@
 export const addMonitorData = "add-monitor-data";
 
 // 获取更新监控数据
-export const updateMonitorData = "add-monitor-data";
+export const updateMonitorData = "update-monitor-data";
 
 // 更新规则，服务器主动推送规则更新
 export const updateRule = "update-rule";

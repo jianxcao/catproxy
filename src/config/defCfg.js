@@ -9,7 +9,7 @@ export const DEFAULT_UI_PORT = 8001;
 // https服务器启动时候需要的证书
 export const  DEFAULT_CERT_HOST = 'localhost';
 export const DEFAULT_BREAK_HTTPS = true;
-export const LIMIT_SIZE = 1024 * 1024 * 5;
+export const LIMIT_SIZE = 1024 * 1024 * 10;
 export const SIN = 1;
 // 自动打开管理界面
 export const AUTO_OPEN = true;

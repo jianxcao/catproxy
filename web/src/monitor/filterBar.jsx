@@ -82,11 +82,6 @@ class FilterBar extends Component{
 					<div className="filter">
 						<input type="text" name="filter" placeholder="过滤" defaultValue={monitorFilterCondition} onChange={this.changeMonitorFilterCondition}/>
 					</div>
-					<div className="hideDataUrl">
-						<input type="checkbox" id="hideDataUrl"
-							checked={hiddenDataUrl}
-							onChange={this.changeHiddenDataUrl}/><label htmlFor="hideDataUrl">隐藏 data Urls</label>
-					</div>
 					<div className="filterTypes">
 						{filterTypes}
 					</div>
@@ -109,3 +104,10 @@ function mapDispatchToProps(dispatch) {
 	}, {});
 };
 export default connect(mapStateToProps, mapDispatchToProps)(FilterBar);
+
+/**
+<div className="hideDataUrl">
+			<input type="checkbox" id="hideDataUrl"
+				checked={hiddenDataUrl}
+				onChange={this.changeHiddenDataUrl}/><label htmlFor="hideDataUrl">隐藏 data Urls</label>
+		</div> */

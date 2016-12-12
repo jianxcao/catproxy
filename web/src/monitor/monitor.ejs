@@ -3,16 +3,13 @@
 	<head>
 		<meta charset="utf-8">
 		<title>catproxy</title>
-		<link rel="stylesheet" href="<%=cdnBasePath%>/lib/bootstrap/bootstrap.css">
+		<link rel="stylesheet" href="<%=locals.uiOption.cdnBasePath%>/lib/bootstrap/bootstrap.css">
 	</head>
 	<body class="light">
-	<div id="g-wrap"></div>
+		<div id="g-wrap"></div>
 		<script>
-			window.config = {
-				env: '<%=env%>',
-				host: '<%=host%>'
-			};
+			window.config = <%-JSON.stringify(locals.uiOption)%>
 		</script>
-		<script src="<%=cdnBasePath%>/monitor/monitor.js"></script>
+		<script src="<%=locals.uiOption.cdnBasePath%>/monitor/monitor.js"></script>
 	</body>
 </html>

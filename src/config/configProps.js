@@ -2,4 +2,4 @@
 const configProps = ['type', 'port', 'httpsPort', 'uiPort', 'log', 'breakHttps', 'excludeHttps', 'autoOpen', 'sni', "hosts", "disCache", "remoteRuleUrl", 'monitor'];
 export default configProps;
 
-export const monitorType = ["all", "doc", "xhr", "js", "css", "img", "media", "font", "ws", "mainifest", "other"];;
+export const monitorType = ["all", "doc", "xhr", "js", "css", "img", "media", "font", "ws", "mainifest", "other"];

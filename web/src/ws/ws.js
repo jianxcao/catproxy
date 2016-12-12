@@ -4,10 +4,10 @@ import * as reciveMsg from './reciveMsg';
 import * as sendType from './sendType';
 import * as status from './status';
 var ws, myMessage;
-
-// 根据不同的Type转发到不同的地方处理
-let recive = (type) => {
-	return myMessage().then(ws => {
+// 处理收到的事件
+// 接受处理
+let distributeReciveMethod = (ws) => {
+	for (let type in reciveType) {
 		ws.on(reciveType[type], message => {
 			console.log('收到服务器端消息，消息类型: ' + reciveType[type]);
 			if (reciveMsg[type]) {
@@ -15,26 +15,17 @@ let recive = (type) => {
 			} else {
 				console.warn('收到消息后，没找到合适的处理方法: ' + reciveType[type]);
 			}
-		});
-	});
-};
-
-// 处理收到的事件
-let distributeReciveMethod = () => {
-	for (let type in reciveType) {
-		recive(type);
+		});		
 	}
 };
-
 export default myMessage = () => {
 	if (ws) {
 		return Promise.resolve(ws);
 	}
-	var host = location.host.replace(/:.*/, '');
-	ws = io.connect(host + ":" + location.port);
+	ws = io.connect(window.config.wsServerUrl);
 
 	return new Promise((resolve)=> {
-		ws.on('connect', function () {
+		ws.once('connect', function () {
 			distributeReciveMethod(ws);
 			resolve(ws);
 		});

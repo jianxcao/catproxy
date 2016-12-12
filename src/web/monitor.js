@@ -1,5 +1,5 @@
-export default (option) => {
+export default () => {
 	return (req, res, next)=> {
-		res.render("monitor/monitor", option);
+		res.render("monitor/monitor");
 	};
 };

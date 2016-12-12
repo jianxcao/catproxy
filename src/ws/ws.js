@@ -23,7 +23,9 @@ import skt from 'socket.io';
 import log from '../log';
 import * as receiveMsg from './receiveMsg';
 import * as receiveType from './receiveType';
-
+import webCfg from '../config/webCfg';
+import monitor from '../monitor/monitor';
+import sendMsg from './sendMsg';
 var wss;
 
 // 方法分发
@@ -55,15 +57,19 @@ let recive = (ws, evtType) => {
 
 // 将接受到的消息映射到 receiveMsg中去处理
 let distributeReciveMethod = () => {
-	// 有新德客户端建立链接
-	wss.on('connection', (ws) => {
+	// 有新的客户端建立链接
+	// 所有请求都在catproxy下
+	wss.of(webCfg.wsPath).on('connection', (ws) => {
 		for(let type in receiveType) {
 			recive(ws, type);
 		}
 	});
 };
 
-export default (server) => {
+export default (server, catproxy) => {
+	if (wss) {
+		return Promise.resolve(wss);
+	}
 	if (!server) {
 		return Promise.reject('must have server');
 	}
@@ -72,7 +78,11 @@ export default (server) => {
 		wss.on('error', (err)=> {
 			log.info('err io', err);
 		});
+		// 初始化监控
+		monitor(catproxy);
 		distributeReciveMethod();
+		// 初始化sendMsg
+		sendMsg(wss.of(webCfg.wsPath));
 		resolve(wss);
 	});
 };

@@ -13,7 +13,7 @@ import {localIps} from './getLocalIps';
 import {getUrl} from './tools';
 import net from 'net';
 import {getCert} from './cert/cert.js';
-import {writeErr, sendErr} from './tools';
+import {writeErr, sendErr, getMonitorId} from './tools';
 import mime from 'mime';
 import path from 'path';
 import querystring from 'querystring';
@@ -68,8 +68,7 @@ let local = function(reqInfo, resInfo, fileAbsPath) {
 		res.emit('resBodyDataReady', null, bodyData);
 	}, function(err) {
 		let {headers = {}, res} = resInfo;
-		delete headers['content-encoding'];
-		delete headers['content-length'];
+		// 由错误方法删除的header
 		return Promise.reject(err);
 	});
 };
@@ -96,8 +95,6 @@ let detailHost = function(result, reqInfo, resInfo) {
 		let {res} = resInfo;
 		return triggerBeforeRes.call(com, merge({}, resInfo, {bodyDataErr: err, headers: {}}))
 		.then(({statusCode, headers}) => {
-			delete headers['content-encoding'];
-			delete headers['content-length'];
 			return Promise.reject(err);
 		});
 	});
@@ -157,11 +154,9 @@ let proxyReq = function(options, reqInfo, resInfo, req) {
 		.on('data', chunk => {
 			if (l > LIMIT_SIZE) {
 				isError = true;
-				// log.debug('in size', LIMIT_SIZE, l);
 				if (!isFired) {
 					isFired = true;
 					let {statusCode, headers} = resInfo;
-					delete headers['content-length'];
 					headers['remote-url'] = querystring.escape(remoteUrl);
 					res.writeHead(statusCode || 200, headers);
 					res.write(Buffer.concat(resBodyData));
@@ -200,7 +195,9 @@ let proxyReq = function(options, reqInfo, resInfo, req) {
 							return resInfo;
 						});
 				} else {
-					return resInfo;
+					bodyData = null;
+					let bodyDataErr = err.message;
+					return triggerBeforeRes.call(com, merge({}, resInfo, {bodyData, bodyDataErr}));
 				}
 			})
 			.then(({headers, bodyData}) => {
@@ -256,11 +253,19 @@ let remote = function(reqInfo, resInfo) {
 		return proxyReq.call(com, options, reqInfo, resInfo, req);
 	});
 };
-
 export default function(reqInfo, resInfo){
 	let self = this;
 	let res = resInfo.res;
 	let req = reqInfo.req;
+	let id = getMonitorId();
+	Object.defineProperty(reqInfo, "id", {
+		value: id,
+		enumerable: true
+	});	
+	Object.defineProperty(resInfo, "id", {
+		value: id,
+		enumerable: true
+	});	
 	// 当bodyData缓存处理完毕就触发事件告诉用户数据
 	res.on("resBodyDataReady", (err, bodyData) => {
 		let headers = res.headers || {};
@@ -332,6 +337,11 @@ export default function(reqInfo, resInfo){
 			bodyDataErr: {
 				writable: false,
 				value: err && err.message ? err.message : err,
+				enumerable: true
+			},
+			id: {
+				writable: false,
+				value: id,
 				enumerable: true
 			}
 		});

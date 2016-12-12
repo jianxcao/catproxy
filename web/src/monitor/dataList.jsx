@@ -9,7 +9,7 @@ import {bindActionCreators} from 'redux';
 import {monitorStatus} from './action/navAction';
 import {upperFirstLetter} from './util';
 import cs from 'classnames';
-
+const getDomainReg = /:\/\/([^:\/]+)/;
 export default class DataList extends Component {
 	constructor(props) {
 		super(props);
@@ -96,15 +96,35 @@ export default class DataList extends Component {
 			customColums: showFeild
 		};
 	}
-	getTextCell ({rowIndex, columnKey, ...props}) {
+	getTextCell ({rowIndex, columnKey: key, ...props}) {
 		let className = "";
 		if (rowIndex === this.state.hoverIndex) {
 			className = "row_hover";
 		}
 		let {monitorList} = this.props;
 		let data = monitorList.get(rowIndex);
+		let result;
+		if (key === 'status' || key === 'size' || key === "time") {
+			result = data.get(key);
+			if (result === undefined || result === null) {
+				result = "Pending";
+			}
+		} else if (key === 'domain') {
+			result = (data.get("name") || "").match(getDomainReg);
+			if (result && result.length > 0) {
+				result = result[1];
+			} else {
+				result = "";
+			}
+		} else {
+			result = data.get(key);
+		}
+		let myProp = {...props};
+		if (key === 'name') {
+			myProp['data-tip'] = result;
+		}
 		return (
-			<Cell {...props} className={className}>{data.get(columnKey)}</Cell>
+			<Cell {...myProp} className={className}>{result}</Cell>
 		);
 	}
 	// 调整列宽度

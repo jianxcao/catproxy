@@ -5,13 +5,10 @@
 		<title>catproxy</title>
 	</head>
 	<body>
-	<div id="g-wrap"></div>
+		<div id="g-wrap"></div>
 		<script>
-			window.config = {
-				env: '<%=env%>',
-				host: '<%=host%>'
-			};
+			window.config = <%-JSON.stringify(locals.uiOption)%>
 		</script>
-		<script src="<%=cdnBasePath%>/host/app.js"></script>
+		<script src="<%=locals.uiOption.cdnBasePath%>/host/app.js"></script>
 	</body>
 </html>

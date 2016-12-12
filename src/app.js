@@ -12,11 +12,15 @@ import {getCert, getCertDir} from './cert/cert.js';
 import {SNICallback} from './httpsProxySer';
 import ui from './web/app';
 import {localIps} from './getLocalIps';
-import {error as errFun} from './tools';
+import {error as errFun, getPort, openCmd} from './tools';
 import * as requestMiddleware from './requestMiddleware';
 import configProps from './config/configProps';
 import util from 'util';
 import * as rule from './config/rule';
+import express from 'express';
+import webCfg from './config/webCfg';
+import path from 'path';
+import ws from './ws/ws';
 // 只有这些字段可以被保存到配置文件，如果设置了这个 只有这些字段会保存到配置文件，其他字段只能在内存中，不能保存到文件中
 const defSaveProps =  ['hosts', "log", 'breakHttps', 'excludeHttps', 'sni'];
 //	process.env.NODE_ENV
@@ -122,7 +126,10 @@ class CatProxy extends EventEmitter{
 		.then(this.checkEnv.bind(this))
 		.then(this.createServer.bind(this))
 		.then(this.uiInit.bind(this))
-		.then(null, this.errorHandle.bind(this));
+		.then(null, (err) => {
+			this.errorHandle(err);
+			process.exit(1);
+		});
 	}
 	// 创建缓存，创建请求保存
 	createCache() {
@@ -195,14 +202,50 @@ class CatProxy extends EventEmitter{
 	}
 	uiInit() {
 		let port = config.get('uiPort');
-		if (+port === 0) {
-			return;
-		}
-		ui({
-			port : port,
-			hostname: localIps[0],
-			host: `http://${localIps[0]}:${port}`,
-			isAutoOpen: config.get('autoOpen')
+		let isAutoOpen = config.get('autoOpen');
+		let p = port;
+		// 如果port是0 则只提供下载链接的server
+		return Promise.resolve(p || getPort())
+		.then((p) => {
+			// 内置服务器初始化
+			let host = `http://${localIps[0]}:${p}`;
+			let uiOption = {
+				port : p,
+				hostname: localIps[0],
+				host: host,
+				wsServerUrl: host + webCfg.wsPath,
+				cdnBasePath: path.join('/c', webCfg.cdnBasePath),
+				env: webCfg.env
+			};
+			let uiApp = ui(!!port);
+			let app = express();
+			let uiServer = app.listen(p, function() {
+				log.info('catproxy ui界面地址：' + host +"/c/index");
+				if(port && isAutoOpen) {
+					openCmd(host + "/c/index");
+				}
+			});
+			uiApp.locals.uiOption = uiOption;
+			uiServer.on('error', (err) => {
+				errFun(err);
+				process.exit(1);
+			});
+			// 字app
+			app.use("/c", uiApp);
+			this.ui = {
+				app,
+				uiServer
+			};
+		})
+		.then(() => {
+			if (port) {
+				return ws(this.ui.uiServer, this);
+			}
+		})
+		.then(wsServer => {
+			if (wsServer) {
+				this.ui.wsServer = wsServer;
+			}
 		});
 	}
 	// 出错处理
