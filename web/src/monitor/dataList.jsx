@@ -10,6 +10,7 @@ import {monitorStatus} from './action/navAction';
 import {upperFirstLetter} from './util';
 import cs from 'classnames';
 const getDomainReg = /:\/\/([^:\/]+)/;
+const wrongCodeReg = /(^4)|(^5).+/;
 export default class DataList extends Component {
 	constructor(props) {
 		super(props);
@@ -97,13 +98,15 @@ export default class DataList extends Component {
 		};
 	}
 	getTextCell ({rowIndex, columnKey: key, ...props}) {
-		let className = "";
-		if (rowIndex === this.state.hoverIndex) {
-			className = "row_hover";
-		}
 		let {monitorList} = this.props;
 		let data = monitorList.get(rowIndex);
 		let result;
+		let status = data.get("status") || "";
+		let className = cs({
+			 "row_hover": rowIndex === this.state.hoverIndex,
+			 "wrong_color": wrongCodeReg.test(status)
+		});
+				
 		if (key === 'status' || key === 'size' || key === "time") {
 			result = data.get(key);
 			if (result === undefined || result === null) {
