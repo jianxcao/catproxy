@@ -106,7 +106,7 @@ export const getReqType = (result) => {
 };
 
 /**
- *  解码数据--- 展示无用
+ *  解码数据--- 暂时无用
  */
 var decodeContent = (resInfo) => {
 	let bodyData = resInfo.bodyData;

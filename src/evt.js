@@ -122,9 +122,25 @@ var disCache = function (resInfo) {
 	// 禁用缓存则删掉缓存相关的header
 	var disCache = config.get('disCache');
 	if (disCache) {
-		resInfo.headers['cache-control'] = "no-store";
-		resInfo.headers.expires = "0";
+		// http 1.1引入
+		resInfo.headers['cache-control'] = "no-cache";
+		
+		// 时间点表示什么时候文件过期，缺点，服务器和客户端必须有严格的时间同步
+		// 旧浏览器兼容  expires -1 表示不缓存
+		resInfo.headers.expires = "-1";
+	 
+		// 删除 etag ,让浏览器下次请求不能带 If-None-Match 头部,这样服务器无法返回304
+		/**
+		 * etag是服务器首次相应带etag，给文件打标机，下次在请求的时候浏览器 
+		 *  请求头会带 If-None-Match , 服务器根据该字段判断文件是否改变，如果没改变就返回304，否则返回新文件
+		 */
 		delete resInfo.headers.etag;
+		/**
+		 * last-Modified 是 浏览器首次返回的res中带Last-Modified头，标记一个时间，服务器下次接受到请求会带头If-Modified-Since
+		 * 服务器根据该头部判断是否是缓存，如果是返回304，不是则返回新文件
+		 * 缺点，如果服务器文件并没有什么改变，只是改变了时间，也会跟新文件
+		 */
+			// 删除 last-modifed,让浏览器下次请求不能带 If-Modified-Since 头部,这样服务器无法返回304
 		delete resInfo.headers['last-modifed'];
 	}
 	return resInfo;
