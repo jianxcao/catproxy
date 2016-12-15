@@ -19,6 +19,10 @@ const resBodyName = "_res_body_";
 fse.ensureDirSync(fileCache);
 // 清空db目录
 fse.emptyDirSync(fileCache);
+
+
+
+
 // 处理mulitpartData
 /** 数据格式
  * multipart/form-data; boundary=----WebKitFormBoundaryAxMpx9qwQiovE99R 659
@@ -90,9 +94,14 @@ export default function(catproxy) {
 	if (!catproxy || !catproxy.onBeforeReq) {
 		throw new Error("catproxy是必须得");
 	}
+	// 检测是不是本地的一个服务器
+	// 只要ip是localhost就忽略
+	let checkIsInnerServer = (originalUrl) => {
+		return catproxy.localUiReg.test(originalUrl);
+	};
 	// 请求发送前
 	catproxy.onBeforeReq((result) => {
-		if (result && result.id && config.get('monitor:monitorStatus')) {
+		if (result && result.id && config.get('monitor:monitorStatus') && !checkIsInnerServer(result.originalUrl)) {
 			/**
 			 * 
 			 * 目前没有把请求数据直接保存到文件，后期可以考虑
@@ -116,14 +125,12 @@ export default function(catproxy) {
 			let bodyData = result.bodyData;
 			if (result.bodyData) {
 				let isb = isBinary(result.bodyData);
-				addMontiorData.isBinary = isb;
+				addMontiorData.isReqBinary = isb;
 				if (isb) {
 					if (contentType) {
 						// 混合流，里面有二进制的文件数据也有 字段数据，需要解析下
 						if (contentType.indexOf('boundary=') > -1) {
 							bodyData = detailMultipartData(contentType, bodyData);
-							if (typeof bodyData === 'string') {
-							}
 						} else {
 							// 不认识的二进制数据忽略
 							bodyData = "";
@@ -143,16 +150,15 @@ export default function(catproxy) {
 	});
 	// 准备发送请求
 	catproxy.onBeforeRes(result => {
-		if (result && result.id && config.get('monitor:monitorStatus')) {
+		if (result && result.id && config.get('monitor:monitorStatus') && !checkIsInnerServer(result.originalUrl)) {
 			let addMontiorData = merge(monitorList[result.id], {
 				ext: result.ext,
-				resHeaders: result.headers
+				resHeaders: result.headers,
+				serverIp: result.serverIp
 			});
-			if (result.originalFullUrl.indexOf('manifest.appcache') > -1) {
-				console.log(2, result.headers);
-			}			
 			let type = getReqType(addMontiorData, result.ext) || "other";
 			addMontiorData.type = type;
+			addMontiorData.isResinary = result.isBinary;
 			// 修改缓存数据
 			monitorList[result.id] = {
 				startTime: addMontiorData.startTime
@@ -163,7 +169,7 @@ export default function(catproxy) {
 	});
 	// 请求发送后
 	catproxy.onAfterRes(result => {
-		if (result && +result.id && config.get('monitor:monitorStatus')) {
+		if (result && +result.id && config.get('monitor:monitorStatus') && !checkIsInnerServer(result.originalUrl)) {
 			if (monitorList[result.id]) {
 				let startTime = monitorList[result.id].startTime;
 				let {bodyData} = result;
@@ -195,11 +201,12 @@ export default function(catproxy) {
 
 	// 管道调用
 	catproxy.onPipeRequest(result => {
-		if (result && result.id && config.get('monitor:monitorStatus')) {
+		// 后面判断带得协议不准确，但是仅仅是为了通过正则，测试，正则中并不关系，请求的类型是ws还是wss
+		if (result && result.id && config.get('monitor:monitorStatus') && !checkIsInnerServer(`ws://${result.host}`)) {
 			if (result.protocol === 'ws' || result.protocol === 'wss'){
 				let addMontiorData = {
 					id: result.id,
-					name: result.host,
+					name: (result.host || "").split(":")[0],
 					protocol: result.protocol,
 					method: "CONNECT",
 					time: "-",

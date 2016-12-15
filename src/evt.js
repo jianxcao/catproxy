@@ -9,6 +9,9 @@ import path from 'path';
 import {getMonitorId} from './tools'; 
 import {decodeCompress, isBinary, getCharset} from './dataHelper';
 import mime from 'mime';
+import requestIp from 'request-ip';
+import {localIps} from './getLocalIps';
+import ip from 'ip';
 // 自动解析类型，其他类型一律保存的是 Buffer
 var autoDecodeRegs = /text\/.+|(?:application\/(?:json.*|.*javascript))/i;
 
@@ -69,7 +72,7 @@ var beforeReq = function(reqInfo) {
 	// reqInfo.headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
 	// reqInfo.bodyData = new Buffer('a=b&c=d');
 	// reqInfo.sendToFile = "D:/project/gitWork/catproxy/bin.js";
-
+	// reqInfo.serverIp ="127.0.1" // 真实地服务器ip地址，请不要修改
 	// log.debug(reqInfo.headers);
 	// log.debug(reqInfo.bodyData.toString());
 	// if (reqInfo.host.indexOf('pimg1.126.net') > -1) {
@@ -80,6 +83,15 @@ var beforeReq = function(reqInfo) {
 	return parseRule(reqInfo)
 	.then(result => result || reqInfo)
 	.then(reqInfo => {
+		let {req, headers} = reqInfo;
+		let clientIp = requestIp.getClientIp(req); 
+		let xForwardedFor = headers['x-forwarded-for'];
+		if (!xForwardedFor) {
+			headers['x-forwarded-for'] = clientIp + "," + localIps[0];
+		} else {
+			headers['x-forwarded-for'] = "," + localIps[0];
+		}
+		reqInfo.clientIp = clientIp;
 		return reqInfo;
 	})
 	.then(function(reqInfo) {
@@ -178,7 +190,7 @@ var beforeRes = async function(resInfo) {
 	resInfo = await disCache(resInfo);
 	try {
 		// 解压成功就删除解压头部
-		if (resInfo.headers['content-encoding']) {
+		if (contentEncoding && resInfo.bodyData.length) {
 			let bodyData = await decodeCompress(resInfo.bodyData, contentEncoding);
 			resInfo.bodyData = bodyData;			
 			delete resInfo.headers['content-encoding'];
@@ -189,7 +201,7 @@ var beforeRes = async function(resInfo) {
 		}		
 	} catch(e) {
 		log.error(e);
-	}		
+	}
 	resInfo.isBinary = isBinary(resInfo.bodyData);	
 	// 文本文件 -- 需要检测编码是不是不是 utf-8
 	// 二进制文件是没有charset的

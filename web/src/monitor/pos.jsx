@@ -38,6 +38,13 @@ class Pos extends Component {
 			top = targetPos.top + targetPos.height;
 			left = targetPos.left + targetPos.width/2 - tipPos.width/2;
 		}
+		// 不能超过屏幕大小
+		if (left < 0) {
+			left = 0;
+		}
+		if (top < 0) {
+			top = 0;
+		} 
 		return {left, top};
 	}
 	pos() {

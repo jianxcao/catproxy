@@ -25,6 +25,7 @@ export const decodeCompress = (bodyData, encode) =>{
 		if (isZip) {
 			zlib.gunzip(bodyData, function(err, buff) {
 				if (err) {
+					log.error(err);
 					reject('decompress err: ', err.message);
 				} else {
 					resolve(buff);
@@ -33,6 +34,7 @@ export const decodeCompress = (bodyData, encode) =>{
 		} else if(isDeflate) {
 			zlib.inflateRaw(bodyData, function(err, buff) {
 				if (err) {
+					log.error(err);
 					reject('decompress err: ', err.message);
 				} else {
 					resolve(buff);
@@ -48,9 +50,9 @@ export const isBinary = (buffer) => {
 	let data;
 	if (Buffer.isBuffer(buffer)) {
 		let l = Math.min(512, buffer.length);
-		// data = Buffer.allocUnsafe(l);
-		// buffer.copy(data, 0, 0, l);
-		return isbinaryfile.sync(buffer, l);
+		data = new Buffer(l);
+		buffer.copy(data, 0, 0, l);
+		return isbinaryfile.sync(data, l);
 	} else if (typeof buffer === 'string') { // 通过文件名称判断是否是buffer
 		return false;
 	}

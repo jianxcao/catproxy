@@ -33,7 +33,7 @@ let middleware = [thunk, promise, sagaMiddleware];
 middleware.push(createLogger());
 
 // if (window.config.env === 'dev') {
-// 	middleware.push(logger);
+// 	middleware.push(createLogger());
 // }
 let store = createStore(reducer, initialState, compose(applyMiddleware(...middleware),
 	window.devToolsExtension ? window.devToolsExtension() : f => f

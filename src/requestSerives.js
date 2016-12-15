@@ -196,7 +196,6 @@ export let requestHandler = function(req, res) {
 		// 超过长度了
 		if (l > LIMIT_SIZE) {
 			req.pause();
-			req.unpipe();
 			req.removeListener('data', data);
 			req.removeListener('end', end);
 			req.emit('reqBodyDataReady', {

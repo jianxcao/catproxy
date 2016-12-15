@@ -10,11 +10,13 @@ import { Provider,connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 import Immutable, {OrderedMap, Map, List} from 'immutable';
 import sendMsg from '../ws/sendMsg';
-import key from 'keymaster';
+import keymaster from 'keymaster';
 import store from './store/store';
 import Checkbox from 'material-ui/Checkbox';
 
-
+keymaster.filter = (event) => {
+	return true;
+};
 import {
 	addBranch,
 	addGroup,
@@ -53,7 +55,7 @@ class SubHeader extends React.Component {
 		};
 	}
 	componentDidMount() {
-		key('⌘+s, ctrl+s', () =>{
+		keymaster('⌘+s, ctrl+s', () =>{
 			this.handleSaveHosts();
 			return false;
 		});		

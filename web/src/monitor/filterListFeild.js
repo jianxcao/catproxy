@@ -4,6 +4,11 @@ let data = [{
 	flex: 3,
 	tip: "请求完整的url"
 },{
+	name: "服务器ip",
+	shortName: "serverIp",
+	flex: 1,
+	tip: "服务器ip"	
+},{
 	name: "状态",
 	shortName: "status",
 	tip: "请求状态，如404"

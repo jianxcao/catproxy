@@ -16,7 +16,7 @@ const config = {
 	devtool: null,
 	output: {
 		path: path.resolve(buildPath, "app"), // Path of output file
-		filename: 'app.js',
+		filename: '[name].js',
 	},
 	plugins: [
 		new webpack.DefinePlugin({

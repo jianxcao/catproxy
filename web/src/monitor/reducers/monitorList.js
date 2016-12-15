@@ -7,6 +7,10 @@ export default {
 	monitorList: handleActions({
 			// 增加数据
 		ADD_MONITOR_LIST: (state , {payload: arrData}) => {
+			// 数据量限定在5000
+			if (state.size > 5000) {
+				state = new Map();
+			}
 			let ids = [];
 			if (arrData && arrData.length) {
 				for(let val of arrData) {

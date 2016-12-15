@@ -1,13 +1,11 @@
 import ReactDom, {render} from 'react-dom';
 import React, {PropTypes, Component, isValidElement, cloneElement} from 'react';
-import {MenuItem, Clearfix} from 'react-bootstrap';
-import AdjustPos from './adjustpos';
+import RightMenu from './rightMenu';
 export default class RightMenuProvider extends Component {
 	constructor() {
 		super();
 		this.openRightMenu = this.openRightMenu.bind(this);
 		this.destroy = this.destroy.bind(this);
-		this._onSelect = this._onSelect.bind(this);
 		this._bodyClick = this._bodyClick.bind(this);
 		this.state = {
 			menus: []
@@ -16,12 +14,19 @@ export default class RightMenuProvider extends Component {
 	componentDidMount () {
 		this._mountNode = document.createElement('div');
 		this._mountNode.className = "rightMenuWrap";
-		document.body.appendChild(this._mountNode);
 		document.body.addEventListener('mousedown', this._bodyClick);
+		document.body.appendChild(this._mountNode);
+		this._mountNode.addEventListener('contextmenu', (e) => {
+			e.preventDefault();
+			e.stopPropagation();
+			return false;
+		});		
 	}
 	componentWillUnmount () {
 		this.destroy();
 		document.body.removeChild(this._mountNode);
+		document.body.removeEventListener('mousedown', this._bodyClick);
+		this._mountNode.removeEventListener('contextmenu');
 		this._mountNode = null;
 	}
 	
@@ -64,16 +69,6 @@ export default class RightMenuProvider extends Component {
 			closeRightMenu: this.destroy
 		};
 	}
-	_onSelect(eventKey, e) {
-		if (this._menuClickEvt) {
-			let result = this._menuClickEvt.call(undefined, eventKey);
-			if (result !== false) {
-				this.destroy();
-			}
-		} else {
-			this.destroy();
-		}
-	}
 	_bodyClick(e) {
 		if (this._menu) {
 			let ele = e.target;
@@ -94,7 +89,6 @@ export default class RightMenuProvider extends Component {
 			ReactDom.unmountComponentAtNode(this._mountNode);
 		} 
 		this._menu = null;
-		this._menuClickEvt = null;
 	}
 	/**
 	 * left: 点击位置，左边
@@ -108,60 +102,13 @@ export default class RightMenuProvider extends Component {
 	 *  text: true
 	 * }
 	 */
-	makeMenu ({left, top, menus, menuClickEvt, className}) {
-		let menu = "";
-		let menuStyle = {
-			left,
-			top,
-			display:"block"
-		};
-		let items = [];
-		// 直接传递了一个  react Element
-		if (isValidElement(menus)) {
-			items = menus;
-		} else if (menus.length) {
-			items = menus.map((current, index) => {
-				// 自定义菜单
-				if (isValidElement(current) && current.type === MenuItem.type) {
-					return current;
-				} else {
-					// 系统菜单
-					let props = {
-						disabled: !!current.disabled,
-						header: !!current.header,
-						divider: !!current.divider
-					};
-					if (current.title) {
-						props.title = current.title;
-					}
-					if (current.eventKey) {
-						props.eventKey = current.eventKey;
-					}
-					if (!props.href) {
-						props.href = "javascript:void(0);";
-					}
-					return (<MenuItem {...props} key={index} onSelect={this._onSelect}>{current.text}</MenuItem>);
-				}
-			});
-			if (className) {
-				className = className + " dropdown-menu";
-			} else {
-				className = 'dropdown-menu';
-			}
-			menu = (
-				<div><Clearfix>
-						<AdjustPos left = {left} top ={top}>
-							<ul className={className} style={menuStyle}>
-								{items}
-							</ul>
-						</AdjustPos>
-				</Clearfix></div>);
-			ReactDom.unstable_renderSubtreeIntoContainer(
-				this, menu, this._mountNode
-			);
-			this._menu = menu;
-			this._menuClickEvt = menuClickEvt;
-		}
+	makeMenu (props) {
+		props.destroy = this.destroy;
+		let menu = (<RightMenu {...props}/>);
+		ReactDom.unstable_renderSubtreeIntoContainer(
+			this, menu, this._mountNode
+		);
+		this._menu = menu;
 	}
 	render() {
 		let children = this.props.children;

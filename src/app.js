@@ -24,7 +24,27 @@ import ws from './ws/ws';
 // 只有这些字段可以被保存到配置文件，如果设置了这个 只有这些字段会保存到配置文件，其他字段只能在内存中，不能保存到文件中
 const defSaveProps =  ['hosts', "log", 'breakHttps', 'excludeHttps', 'sni'];
 //	process.env.NODE_ENV
-
+const getLocalUiReg = (port) => {
+	let ips = localIps.slice(0);
+	ips.push('localhost');
+	let l = ips.length;
+	return ips.reduce((result, cur, index) => {
+		if (index > 0) {
+			result += "|";
+		} 
+		result += `(?:${cur}`;
+		if (port !== 80 || port !== 443) {
+			result += `:${port})`;
+		} else {
+			result += ")";
+		}
+		// 最后一次
+		if (index === l - 1) {
+			return new RegExp(result, "i");
+		}
+		return result;
+	}, "^(?:http|ws)(?:s?)://");
+};
 class CatProxy extends EventEmitter{
 	/**
 	 * 
@@ -217,6 +237,8 @@ class CatProxy extends EventEmitter{
 				cdnBasePath: path.join('/c', webCfg.cdnBasePath),
 				env: webCfg.env
 			};
+			// 写成正则，判断是否是ui的一个访问地址
+			this.localUiReg = getLocalUiReg(p);
 			let uiApp = ui(!!port);
 			let app = express();
 			let uiServer = app.listen(p, function() {

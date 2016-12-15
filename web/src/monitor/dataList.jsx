@@ -182,29 +182,38 @@ export default class DataList extends Component {
 	}
 	// 鼠标按下 某一行，弹出右键菜单
 	_onRowMouseDown(e, index) {
+		let {monitorStatus, monitorList} = this.props;
+		let data = monitorList.get(index);
 		if (e.button == 2) {
+			let domain = (data.get("name") || "").match(getDomainReg);
+			if (domain && domain.length > 0) {
+				domain = domain[1];
+			} else {
+				domain = "";
+			}		
 			let menus =  [{
 				text: "复制url",
-				eventKey: "copyUrl"
+				eventKey: "copyUrl",
+				copy: data.get("name")
 			},{
 				text: "复制域名",
-				eventKey: "copyDomain"
+				eventKey: "copyDomain",
+				copy: domain
 			},{
 				divider: true
 			},{
 				text: "复制请求头",
-				eventKey: "copyReqHeader"
+				eventKey: "copyReqHeader",
+				copy: data.get('reqHeaders').toJS()
 			},{
 				text: "复制响应头",
-				eventKey: "copyResHeader"
+				eventKey: "copyResHeader",
+				copy: data.get('resHeaders').toJS()
 			}];
 			this.context.openRightMenu({
 				left: e.clientX,
 				top: e.clientY,
-				menuItems: menus,
-				menuClickEvt: function(eventKey) {
-					console.log(eventKey);
-				}
+				menuItems: menus
 			});
 		}
 	}

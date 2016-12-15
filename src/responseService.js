@@ -104,6 +104,8 @@ let detailHost = function(result, reqInfo, resInfo) {
 let proxyReq = function(options, reqInfo, resInfo, req) {
 	var com = this;
 	return new Promise((resolve, reject) => {
+		// 在这里hostname已经全部被转换成 ip了，将ip传递到前端
+		resInfo.serverIp = options.hostname;
 		// 发出请求
 		log.verbose('send proxy request originalFullUrl: ' + reqInfo.originalFullUrl);
 		let proxyReq = (isStartHttps.test(reqInfo.protocol) ? https : http)
@@ -130,7 +132,6 @@ let proxyReq = function(options, reqInfo, resInfo, req) {
 					proxyReq.end();
 				});
 				req.resume();
-				req.pipe(proxyReq);				
 			}
 		} else {// 没有数据就直接end否则读取数据
 			proxyReq.end();
@@ -162,6 +163,10 @@ let proxyReq = function(options, reqInfo, resInfo, req) {
 					res.write(Buffer.concat(resBodyData));
 					res.write(chunk);	
 					resBodyData = [];
+					let bodyData = null;
+					let bodyDataErr = err.message;
+					// 提前触发事件
+					return triggerBeforeRes.call(com, merge({}, resInfo, {bodyData, bodyDataErr}));					
 				} else {
 					res.write(chunk);
 				}
@@ -195,9 +200,9 @@ let proxyReq = function(options, reqInfo, resInfo, req) {
 							return resInfo;
 						});
 				} else {
-					bodyData = null;
-					let bodyDataErr = err.message;
-					return triggerBeforeRes.call(com, merge({}, resInfo, {bodyData, bodyDataErr}));
+					resInfo.bodyData = new Buffer("");
+					resInfo.bodyDataErr = err.message;
+					return resInfo;
 				}
 			})
 			.then(({headers, bodyData}) => {
@@ -206,7 +211,7 @@ let proxyReq = function(options, reqInfo, resInfo, req) {
 					res.headers = headers;
 				}
 				res.end();
-				res.emit('resBodyDataReady', isError ? err : null, bodyData || []);
+				res.emit('resBodyDataReady', isError ? err : null, bodyData || new Buffer(""));
 			}, function(err) {
 				log.error(err);
 			});

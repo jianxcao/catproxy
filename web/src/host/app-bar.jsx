@@ -149,7 +149,7 @@ class Header extends React.Component {
 	handleShowCertQrcode = () => {
 		let {dialog} = this.context;
 		let opt = {
-			text: 'http://' + location.host + "/downloadcert.html"
+			text: 'http://' + location.host + "/c/downloadcert.html"
 		};
 		dialog({
 			title: '证书二维码',
@@ -159,8 +159,8 @@ class Header extends React.Component {
 	}
 	render() {
 		let host = 'http://' + location.host;
-		let downloadrule = "/downloadrule.html";
-		let downloadcert = "/downloadcert.html";
+		let downloadrule = "/c/downloadrule.html";
+		let downloadcert = "/c/downloadcert.html";
 		return (<AppBar
 		title="catproxy"
 		onLeftIconButtonTouchTap = {this.handleToggle}

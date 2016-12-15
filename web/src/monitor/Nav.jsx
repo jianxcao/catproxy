@@ -71,8 +71,8 @@ class MyNav extends Component{
 					</Navbar.Brand>
 				</Navbar.Header>
 				<Nav>
-					<NavItem eventKey={"record"} href="javascript:;" className={recordCls} data-tip={recordTip} onClick={this.changeMonitorStatus}></NavItem>
-					<NavItem eventKey={"clear"} href="javascript:;" className="navBtn clear" data-tip="清除全部" onClick={this.clearMonitorList}></NavItem>
+					<NavItem eventKey={"record"} href="javascript:;" className={recordCls} data-tip={recordTip + " Ctrl+e ⌘+e"} onClick={this.changeMonitorStatus}></NavItem>
+					<NavItem eventKey={"clear"} href="javascript:;" className="navBtn clear" data-tip="清除全部 Ctrl+K ⌘+K" onClick={this.clearMonitorList}></NavItem>
 					<NavItem eventKey={"clear"} href="javascript:;" className="split"></NavItem>
 					<NavItem eventKey={"toolbar"} href="javascript:;" className={toobarCls} title="显示隐藏过滤" onClick={this.changeMonitorFilterStatus}></NavItem>
 				</Nav>

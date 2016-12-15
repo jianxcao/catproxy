@@ -42,7 +42,7 @@ export let addMonitor = (data) => {
 		let data = addMonitorArr;
 		addMonitorArr = [];
 		sendAddMonitor(data);
-	}, 500);	
+	}, 300);	
 };
 
 export let updateMonitor = (data) => {
@@ -60,7 +60,7 @@ export let updateMonitor = (data) => {
 		let data = updateMonitorArr;
 		updateMonitorArr = [];
 		sendUpdateMonitor(data);
-	}, 500);
+	}, 300);
 };
 
 // 启动项目的时候需要  群发一个消息，清除掉当前页面的记录，否则id会冲突--- 为了以防万一，id前面带个随机数？？
