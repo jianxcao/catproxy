@@ -62,10 +62,7 @@ export let sendErr = (res, err, uri) => {
 		return;
 	}
 	err = err || "";
-	log.error(err);
-	if (uri) {
-		log.error('error url: ' + uri);
-	}
+
 	if (res.finished) {
 		return;
 	}
@@ -87,8 +84,14 @@ export let sendErr = (res, err, uri) => {
 		delete res.headers['content-encoding'];
 	}
 	let statusCode = '500';
-	if (err.message && err.message.indexOf('ETIMEDOUT') > -1) {
+	err.message = err.message || "";
+	if (err.message.indexOf('ETIMEDOUT') > -1) {
+		statusCode = '408';
+	} else if (err.message.indexOf('ENOTFOUND') > -1){
 		statusCode = '504';
+	}
+	if (statusCode === '500') {
+		log.error(`url:${uri||""},errInfo: ${err}${err.stack && err.stack}`);
 	}
 	res.writeHead(statusCode, res.headers);
 	res.end(message);

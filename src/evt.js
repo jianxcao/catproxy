@@ -85,12 +85,13 @@ var beforeReq = function(reqInfo) {
 	.then(reqInfo => {
 		let {req, headers} = reqInfo;
 		let clientIp = requestIp.getClientIp(req); 
-		let xForwardedFor = headers['x-forwarded-for'];
-		if (!xForwardedFor) {
-			headers['x-forwarded-for'] = clientIp + "," + localIps[0];
-		} else {
-			headers['x-forwarded-for'] = "," + localIps[0];
-		}
+		// clientIp获取不对，就设置成 机器ip？？？
+		// let xForwardedFor = headers['x-forwarded-for'];
+		// if (!xForwardedFor) {
+		// 	headers['x-forwarded-for'] = clientIp + "," + localIps[0];
+		// } else {
+		// 	headers['x-forwarded-for'] = "," + localIps[0];
+		// }
 		reqInfo.clientIp = clientIp;
 		return reqInfo;
 	})

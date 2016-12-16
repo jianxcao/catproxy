@@ -274,10 +274,10 @@ export let requestConnectHandler = function(req, cltSocket, head) {
 					});
 					srvSocket.on('error', (err) => {
 						cltSocket.end();
-						log.error(`crack https请求出现错误: ${err}`);
+						log.error(`crack https-srv:${reqUrl}请求出现错误: ${err}${err.stack}`);
 					});
 					cltSocket.on('error', err => {
-						log.error(`crack https请求出现错误: ${err}`);
+						log.error(`crack https-clt:${reqUrl}请求出现错误: ${err}${err.stack}`);
 						srvSocket.end();
 					});
 				});

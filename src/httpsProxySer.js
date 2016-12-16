@@ -44,6 +44,7 @@ export default (host, port) => {
 			}
 			requestHandler.call(this, req, res);
 		});
+
 		server.on('upgrade', requestUpgradeHandler);
 		server.listen(port);
 		server.on('error', err => log.error(err + 'inner https prxoy server err:' + err));

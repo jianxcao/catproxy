@@ -93,8 +93,8 @@ let detailHost = function(result, reqInfo, resInfo) {
 		});
 	}, err => {
 		let {res} = resInfo;
-		return triggerBeforeRes.call(com, merge({}, resInfo, {bodyDataErr: err, headers: {}}))
-		.then(({statusCode, headers}) => {
+		return triggerBeforeRes.call(com, merge({statusCode: 504}, resInfo, {bodyDataErr: err, headers: {}}))
+		.then(() => {
 			return Promise.reject(err);
 		});
 	});
@@ -215,6 +215,17 @@ let proxyReq = function(options, reqInfo, resInfo, req) {
 			}, function(err) {
 				log.error(err);
 			});
+		});
+	})
+	.then(null, err => {
+		let statusCode = "500";
+		if (err && err.message.indexOf('ENOTFOUND') > -1){
+			statusCode = '504';
+		}
+		// 出错也要处理下
+		return triggerBeforeRes.call(com, merge({statusCode}, resInfo, {bodyDataErr: err, headers: {}}))
+		.then(() => {
+			return Promise.reject(err);
 		});
 	});
 };
@@ -420,7 +431,7 @@ export default function(reqInfo, resInfo){
 			}
 		})
 		.then(null, function(err) {
-			log.error(`proxy request err:  ${err}`);
+			// 日志在 sendErr中打印和处理
 			sendErr(res, err, req.url);
 			res.emit('resBodyDataReady', err, null);
 		});
