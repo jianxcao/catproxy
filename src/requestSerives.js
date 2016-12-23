@@ -231,10 +231,10 @@ export let requestConnectHandler = function(req, cltSocket, head) {
 		cltSocket.write('HTTP/' + req.httpVersion +' 200 Connection Established\r\n' +
 			'Proxy-agent: Node-CatProxy\r\n'
 		);
-		if (req.headers['proxy-connection'] === 'keep-alive') {
-			cltSocket.write('Proxy-Connection: keep-alive\r\n');
-			cltSocket.write('Connection: keep-alive\r\n');
-		}
+		// if (req.headers['proxy-connection'] === 'keep-alive') {
+		// 	cltSocket.write('Proxy-Connection: keep-alive\r\n');
+		// 	cltSocket.write('Connection: keep-alive\r\n');
+		// }
 		cltSocket.write('\r\n');
 	})
 	.then(first => {

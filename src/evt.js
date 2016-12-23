@@ -124,8 +124,7 @@ var disCache = function (resInfo) {
 	var disCache = config.get('disCache');
 	if (disCache) {
 		// http 1.1引入
-		resInfo.headers['cache-control'] = "no-cache";
-		
+		resInfo.headers['cache-control'] = "no-store";
 		// 时间点表示什么时候文件过期，缺点，服务器和客户端必须有严格的时间同步
 		// 旧浏览器兼容  expires -1 表示不缓存
 		resInfo.headers.expires = "-1";
@@ -141,8 +140,8 @@ var disCache = function (resInfo) {
 		 * 服务器根据该头部判断是否是缓存，如果是返回304，不是则返回新文件
 		 * 缺点，如果服务器文件并没有什么改变，只是改变了时间，也会跟新文件
 		 */
-			// 删除 last-modifed,让浏览器下次请求不能带 If-Modified-Since 头部,这样服务器无法返回304
-		delete resInfo.headers['last-modifed'];
+			// 删除 last-modified,让浏览器下次请求不能带 If-Modified-Since 头部,这样服务器无法返回304
+		delete resInfo.headers['last-modified'];
 	}
 	return resInfo;
 };
@@ -202,7 +201,7 @@ var beforeRes = async function(resInfo) {
 	let com = this;
 	let contentEncoding = resInfo.headers['content-encoding'];
 	let contentType = resInfo.headers['content-type'];
-	resInfo.ext = (path.extname(resInfo.originalUrl) || "").slice(1) || mime.extension(contentType || "")
+	resInfo.ext = (path.extname(resInfo.originalUrl) || "").slice(1) || mime.extension(contentType || "");
 	// 禁止缓存
 	resInfo = await disCache(resInfo);
 	try {

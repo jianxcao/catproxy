@@ -1,0 +1,94 @@
+.jsonTree{
+	font-size: 14px;
+	span{
+		font-style: normal;
+	}			
+	// 所有得tab
+	.jsonNode{
+		.header{
+			&:before{
+				content: " ";
+				display:inline-block;
+				margin-right: 5px;
+				width:8px; 
+				height:8px; 
+				border-top:4px solid transparent;
+				border-bottom: 4px solid transparent;
+				border-right: 0px;					
+			}
+			&.active{
+				&:before{
+					border-left:4px solid transparent;
+					border-right:4px solid transparent;
+					border-bottom:0px;
+				}
+			}
+		}
+		.content{
+			margin-left: 13px;
+			padding-left: 11px;
+		}
+		.end, .abbr {
+			font-weight: bold;
+		}
+		.end{
+			margin-left: 15px;
+		}
+		.key{
+			padding-right: 3px;
+		}
+		.abbr{
+			padding-left: 3px;
+			font-weight: bold;
+		}
+		.jData{
+			padding-left: 13px;
+			.str,.num {
+				padding-left: 3px;
+			}
+			.num{
+				font-weight: 700;
+			}
+		}
+	}
+}
+.jsonTreeTheme(){
+	.jsonTree {
+		.jsonNode {
+			.header{
+				&:before{
+					border-left: 8px solid @arrowColor;
+				}
+				&.active{
+					&:before{
+						border-left: 4px solid transparent;
+						border-top:8px solid @arrowColor;						
+					}
+				}
+			}
+			.content {
+				border-left: 1px dotted @dottedColor;
+			}
+			.key {
+				color:@keyColor;
+			}
+			.jData{
+				.str {
+					color: @strColor;
+				}
+				.num {
+					color: @numColor;
+				}
+			}							
+		}
+	}
+};
+// 分割线颜色
+.jsonTreeColor(@theme) when (@theme=light) {	
+	@arrowColor: #6e6e6e;
+	@strColor: #050;
+	@numColor: #1A01CC;
+	@keyColor: #881f92;
+	@dottedColor: #ddd;
+	.jsonTreeTheme();
+}

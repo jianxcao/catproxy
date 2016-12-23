@@ -18,6 +18,7 @@ import {clearMonitorList} from './action/monitorListAction';
 import {monitorStatus} from './action/navAction';
 import {isRegStr, isDataUrl} from './util';
 import keymaster from 'keymaster';
+import ConInfoProvider from './conInfo/conInfoProvider';
 keymaster.filter = (event) => {
 	return true;
 };
@@ -104,7 +105,9 @@ class Monitor extends Component{
 					<ToolTipProvider>
 						<MyNav/>
 						<FilterBar/>
-						<DataList monitorStatus={monitorStatus} monitorList={monitorList} filterListFeild={filterListFeild}/>
+						<ConInfoProvider>
+							<DataList monitorStatus={monitorStatus} monitorList={monitorList} filterListFeild={filterListFeild}/>
+						</ConInfoProvider>
 						</ToolTipProvider>
 				</RightMenuProvider>);
 		}

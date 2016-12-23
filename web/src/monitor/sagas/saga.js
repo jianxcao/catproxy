@@ -1,9 +1,9 @@
 import { takeEvery, delay } from 'redux-saga';
 import { call, put, fork } from 'redux-saga/effects';
 import {fetchConfig} from "../../ws/sendMsg";
-import {FETCH_CONFIG} from '../action/fetchType';
+import {FETCH_CONFIG, FETCH_CON_DATA} from '../action/fetchType';
 import {disCache as disCacheAction, monitorStatus, monitorFilterStatus} from '../action/navAction';
-import {loadingPage} from '../action/loadingAction';
+import {loadingPage, loadingConData} from '../action/loadingAction';
 import {hiddenDataUrl, monitorFilterType} from '../action/filterBarAction';
 import Immutable from 'immutable';
 
@@ -30,12 +30,21 @@ function* fetchCfg(action) {
 	yield put(monitorFilterType(monitor.monitorFilterType));
 };
 
+function* fetchConData(action) {
+	console.log('prepare fetchData', action);
+	// 先显示加载
+	yield put(loadingConData(true));
+}
 // 获取配置文件
 function* getALLCfg() {
 	yield* takeEvery(FETCH_CONFIG, fetchCfg);
+}
+function* getConData() {
+	yield* takeEvery(FETCH_CON_DATA, fetchConData);
 }
 
 // 入口
 export default function* root() {
 	yield fork(getALLCfg);
+	yield fork(getConData);
 };

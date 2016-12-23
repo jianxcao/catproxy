@@ -56,6 +56,7 @@ export let disCache =(status) => {
 	return send('saveConfig')(result);
 };
 
+// 更新监控状态
 export let monitorStatus = (status) => {
 	status = !!status;
 	let result = {
@@ -67,6 +68,7 @@ export let monitorStatus = (status) => {
 	return send('saveConfig')(result);
 };
 
+// 更新过滤状态
 export let monitorFilterStatus = (status) => {
 	status = !!status;
 	let result = {
@@ -78,6 +80,7 @@ export let monitorFilterStatus = (status) => {
 	return send('saveConfig')(result);
 };
 
+// 更新过滤类型
 export let monitorFilterType = (type) => {
 	status = !!status;
 	let result = {
@@ -89,6 +92,7 @@ export let monitorFilterType = (type) => {
 	return send('saveConfig')(result);
 };
 
+// 更新是否隐藏 dataUrl，暂时无用
 export let hiddenDataUrl = (status) => {
 	status = !!status;
 	let result = {

@@ -12,7 +12,7 @@ export const {
 	 *  请求内容状态
 	 * @param boolean 是否正在加载
 	*/	
-	loadingReqContent,
+	loadingConData,
 } = result;
 
 export default result;

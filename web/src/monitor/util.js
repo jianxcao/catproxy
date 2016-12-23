@@ -26,3 +26,23 @@ export let upperFirstLetter =  (str) => {
 export const isRegStr = /^\/.+\//;
 
 export const isDataUrl = /^data:.+/;
+
+export function getPara(str) {
+	let data = {};
+	let arr = ("" + str).match(/([^=&#\?]+)=[^&#]+/g) || [];
+	arr.forEach((para) => {
+		var d = para.split("="),
+			val = (d[1]);
+		if (data[d[0]] !== undefined) {
+			data[d[0]] += "," + val;
+		} else {
+			data[d[0]] = val;
+		}
+	});
+	return data;
+};
+
+export function jsonParse(str) {
+	var json = (new Function("return " + str))();
+	return json;
+};

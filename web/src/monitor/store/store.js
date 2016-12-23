@@ -22,7 +22,7 @@ const initialState = new Immutable.fromJS({
 	monitorList: {},
 	loading: {
 		loadingPage: true,
-		loadingReqContent: false
+		loadingConData: false
 	}
 });
 // 组合所有reducers 

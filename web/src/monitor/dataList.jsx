@@ -33,17 +33,20 @@ export default class DataList extends Component {
 		filterListFeild: PropTypes.array.isRequired,
 		minCellWidth: PropTypes.number,
 		minTableWidth: PropTypes.number,
+		minTableHeight: PropTypes.number,
 		monitorStatus: PropTypes.bool.isRequired,
 		// 这里必须是一个list
 		monitorList: PropTypes.object.isRequired
 	};
 	static defaultProps = {
 		minCellWidth: 80,
-		minTableWidth: 800
+		minTableWidth: 800,
+		minTableHeight: 500
 	}
 	static contextTypes = {
 		openRightMenu: PropTypes.func.isRequired,
-		closeRightMenu: PropTypes.func.isRequired
+		closeRightMenu: PropTypes.func.isRequired,
+		openConInfo: PropTypes.func.isRequired
 	}
 	componentDidMount() {
 		var win = window;
@@ -71,7 +74,7 @@ export default class DataList extends Component {
 	init() {
 		let tableWidth = window.innerWidth;
 		let tableHeight = window.innerHeight;
-		let {filterListFeild, minCellWidth} = this.props;
+		let {filterListFeild, minCellWidth, minTableHeight} = this.props;
 		let showFeild;
 		// 从本地取到列，要显示的列和列的宽度
 		let customColums = localStorage.getItem("customColums");
@@ -90,8 +93,9 @@ export default class DataList extends Component {
 		} else {
 			showFeild = computeColumnWidth(filterListFeild, minCellWidth, tableWidth);
 		}
+		tableHeight = Math.max(tableHeight - 66, minTableHeight);
 		this.state = {
-			tableHeight: tableHeight - 66,
+			tableHeight: tableHeight,
 			tableWidth: tableWidth,
 			hoverIndex: -1,
 			customColums: showFeild
@@ -154,19 +158,26 @@ export default class DataList extends Component {
 	// 页面大小发生变化
 	_update() {
 		var win = window;
-		let {customColums} = this.state;
-		let {minTableWidth, minCellWidth} = this.props;
+		let {customColums, tableHeight, tableWidth} = this.state;
+		let {minTableWidth, minCellWidth, minTableHeight} = this.props;
 		let newWidth = win.innerWidth;
 		if (newWidth < minTableWidth) {
 			newWidth = minTableWidth;
 		}
 		let newHeight = win.innerHeight - 66;
+		newHeight = Math.max(newHeight, minTableHeight);
+		if (newHeight === tableHeight && newWidth === tableWidth) {
+			return this;
+		}
 		// 从新更新一次tab的height
 		this.setState({
 			tableWidth: newWidth,
 			tableHeight: newHeight,
 			customColums: adjustColumnWidth(customColums, minCellWidth, newWidth)
 		});
+		if (this._conInfoInstance && this._conInfoInstance.updateSize) {
+			this._conInfoInstance.updateSize(null, newHeight);
+		}
 	}
 	// 鼠标悬浮行
 	_onRowMouseEnter(e, index) {
@@ -215,6 +226,18 @@ export default class DataList extends Component {
 				top: e.clientY,
 				menuItems: menus
 			});
+		} else {
+			// 打开 右侧链接详情
+			let conInfo = this.context.openConInfo({
+				style: {
+					width: "50%",
+					height: this.state.tableHeight,
+					top: 66,
+					right: 0
+				},
+				data
+			});
+			this._conInfoInstance = conInfo;
 		}
 	}
 	_changeFilterList(e) {

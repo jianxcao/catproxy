@@ -1,0 +1,133 @@
+.conInfo{
+	position: absolute;
+	top:0;
+	right:0;
+	min-width: 300px;
+	min-height: 300px;
+	z-index: 5;
+	border-width: 1px;
+	border-style: solid;
+	margin-top:-2px;
+	overflow: auto;
+	min-width: 300px;
+	border-bottom: 0px;
+	nav{
+		height: 31px;
+		border-bottom: 1px solid transparent;
+		padding-left: 30px;
+		overflow: hidden;
+		&>span{
+			display: inline-block;
+    	height: 27px;
+    	margin-top: 5px;
+   	 	padding: 0 8px;
+			border:1px solid transparent;
+		}
+	}
+	// 所有得tab
+	.contentTab{
+		font-size: 14px;
+		em{
+				font-style: normal;
+			}			
+		// 头部tab
+		.headers{
+			margin-left: 10px;
+			.viewHeader{
+				border:1px solid transparent;
+				&:first-child{
+					border: 0px;
+				}
+				padding: 5px 0px;
+				.headerTitle{
+					font-weight: 700;
+					.source, .encode{
+						font-weight: normal;
+						display: inline-block;
+						padding-left: 30px;
+						font-size: 12px;
+						height: 20px;
+						line-height: 20px;						
+					}
+					&:before{
+						content: " ";
+						display:inline-block;
+						margin-right: 5px;
+						width:8px; 
+						height:8px; 
+						border-top:4px solid transparent;
+						border-bottom: 4px solid transparent;
+						border-right: 0px;							
+					}
+					&.active{
+						&:before{
+							border-left:4px solid transparent;
+							border-right:4px solid transparent;
+							border-bottom:0px;		
+						}
+					}					
+				}
+				.headerContent{
+					margin-left: 21px;
+					& > div > span{
+						font-weight: 700;
+					}
+				}
+			}
+		}
+	}
+}
+.conInfoTheme(){
+	.conInfo {
+		border-color: @baseBorderColor;
+		border-left-color: @leftSplitColor;
+		background: @bgColor;
+		nav{
+			border-color: @baseBorderColor;
+			&>span{
+				&:hover{
+					background: @navItemHoverColor;
+				}
+				&.active{
+					border-color:@activeNavItemBorderColor;
+				}
+			}
+		}
+		.contentTab{
+			// 头部tab
+			.headers{
+				.viewHeader{
+					border-top-color: @baseBorderColor;
+					.headerTitle{
+						.source, .encode{
+							color: @titleSourceColor;
+						}
+						&:before{
+							border-left: 8px solid @baseFontColor;
+						}
+						&.active{
+							&:before{
+								border-left: 4px solid transparent;
+								border-top:8px solid @baseFontColor;
+							}
+						}
+					}			
+				}
+			}
+		}
+	}
+};
+// 分割线颜色
+.conInfoColor(@theme) when (@theme=light) {
+	// 头部边框的颜色
+	@bgColor:#fff;
+	// 左侧分割边界颜色
+	@leftSplitColor: #a3a3a3;
+	// 激活时nav边框样式
+	@activeNavItemBorderColor: #cccccc;
+	// nav上的tab的悬浮的样式
+	@navItemHoverColor: #e5e5e5;
+	// title上的源的颜色
+	@titleSourceColor: #737373;
+	.conInfoTheme();
+}

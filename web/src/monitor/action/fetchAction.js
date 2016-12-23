@@ -5,10 +5,13 @@ import {createAction, createActions, combineActions} from 'redux-actions';
 const result = createActions(...Object.keys(fetchType));
 export const {
 	/**
-	 * 过滤条件
 	 * 获取配置
 	*/
-	fetchConfig
+	fetchConfig,
+	/**
+	 * 获取某个请求的详细数据，主要是resBodyData
+	 */
+	fetchConData,
 } = result;
 export default result;
 

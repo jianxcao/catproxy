@@ -308,6 +308,9 @@ class CatProxy extends EventEmitter{
 				}
 				requestFun.call(this, req, res);
 			});
+			server.on('clientError', function(err, con) {
+				log.error('ser-clientError' + err);
+			});			
 			let serverType = server instanceof  http.Server ? 'http' : 'https';
 			let port = serverType === 'http' ? opt.port : opt.httpsPort;
 			// 如果server没有被监听，则调用默认端口监听
