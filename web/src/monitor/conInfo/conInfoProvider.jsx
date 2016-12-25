@@ -6,9 +6,9 @@ export default class ConInfoProvider extends Component {
 	constructor() {
 		super();
 		this.openConInfo = this.openConInfo.bind(this);
+		this.closeConInfo = this.closeConInfo.bind(this);
 	}
 	componentDidMount () {
-		console.log('ConInfoProvider is mount');
 		this._mountNode = document.createElement('div');
 		this._mountNode.className = "conInfoMount";
 		document.body.appendChild(this._mountNode);
@@ -20,7 +20,8 @@ export default class ConInfoProvider extends Component {
 	}
 
 	static childContextTypes = {
-		openConInfo: React.PropTypes.func
+		openConInfo: React.PropTypes.func,
+		closeConInfo: React.PropTypes.func
 	}
 
 	static propTypes = {
@@ -29,7 +30,8 @@ export default class ConInfoProvider extends Component {
 
 	getChildContext() {
 		return {
-			openConInfo: this.openConInfo
+			openConInfo: this.openConInfo,
+			closeConInfo: this.closeConInfo
 		};
 	}
 
@@ -39,6 +41,9 @@ export default class ConInfoProvider extends Component {
 			this.destroy();
 		}
 		return this.makeConInfo(opt);
+	}
+	closeConInfo() {
+		this.destroy();
 	}
 	makeConInfo (opt) {
 		opt = opt || {};

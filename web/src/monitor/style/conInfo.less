@@ -128,6 +128,36 @@
 		}
 	}
 };
+
+.close(@size:28;@color: #aaa;@background:transparent;@weight:4;@base-bet:1){
+	@lineSize: @size*@base-bet;
+  position: relative;
+  display: block;
+	width: @size/24rem;
+	height: @size/24rem;
+  overflow: hidden;
+  background: @background;
+  font-size: 0px;
+ 	transform: rotate(0deg);
+	&:before, &:after {
+	  content: '';
+	  position: absolute;
+	  height: @weight * 1px;
+	  width: @lineSize/24rem;
+	  top: 50%;
+	  left: 50%;
+	  margin-left: @lineSize/-48rem;
+	  margin-top: @weight/-2px;
+	  background: @color;
+	}
+	&:before {
+	  transform: rotate(45deg);
+	}
+	&:after {
+	  transform: rotate(-45deg);
+	}
+}
+
 // 分割线颜色
 .conInfoColor(@theme) when (@theme=light) {
 	// 头部边框的颜色

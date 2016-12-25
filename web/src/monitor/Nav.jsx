@@ -10,6 +10,10 @@ import reduce from 'lodash/reduce';
 import {upperFirstLetter} from './util';
 import cs from 'classnames';
 import * as sendMsg from "../ws/sendMsg";
+import keymaster from 'keymaster';
+keymaster.filter = (event) => {
+	return true;
+};
 class MyNav extends Component{
 	static propTypes = {
 		monitorStatus: PropTypes.bool.isRequired,
@@ -27,6 +31,26 @@ class MyNav extends Component{
 		this.changeMonitorFilterStatus = this.changeMonitorFilterStatus.bind(this);
 		this.changeDisCache = this.changeDisCache.bind(this);
 	}
+	static contextTypes = {
+		closeConInfo: PropTypes.func.isRequired
+	}
+	componentDidMount () {
+		// 清除快捷
+		keymaster('⌘+k,ctrl+k', () =>{
+			let {sendClearMonitorList} = this.props;
+			let {closeConInfo} = this.context;
+			closeConInfo();			
+			sendClearMonitorList();
+			return false;
+		});	
+		// 停止 启动  快捷
+		keymaster('⌘+e,ctrl+e', () =>{
+			let {monitorStatus, sendMonitorStatus} = this.props;
+			sendMonitorStatus(!monitorStatus);
+			return false;
+		});	
+	}
+	
 	// 切换当前的监听状态
 	changeMonitorStatus (e) {
 		let {sendMonitorStatus, monitorStatus} = this.props;
@@ -38,6 +62,8 @@ class MyNav extends Component{
 	// 清除掉所有得监控数据
 	clearMonitorList(e) {
 		let {sendClearMonitorList} = this.props;
+		let {closeConInfo} = this.context;
+		closeConInfo();
 		sendClearMonitorList();
 	}
 	// 切换下边的 条件选择的现实隐藏

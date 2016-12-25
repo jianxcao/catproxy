@@ -17,11 +17,7 @@ import {fetchConfig} from './action/fetchAction';
 import {clearMonitorList} from './action/monitorListAction';
 import {monitorStatus} from './action/navAction';
 import {isRegStr, isDataUrl} from './util';
-import keymaster from 'keymaster';
 import ConInfoProvider from './conInfo/conInfoProvider';
-keymaster.filter = (event) => {
-	return true;
-};
 injectTapEventPlugin();
 const pageUrl = window.config.host + "/m";
 class Monitor extends Component{
@@ -34,9 +30,7 @@ class Monitor extends Component{
 		monitorStatus: PropTypes.bool.isRequired,
 		monitorFilterType: PropTypes.string.isRequired,
 		monitorFilterCondition: PropTypes.string.isRequired,
-		hiddenDataUrl: PropTypes.bool.isRequired,
-		sendClearMonitorList: PropTypes.func.isRequired,
-		sendMonitorStatus: PropTypes.func.isRequired
+		hiddenDataUrl: PropTypes.bool.isRequired
 	}
 	static defaultProps = {
 		monitorFilterCondition: "",
@@ -51,19 +45,6 @@ class Monitor extends Component{
 			e.stopPropagation();
 			return false;
 		});
-		// 清除快捷
-		keymaster('⌘+k,ctrl+k', () =>{
-			let {sendClearMonitorList} = this.props;
-			sendClearMonitorList();
-			return false;
-		});	
-		// 停止 启动  快捷
-		keymaster('⌘+e,ctrl+e', () =>{
-			let {monitorStatus, sendMonitorStatus} = this.props;
-			console.log(monitorStatus);
-			sendMonitorStatus(!monitorStatus);
-			return false;
-		});	
 		this.props.sendFetchConfig();
 	}
 	converData() {
@@ -105,11 +86,13 @@ class Monitor extends Component{
 		} else {
 			out = (<RightMenuProvider>
 					<ToolTipProvider>
-						<MyNav/>
-						<FilterBar/>
 						<ConInfoProvider>
-							<DataList monitorStatus={monitorStatus} monitorList={monitorList} filterListFeild={filterListFeild}/>
-						</ConInfoProvider>
+								<div>
+									<MyNav/>
+									<FilterBar/>
+									<DataList monitorStatus={monitorStatus} monitorList={monitorList} filterListFeild={filterListFeild}/>
+								</div>
+							</ConInfoProvider>
 						</ToolTipProvider>
 				</RightMenuProvider>);
 		}
@@ -128,9 +111,7 @@ function mapStateToProps(state) {
 }
 function mapDispatchToProps(dispatch) {
 	return {
-		sendFetchConfig: bindActionCreators(fetchConfig, dispatch),
-		sendClearMonitorList: bindActionCreators(clearMonitorList, dispatch),
-		sendMonitorStatus: bindActionCreators(monitorStatus, dispatch)
+		sendFetchConfig: bindActionCreators(fetchConfig, dispatch)
 	};
 };
 const ConnectMonitor = connect(mapStateToProps, mapDispatchToProps)(Monitor);
