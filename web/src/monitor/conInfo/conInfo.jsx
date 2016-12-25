@@ -3,6 +3,7 @@ import React, { PropTypes, Component, Children } from 'react';
 import merge from 'lodash/merge';
 import ViewHeader from './viewHeader';
 import ReqData from './reqData';
+import DargResize from './dargResize';
 const defStyle = {
 	width: 600,
 	height: 300,
@@ -12,6 +13,7 @@ const defStyle = {
 class ConInfo extends Component {
 	constructor() {
 		super();
+		this._onDargResize = this._onDargResize.bind(this);
 	}
 	static propTypes = {
 		opt: PropTypes.object.isRequired
@@ -27,15 +29,15 @@ class ConInfo extends Component {
 	componentWillMount () {
 		let {opt:{style}} = this.props;
 		if (style) {
-			let width = width;
-			let height = height;
+			let width = style.width;
+			let height = style.height;
 			this.state = {
 				width,
 				height
 			};
 		}
 	}
-	
+
 	updateSize(width, height) {
 		let newS = {};
 		if (width) {
@@ -45,6 +47,17 @@ class ConInfo extends Component {
 			newS.height = +height;
 		}
 		this.setState(newS);
+	}
+
+	_onDargResize(dargWidth, dargHeight) {
+		let {width} = this.state;
+		width = width + dargWidth;
+		let winWidth = window.innerWidth;
+		if (winWidth - width > 100) {
+			this.setState({
+				width: width
+			});
+		}
 	}
 	// 渲染
 	render() {
@@ -101,6 +114,7 @@ class ConInfo extends Component {
 		}
 		result = (
 			<div className="conInfo" style={style}>
+				<DargResize onDargResize={this._onDargResize}></DargResize>
 				<nav className="contTab">
 					<span className="active">头部</span>
 					<span>响应数据</span>

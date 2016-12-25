@@ -230,7 +230,7 @@ export default class DataList extends Component {
 			// 打开 右侧链接详情
 			let conInfo = this.context.openConInfo({
 				style: {
-					width: "50%",
+					width: parseInt(window.innerWidth * 0.5),
 					height: this.state.tableHeight,
 					top: 66,
 					right: 0

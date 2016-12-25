@@ -51,11 +51,13 @@ class Monitor extends Component{
 			e.stopPropagation();
 			return false;
 		});
+		// 清除快捷
 		keymaster('⌘+k,ctrl+k', () =>{
 			let {sendClearMonitorList} = this.props;
 			sendClearMonitorList();
 			return false;
 		});	
+		// 停止 启动  快捷
 		keymaster('⌘+e,ctrl+e', () =>{
 			let {monitorStatus, sendMonitorStatus} = this.props;
 			console.log(monitorStatus);
