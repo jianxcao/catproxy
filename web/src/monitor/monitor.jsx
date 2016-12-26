@@ -17,7 +17,6 @@ import {fetchConfig} from './action/fetchAction';
 import {clearMonitorList} from './action/monitorListAction';
 import {monitorStatus} from './action/navAction';
 import {isRegStr, isDataUrl} from './util';
-import ConInfoProvider from './conInfo/conInfoProvider';
 injectTapEventPlugin();
 const pageUrl = window.config.host + "/m";
 class Monitor extends Component{
@@ -86,13 +85,15 @@ class Monitor extends Component{
 		} else {
 			out = (<RightMenuProvider>
 					<ToolTipProvider>
-						<ConInfoProvider>
-								<div>
-									<MyNav/>
-									<FilterBar/>
-									<DataList monitorStatus={monitorStatus} monitorList={monitorList} filterListFeild={filterListFeild}/>
-								</div>
-							</ConInfoProvider>
+						<div>
+							<MyNav/>
+							<FilterBar/>
+							<DataList 
+								monitorStatus={monitorStatus} 
+								monitorList={monitorList} 
+								filterListFeild={filterListFeild}
+								/>
+						</div>
 						</ToolTipProvider>
 				</RightMenuProvider>);
 		}

@@ -9,6 +9,7 @@ import {bindActionCreators} from 'redux';
 import {monitorStatus} from './action/navAction';
 import {upperFirstLetter} from './util';
 import cs from 'classnames';
+import ConInfo from './conInfo/conInfo';
 const clsChec = /[^\x20\t\r\n\f]+/g ;
 const getDomainReg = /:\/\/([^:\/]+)/;
 const wrongCodeReg = /(^4)|(^5).+/;
@@ -25,13 +26,11 @@ export default class DataList extends Component {
 		this._onHeaderCellMouseDown = this._onHeaderCellMouseDown.bind(this);
 		this._changeFilterList = this._changeFilterList.bind(this);
 		this._onScrollStart = this._onScrollStart.bind(this);
+		this._onDargDetailResize = this._onDargDetailResize.bind(this);
+		this.closeDetailCon = this.closeDetailCon.bind(this);
 		// 打开详情的宽度
 		this._conInfoWidth = null;
-		// 打开详情的 实例对象
-		this._conInfoInstance = null;
-		// 选中的打开详情的字段
-		this._selectId = null;
-		this.init();
+	
 	}
 	static propTypes = {
 		filterListFeild: PropTypes.array.isRequired,
@@ -45,13 +44,17 @@ export default class DataList extends Component {
 	static defaultProps = {
 		minCellWidth: 80,
 		minTableWidth: 800,
-		minTableHeight: 500
+		minTableHeight: 500,
+		rowSelect: -1
 	}
 	static contextTypes = {
 		openRightMenu: PropTypes.func.isRequired,
-		closeRightMenu: PropTypes.func.isRequired,
-		openConInfo: PropTypes.func.isRequired
+		closeRightMenu: PropTypes.func.isRequired
 	}
+	componentWillMount() {
+		this.init();
+	}
+	
 	componentDidMount() {
 		var win = window;
 		if (win.addEventListener) {
@@ -82,7 +85,7 @@ export default class DataList extends Component {
 	init() {
 		let tableWidth = window.innerWidth;
 		let tableHeight = window.innerHeight;
-		let {filterListFeild, minCellWidth, minTableHeight} = this.props;
+		let {filterListFeild, minCellWidth, minTableHeight, rowSelect} = this.props;
 		let showFeild;
 		// 从本地取到列，要显示的列和列的宽度
 		let customColums = localStorage.getItem("customColums");
@@ -102,13 +105,27 @@ export default class DataList extends Component {
 			showFeild = computeColumnWidth(filterListFeild, minCellWidth, tableWidth);
 		}
 		tableHeight = Math.max(tableHeight - 66, minTableHeight);
+		rowSelect = + rowSelect;
+		if (!(rowSelect > -1)) {
+			rowSelect = -1;
+		}		
 		this.state = {
 			tableHeight: tableHeight,
 			tableWidth: tableWidth,
 			hoverIndex: -1,
-			customColums: showFeild
+			customColums: showFeild,
+			rowSelect
 		};
 	}
+	componentWillReceiveProps (nextProps) {
+		let {monitorList} = this.props;
+		if (monitorList.size === 0) {
+			this.setState({
+				rowSelect: -1
+			});
+		}
+	}
+	
 	getTextCell ({rowIndex, columnKey: key, ...props}) {
 		let {monitorList} = this.props;
 		let data = monitorList.get(rowIndex);
@@ -183,9 +200,6 @@ export default class DataList extends Component {
 			tableHeight: newHeight,
 			customColums: adjustColumnWidth(customColums, minCellWidth, newWidth)
 		});
-		if (this._conInfoInstance && this._conInfoInstance.updateSize) {
-			this._conInfoInstance.updateSize(null, newHeight);
-		}
 	}
 	// 鼠标悬浮行
 	_onRowMouseEnter(e, index) {
@@ -245,37 +259,6 @@ export default class DataList extends Component {
 			if (!id) {
 				return this;
 			}
-			let timer = null;
-			// 打开 右侧链接详情
-			this.context.openConInfo({
-				style: {
-					width: this._conInfoWidth || parseInt(window.innerWidth * 0.5),
-					height: this.state.tableHeight,
-					top: 66,
-					right: 0,
-				},
-				onDargResize: (width) => {
-					this._conInfoWidth = width;
-					if (timer) {
-						window.clearTimeout(timer);
-					}
-					timer = window.setTimeout(() => {
-						localStorage.setItem('conInfoWidth', this._conInfoWidth);
-					}, 500);
-				},
-				// 准备要销毁了 返回false放弃销毁
-				onDestory: (instance) => {
-					this.setState({
-						rowSelect: -1
-					});					
-					this._selectId = null;
-				},
-				onCreate: (instance) => {
-					this._conInfoInstance = instance;
-					this._selectId = id;
-				},
-				data
-			});
 			this.setState({
 				rowSelect: index
 			});
@@ -381,9 +364,28 @@ export default class DataList extends Component {
 		closeRightMenu();
 		return false;
 	}
+	// 详情页面拖拽改大小
+	_onDargDetailResize(width) {
+		this._conInfoWidth = width;
+		if (this.__dargDetailResizeTimer) {
+			window.clearTimeout(this.__dargDetailResizeTimer);
+		}
+		this.__dargDetailResizeTimer = window.setTimeout(() => {
+			localStorage.setItem('conInfoWidth', this._conInfoWidth);
+		}, 500);
+	}
+	closeDetailCon() {
+		let {rowSelect} = this.state;
+		if (rowSelect && rowSelect != -1) {
+			this.setState({
+				rowSelect: -1
+			});
+		}
+	}
 	render() {
-		let {tableWidth, tableHeight, customColums} = this.state;
+		let {tableWidth, tableHeight, customColums, rowSelect} = this.state;
 		let {monitorStatus, monitorList} = this.props;
+		// 没有数据的情况
 		if (!monitorStatus || !monitorList || !monitorList.size) {
 			let style = {
 				width: tableWidth,
@@ -393,6 +395,7 @@ export default class DataList extends Component {
 			let content = monitorStatus ? "监控已经准备好" : "点击开始录制按钮录制";
 			return (<div className="dataList noData" style={style}>{content}</div>);
 		}
+		// 按列初始化数据
 		let col = customColums.reduce((all, current, index) => {
 			let width  = current.width;
 			let flexGrow = +current.flexGrow || 1;
@@ -411,6 +414,22 @@ export default class DataList extends Component {
 			);
 			return all;
 		}, []);
+		let detail = "";
+		if (rowSelect > -1 && rowSelect < monitorList.size) {
+			let data = monitorList.get(rowSelect);
+			let width = this._conInfoWidth || parseInt(window.innerWidth * 0.5);
+			let style = {
+				top: 66
+			};
+			if (data) {
+				detail = 	<ConInfo 
+					width={width} 
+					height={tableHeight} 
+					style={style} 
+					onDargResize={this._onDargDetailResize} 
+					data={data} destory= {this.closeDetailCon}></ConInfo>;
+			}
+		}
 		return (
 			<div className="dataList">
 				<Table
@@ -427,6 +446,7 @@ export default class DataList extends Component {
 					height={tableHeight}>
 					{col}
 				</Table>
+				{detail}
 			</div>
 		);
 	}

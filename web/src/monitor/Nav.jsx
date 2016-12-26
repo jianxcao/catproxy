@@ -32,14 +32,11 @@ class MyNav extends Component{
 		this.changeDisCache = this.changeDisCache.bind(this);
 	}
 	static contextTypes = {
-		closeConInfo: PropTypes.func.isRequired
 	}
 	componentDidMount () {
 		// 清除快捷
 		keymaster('⌘+k,ctrl+k', () =>{
 			let {sendClearMonitorList} = this.props;
-			let {closeConInfo} = this.context;
-			closeConInfo();			
 			sendClearMonitorList();
 			return false;
 		});	
@@ -62,8 +59,6 @@ class MyNav extends Component{
 	// 清除掉所有得监控数据
 	clearMonitorList(e) {
 		let {sendClearMonitorList} = this.props;
-		let {closeConInfo} = this.context;
-		closeConInfo();
 		sendClearMonitorList();
 	}
 	// 切换下边的 条件选择的现实隐藏

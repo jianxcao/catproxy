@@ -14,7 +14,10 @@ export const {
 	 * @param list [array] 
 	*/	
 	updateMonitorList,
-	// 过滤器显示隐藏状态
+	/**
+	 * 过滤器显示隐藏状态
+	 * @param id 数据的id
+	 */
 	clearMonitorList
 } = result = createActions(...Object.keys(monitorListType));
 export default result;

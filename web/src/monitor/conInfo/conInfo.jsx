@@ -24,10 +24,13 @@ class ConInfo extends Component {
 	 * }
 	 */
 	static propTypes = {
-		opt: PropTypes.object.isRequired
+		width: PropTypes.number.isRequired,
+		height: PropTypes.number.isRequired,
+		onDargResize: PropTypes.func,
+		data: PropTypes.object.isRequired,
+		destory: PropTypes.func.isRequired
 	};
 	static defaultProps = {
-		opt: {}
 	}
 	static contextTypes = {
 		openRightMenu: PropTypes.func.isRequired,
@@ -35,31 +38,19 @@ class ConInfo extends Component {
 	}
 	
 	componentWillMount () {
-		let {opt:{style}} = this.props;
-		if (style) {
-			let width = style.width;
-			let height = style.height;
-			this.state = {
-				width,
-				height
-			};
-		}
-	}
+		let {width, height} = this.props;
+		width = +width || defStyle.width;
+		height = +height || defStyle.height;
 
-	updateSize(width, height) {
-		let newS = {};
-		if (width) {
-			newS.width = +width;
-		}
-		if (height) {
-			newS.height = +height;
-		}
-		this.setState(newS);
+		this.state = {
+			width,
+			height
+		};	
 	}
 
 	_onDargResize(dargWidth, dargHeight) {
 		let {width} = this.state;
-		let {opt:{onDargResize}} = this.props;
+		let {onDargResize} = this.props;
 		width = width + dargWidth;
 		let winWidth = window.innerWidth;
 		if (winWidth - width > 100) {
@@ -80,14 +71,14 @@ class ConInfo extends Component {
 		let result;
 		let headers = [];
 		let response = [];
-		let {opt, opt: {data}} = this.props;
+		let {onDargResize, width:w, height:h, style, data, ...props} = this.props;
+		let comStyle = merge({}, defStyle, style);
 		let {width, height} = this.state;
-		let style = merge({}, defStyle, opt.style);
 		if (width) {
-			style.width = width;
+			comStyle.width = width;
 		}
 		if (height) {
-			style.height = height;
+			comStyle.height = height;
 		}
 		// 请求头
 		let reqHeads = data.get('reqHeaders');
@@ -133,7 +124,7 @@ class ConInfo extends Component {
 			headers.push(<ReqData header="表单数据" content={reqBodyData} key="formData"/>);
 		}
 		result = (
-			<div className="conInfo" style={style}>
+			<div className="conInfo" style={comStyle}>
 				<DargResize onDargResize={this._onDargResize}></DargResize>
 				<span className="closeBtn" onClick={this._handleClose}><em></em></span>
 				<nav className="contTab">
