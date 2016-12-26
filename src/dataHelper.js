@@ -9,7 +9,7 @@ import path from 'path';
 // <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 var checkMetaCharset = /<meta(?:\s)+.*charset(?:\s)*=(?:[\s'"])*([^"']+)/i;
 
-const isFont = /(^font\/.+)|(^application\/x-font.+)/;
+const isFont = /(^font\/.+)|(^application\/x-font.+)|(^application\/font.+)/;
 const isDataUrl = /^data:.+/;
 const isImage = /^image\/.+/;
 const isMedia = /(^video\/.+)|(^video\/.+)/;

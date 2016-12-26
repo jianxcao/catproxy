@@ -34,7 +34,7 @@ export let getRules =()=> {
 };
 
 /**
- *   reqInfo 包含的信息
+ *   messageInfo 包含的信息
  *  {
  *    headers: "请求头"
  *		host: "请求地址"
@@ -45,26 +45,24 @@ export let getRules =()=> {
  *		port: "请求端口"
  *		startTime: "请求开始时间"
  *		path: "请求路径，包括参数"
- *		originalUrl: "原始的请求地址,不包括参数,请不要修改",
- *		bodyData: "buffer 数据，body参数，可以修改"
- *		原始地址仅供查看，无法修改
+ *		originalUrl: "原始的请求地址,不包括参数,请不要修改"
  *	}
  */
-export let parseRule = reqInfo => {
+export let parseRule = messageInfo => {
 	let rules = getRules();
 	if (!rules || !rules.length) {
-		return Promise.resolve(reqInfo);
+		return Promise.resolve(messageInfo);
 	}
 	return execParse(rules.map(current => {
 		return {
 			fun: parseOneRule,
-			param: [current, reqInfo]
+			param: [current, messageInfo]
 		};
 	}))
-	.then(result => result ? result : reqInfo);
+	.then(result => result ? result : messageInfo);
 };
 
-parseOneRule = (group, reqInfo) => {
+parseOneRule = (group, messageInfo) => {
 	let branches;
 	branches = group.branch;
 	// 如果禁用这个分组直接跳出,不存在分支
@@ -74,13 +72,13 @@ parseOneRule = (group, reqInfo) => {
 	return execParse(branches.map(current => {
 		return {
 			fun: parseBranch,
-			param: [current, reqInfo]
+			param: [current, messageInfo, group.name]
 		};
 	})
 	);
 };
 
-parseBranch = (branch, reqInfo) => {
+parseBranch = (branch, messageInfo, name) => {
 	let rules = branch.rules;
 	if (branch.disable || !rules || !rules.length) {
 		return;
@@ -88,28 +86,28 @@ parseBranch = (branch, reqInfo) => {
 	return execParse(rules.map(current => {
 		return {
 			fun: parseOneBranch,
-			param: [current, reqInfo]
+			param: [current, messageInfo, name, branch.name]
 		};
 	})
 	);
 };
 
-parseOneBranch = (rule, reqInfo) => {
+parseOneBranch = (rule, messageInfo, groupName, branchName) => {
 	let {test, exec, type, virtualPath = ''} = rule;
 	if (isStringReg.test(test)) {
 		test = test.slice(1, test.length -1);
 	} else {
-		test = isStartHttp.test(test) ? test : (reqInfo.protocol === 'https' ? "https://" + test : "http://" + test);
+		test = isStartHttp.test(test) ? test : (messageInfo.protocol === 'https' ? "https://" + test : "http://" + test);
 		test = '^' + test;
 	}
 	// 将test转换成正则
 	test = new RegExp(test);
-	let currentUrl = getUrl(reqInfo);
+	let currentUrl = getUrl(messageInfo);
 	// 测试没有通过
 	if (!test.test(currentUrl) || rule.disable) {
 		return;
 	}
-	log.info(`解析规则,当前url:${currentUrl}, 规则类型:${type},规则正则${test},规则执行${exec}`);
+	log.debug(`解析规则,当前url:${currentUrl}, 规则类型:${type},规则正则${test},规则执行${exec}`);
 	switch(type){
 		// host模式下只能修改 host protocol port
 	case('host'):
@@ -117,23 +115,24 @@ parseOneBranch = (rule, reqInfo) => {
 	case('remoteFile'):
 		if (exec) {
 				// 转换成一个url的对象
-			let execObj = standardUrl(exec, reqInfo.protocol);
-			reqInfo.host = execObj.host;
-			reqInfo.protocol = execObj.protocol.split(':')[0];
-			reqInfo.port = execObj.port ? execObj.port : (reqInfo.protocol === 'https' ? 443 : 80);
-			reqInfo.path = type === 'host' ? reqInfo.path : execObj.path;
-			// log.debug('', reqInfo.protocol, reqInfo.port, exec);
+			let execObj = standardUrl(exec, messageInfo.protocol);
+			messageInfo.host = execObj.host;
+			messageInfo.protocol = execObj.protocol.split(':')[0];
+			messageInfo.port = execObj.port ? execObj.port : (messageInfo.protocol === 'https' ? 443 : 80);
+			messageInfo.path = type === 'host' ? messageInfo.path : execObj.path;
+			// log.debug('', messageInfo.protocol, messageInfo.port, exec);
+			messageInfo.ruleInfo = `分组:${groupName}-分支:${branchName}-规则类型:${type}-规则正则:${test}-规则执行:${exec}`;
 		} else  {
 				// 没有配置exec如果是 host就访问线上，如果是 remoteFile就跳过
 			if (type === 'host') {
 				return new Promise((resolve, reject) => {
-					dns.resolve(reqInfo.host.split(':')[0], function(err, addresses) {
+					dns.resolve(messageInfo.host.split(':')[0], function(err, addresses) {
 						if (err || !addresses || !addresses.length) {
 							log.error(`规则解析中, dns解析出现错误，规则类型:${type},规则正则${test}`);
-							reject(reqInfo);
+							reject(messageInfo);
 						} else {
-							reqInfo.host = addresses[0];
-							resolve(reqInfo);
+							messageInfo.host = addresses[0];
+							resolve(messageInfo);
 						}
 					});
 				});
@@ -142,29 +141,32 @@ parseOneBranch = (rule, reqInfo) => {
 		break;
 	case('redirect') :
 		if (exec) {
-			reqInfo.redirect = isStartHttp.test(exec) ? exec : 'http://' + exec;
+			messageInfo.redirect = isStartHttp.test(exec) ? exec : messageInfo.protocol + '://' + exec;
+			messageInfo.ruleInfo = `分组:${groupName}-分支:${branchName}-规则类型:${type}-规则正则:${test}-规则执行:${exec}`;
 		}
 		break;
 	case('localFile'):
 		if (exec) {
-			reqInfo.sendToFile = exec;
+			messageInfo.sendToFile = exec;
+			messageInfo.ruleInfo = `分组:${groupName}-分支:${branchName}-规则类型:${type}-规则正则:${test}-规则执行:${exec}`;
 		}
 		break;
 	case('localDir'):
 		if (exec) {
 				// 去掉hash和param
-			let p = reqInfo.path.split('?')[0];
-			p = reqInfo.path.split('#')[0];
+			let p = messageInfo.path.split('?')[0];
+			p = messageInfo.path.split('#')[0];
 			if (!isStartSlash.test(virtualPath)) {
 				virtualPath = '/' + virtualPath;
 			}
 			p = p.replace(new RegExp('^' + virtualPath), '');
-			reqInfo.sendToFile = path.join(exec, p);
+			messageInfo.sendToFile = path.join(exec, p);
+			messageInfo.ruleInfo = `分组:${groupName}-分支:${branchName}-规则类型:${type}-规则正则:${test}-规则执行:${exec}`;
 		}
 		break;
 	default:
 	}
-	return reqInfo;
+	return messageInfo;
 };
 // 转换url为一个标准对象
 standardUrl = (originalUrl, protocol) => {
@@ -211,7 +213,7 @@ execParse = (tasks, index) => {
 
 // test===========
 
-// let reqInfo = {
+// let messageInfo = {
 // 	headers: {},
 // 	host: "g.caipiao.163.com",
 // 	protocol: "http",
@@ -219,7 +221,7 @@ execParse = (tasks, index) => {
 // 	path: "/caipiao/test/mm/bb.html",
 // 	originalFullUrl: "http://g.caipiao.163.com/caipiao/test/mm/bb.html"
 // };
-// parseRule(reqInfo)
+// parseRule(messageInfo)
 // .then((result) => {
 // 	log.debug(result);
 // });
@@ -228,21 +230,21 @@ execParse = (tasks, index) => {
 // 	type: "host",
 // 	test: '/zhuhu.com/test/',
 // 	exec: "http://192.168.199.100/test?aaa"
-// }, reqInfo);
+// }, messageInfo);
 
 
 // parseOneBranch({
 // 	type: "remoteFile",
 // 	test: '/zhuhu.com/test/',
 // 	exec: "http://192.168.199.100/test?aaa"
-// }, reqInfo);
+// }, messageInfo);
 // 
 
 // parseOneBranch({
 // 	type: "localFile",
 // 	test: '/zhuhu.com/test/',
 // 	exec: "D:/test/1111/1222"
-// }, reqInfo);
+// }, messageInfo);
 
 
 // parseOneBranch({
@@ -250,7 +252,7 @@ execParse = (tasks, index) => {
 // 	test: '/zhuhu.com/test/',
 // 	exec: "D:/test/1111/cjx",
 // 	virtualPath: "/test/"
-// }, reqInfo);
+// }, messageInfo);
 
 
 // console.log(standardUrl("test:8080?a=1"));

@@ -104,6 +104,10 @@ class ConInfo extends Component {
 			"请求状态": data.get('status') || "",
 			"服务器地址": data.get('serverIp') || ""
 		};
+		let reqRuleInfo = data.get('reqRuleInfo');
+		if (reqRuleInfo) {
+			general["请求规则执行"] = reqRuleInfo;
+		}
 		// 请求概要
 		headers.push(<ViewHeader header="概览" content={general} key="general"/>);
 		// 请求头i

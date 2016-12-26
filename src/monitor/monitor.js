@@ -122,6 +122,9 @@ export default function(catproxy) {
 				reqHeaders: result.headers,
 				startTime: result.startTime
 			};
+			if (result.ruleInfo) {
+				addMontiorData.reqRuleInfo = result.ruleInfo;
+			}
 			let bodyData = result.bodyData;
 			if (result.bodyData) {
 				let isb = isBinary(result.bodyData);

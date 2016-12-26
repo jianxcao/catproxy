@@ -61,7 +61,7 @@ class Monitor extends Component{
 		});
 		let mySeq = monitorList.get('mySeq');
 		if (mySeq && mySeq.size) {
-			return mySeq.reduceRight((result, id) => {
+			return mySeq.reduce((result, id) => {
 				let one = monitorList.get(id);
 				let name = one.get('name');
 				let type = one.get('type');
