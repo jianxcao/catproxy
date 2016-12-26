@@ -1,3 +1,32 @@
+.close(@size:26;@color: #aaa;@background:transparent;@weight:1;@base-bet:1){
+	@lineSize: @size*@base-bet;
+  position: relative;
+  display: block;
+	width: @size/1px;
+	height: @size/1px;
+  overflow: hidden;
+  background: @background;
+  font-size: 0px;
+ 	transform: rotate(0deg);
+	&:before, &:after {
+	  content: '';
+	  position: absolute;
+	  height: @weight * 1px;
+	  width: @lineSize/1px;
+	  top: 50%;
+	  left: 50%;
+	  margin-left: @lineSize/-2px;
+	  margin-top: @weight/-2px;
+	  background: @color;
+	}
+	&:before {
+	  transform: rotate(45deg);
+	}
+	&:after {
+	  transform: rotate(-45deg);
+	}
+}
+
 .conInfo{
 	position: absolute;
 	top:0;
@@ -11,6 +40,20 @@
 	overflow: auto;
 	min-width: 300px;
 	border-bottom: 0px;
+	.closeBtn{
+		em{
+			.close(@size:18;@color:@baseFontColor;@background:transparent;@weight:2;@base-bet:0.5);
+			transform: translate(-50%, -50%);
+			top: 50%;
+			left: 50%;
+			border-radius: 50%;
+		}
+		position: absolute;
+    left: 0px;
+    top: 0px;
+		height: 30px;
+		width: 30px;		
+	}
 	nav{
 		height: 31px;
 		border-bottom: 1px solid transparent;
@@ -93,6 +136,16 @@
 		border-color: @baseBorderColor;
 		border-left-color: @leftSplitColor;
 		background: @bgColor;
+		.closeBtn{
+			em{
+				&:hover{
+					background: @closeBtnHoverBgColor;
+					&:before,&:after{
+						background: @closeBtnHoverColor;
+					}
+				}
+			}	
+		}		
 		nav{
 			border-color: @baseBorderColor;
 			&>span{
@@ -129,35 +182,6 @@
 	}
 };
 
-.close(@size:28;@color: #aaa;@background:transparent;@weight:4;@base-bet:1){
-	@lineSize: @size*@base-bet;
-  position: relative;
-  display: block;
-	width: @size/24rem;
-	height: @size/24rem;
-  overflow: hidden;
-  background: @background;
-  font-size: 0px;
- 	transform: rotate(0deg);
-	&:before, &:after {
-	  content: '';
-	  position: absolute;
-	  height: @weight * 1px;
-	  width: @lineSize/24rem;
-	  top: 50%;
-	  left: 50%;
-	  margin-left: @lineSize/-48rem;
-	  margin-top: @weight/-2px;
-	  background: @color;
-	}
-	&:before {
-	  transform: rotate(45deg);
-	}
-	&:after {
-	  transform: rotate(-45deg);
-	}
-}
-
 // 分割线颜色
 .conInfoColor(@theme) when (@theme=light) {
 	// 头部边框的颜色
@@ -170,5 +194,8 @@
 	@navItemHoverColor: #e5e5e5;
 	// title上的源的颜色
 	@titleSourceColor: #737373;
+	@closeBtnColor: @baseFontColor;
+	@closeBtnHoverColor: #fff;
+	@closeBtnHoverBgColor: #e89590;
 	.conInfoTheme();
 }

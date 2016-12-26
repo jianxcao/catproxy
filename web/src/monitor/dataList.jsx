@@ -9,6 +9,7 @@ import {bindActionCreators} from 'redux';
 import {monitorStatus} from './action/navAction';
 import {upperFirstLetter} from './util';
 import cs from 'classnames';
+const clsChec = /[^\x20\t\r\n\f]+/g ;
 const getDomainReg = /:\/\/([^:\/]+)/;
 const wrongCodeReg = /(^4)|(^5).+/;
 export default class DataList extends Component {
@@ -24,10 +25,13 @@ export default class DataList extends Component {
 		this._onHeaderCellMouseDown = this._onHeaderCellMouseDown.bind(this);
 		this._changeFilterList = this._changeFilterList.bind(this);
 		this._onScrollStart = this._onScrollStart.bind(this);
+		// 打开详情的宽度
+		this._conInfoWidth = null;
+		// 打开详情的 实例对象
+		this._conInfoInstance = null;
+		// 选中的打开详情的字段
+		this._selectId = null;
 		this.init();
-		// 记录所有存在数据索引和id的关系
-		// {索引： 数据id}
-		this.__rowRelId = {};
 	}
 	static propTypes = {
 		filterListFeild: PropTypes.array.isRequired,
@@ -56,6 +60,10 @@ export default class DataList extends Component {
 			win.attachEvent('onresize', this._onResize);
 		} else {
 			win.onresize = this._onResize;
+		}
+		let width = +localStorage.getItem('conInfoWidth');
+		if (width > 0) {
+			this._conInfoWidth = width;
 		}
 	}
 	componentDidUpdate(prevProps, prevState) {
@@ -107,8 +115,8 @@ export default class DataList extends Component {
 		let result;
 		let status = data.get("status") || "";
 		let className = cs({
-			 "row_hover": rowIndex === this.state.hoverIndex,
-			 "wrong_color": wrongCodeReg.test(status)
+			 "wrong_color": wrongCodeReg.test(status),
+			 "row_select": this.state.rowSelect === rowIndex
 		});
 				
 		if (key === 'status' || key === 'size' || key === "time") {
@@ -181,15 +189,21 @@ export default class DataList extends Component {
 	}
 	// 鼠标悬浮行
 	_onRowMouseEnter(e, index) {
-		this.setState(({hoverIndex}) => ({
-			hoverIndex: index
-		}));
+		let rowEle = e.currentTarget;
+		let cls = "row_hover";
+		let className = " " + (rowEle.className || "") + " ";
+		if (className.indexOf( " " + cls + " " ) < 0) {
+			rowEle.className = (className + cls).trim();
+		}
 	}
 	// 鼠标离开行
 	_onRowMouseLeave(e, index) {
-		this.setState(({hoverIndex}) => ({
-			hoverIndex: -1
-		}));
+		let rowEle = e.currentTarget;
+		let cls = "row_hover";
+		let className = " " + (rowEle.className || "") + " ";
+		if (className.indexOf( " " + cls + " " ) > -1) {
+			rowEle.className = (className.replace(" " + cls + " ", "")).trim();
+		}		
 	}
 	// 鼠标按下 某一行，弹出右键菜单
 	_onRowMouseDown(e, index) {
@@ -227,19 +241,47 @@ export default class DataList extends Component {
 				menuItems: menus
 			});
 		} else {
+			let id = data.get('id');
+			if (!id) {
+				return this;
+			}
+			let timer = null;
 			// 打开 右侧链接详情
-			let conInfo = this.context.openConInfo({
+			this.context.openConInfo({
 				style: {
-					width: parseInt(window.innerWidth * 0.5),
+					width: this._conInfoWidth || parseInt(window.innerWidth * 0.5),
 					height: this.state.tableHeight,
 					top: 66,
-					right: 0
+					right: 0,
+				},
+				onDargResize: (width) => {
+					this._conInfoWidth = width;
+					if (timer) {
+						window.clearTimeout(timer);
+					}
+					timer = window.setTimeout(() => {
+						localStorage.setItem('conInfoWidth', this._conInfoWidth);
+					}, 500);
+				},
+				// 准备要销毁了 返回false放弃销毁
+				onDestory: (instance) => {
+					this.setState({
+						rowSelect: -1
+					});					
+					this._selectId = null;
+				},
+				onCreate: (instance) => {
+					this._conInfoInstance = instance;
+					this._selectId = id;
 				},
 				data
 			});
-			this._conInfoInstance = conInfo;
+			this.setState({
+				rowSelect: index
+			});
 		}
 	}
+	// 修改显示字段
 	_changeFilterList(e) {
 		let ele = e.target;
 		let name = ele.name;

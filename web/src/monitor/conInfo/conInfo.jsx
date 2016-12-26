@@ -14,7 +14,15 @@ class ConInfo extends Component {
 	constructor() {
 		super();
 		this._onDargResize = this._onDargResize.bind(this);
+		this._handleClose = this._handleClose.bind(this);
 	}
+	/**
+	 * opt {
+	 *  data: '链接数据',
+	 *  style: "链接样式",
+	 *  onDargResize: fun() 大小发生改变的时候的回调
+	 * }
+	 */
 	static propTypes = {
 		opt: PropTypes.object.isRequired
 	};
@@ -51,13 +59,21 @@ class ConInfo extends Component {
 
 	_onDargResize(dargWidth, dargHeight) {
 		let {width} = this.state;
+		let {opt:{onDargResize}} = this.props;
 		width = width + dargWidth;
 		let winWidth = window.innerWidth;
 		if (winWidth - width > 100) {
 			this.setState({
 				width: width
 			});
+			if (onDargResize) {
+				onDargResize(width);
+			}
 		}
+	}
+	_handleClose() {
+		let {destory} = this.props;
+		destory();
 	}
 	// 渲染
 	render() {
@@ -115,6 +131,7 @@ class ConInfo extends Component {
 		result = (
 			<div className="conInfo" style={style}>
 				<DargResize onDargResize={this._onDargResize}></DargResize>
+				<span className="closeBtn" onClick={this._handleClose}><em></em></span>
 				<nav className="contTab">
 					<span className="active">头部</span>
 					<span>响应数据</span>

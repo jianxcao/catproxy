@@ -88,7 +88,11 @@
 		background-color: @rowHover;
 	}
 	.wrong_color, .wrong_color .public_fixedDataTableCell_main{
-		color: #e01d1f;
+		color: @rowWrong;
+	}
+	.row_select, .row_select .public_fixedDataTableCell_main {
+		background-color: @rowSelectBgColor;
+		color: @rowSelectColor;
 	}
 	/**
 	* Scrollbars.
@@ -139,6 +143,12 @@
 	@scrollBarHover: rgba(255, 255, 255, 0.8);
 	// 行悬浮背景色
 	@rowHover: #ecf2fb;
+	// 行选中背景色
+	@rowSelectBgColor: #347cdb;
+	// 行选中文字颜色
+	@rowSelectColor: #fff;
+	// 行错误字体颜色
+	@rowWrong: #e01d1f;
 	.dataListTheme();
 }
 

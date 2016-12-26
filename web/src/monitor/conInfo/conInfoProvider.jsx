@@ -14,7 +14,7 @@ export default class ConInfoProvider extends Component {
 		document.body.appendChild(this._mountNode);
 	}
 	componentWillUnmount () {
-		this.destroy();
+		this.destory();
 		document.body.removeChild(this._mountNode);
 		this._mountNode = null;
 	}
@@ -38,29 +38,47 @@ export default class ConInfoProvider extends Component {
 	openConInfo(opt) {
 		// 当前已经打开了一个, 干掉他，从开一个
 		if (this._conInfo) {
-			this.destroy();
+			this.destory();
 		}
 		return this.makeConInfo(opt);
 	}
 	closeConInfo() {
-		this.destroy();
+		this.destory();
 	}
 	makeConInfo (opt) {
 		opt = opt || {};
-		let result = (<ConInfo opt = {opt}></ConInfo>);
-		this._conInfo = result;
+		let {onCreate, onDestory, ...option} = opt;
+		if (onCreate) {
+			this._onCreate = onCreate;
+		}
+		if (onDestory) {
+			this._onDestory = onDestory;
+		}
+		let result = (<ConInfo opt = {option} destory={this.closeConInfo}></ConInfo>);
 		// 返回 组件对象，注意不要乱用，销毁时请回收
 		let instance = ReactDom.unstable_renderSubtreeIntoContainer(
 			this, result, this._mountNode
 		);
+		this._conInfo = instance;
+		if (this._onCreate) {
+			this._onCreate(instance);
+		}
 		return instance;
 	}
 
-	destroy() {
-		if (this._mountNode) {
-			ReactDom.unmountComponentAtNode(this._mountNode);
+	destory() {
+		if (this._mountNode && this._conInfo) {
+			let status;
+			if (this._onDestory) {
+				status = this._onDestory(this._conInfo);
+			}
+			if (status !== false) {
+				this._onDestory = null;
+				this._onCreate = null;
+				ReactDom.unmountComponentAtNode(this._mountNode);
+				this._conInfo = null;
+			}
 		} 
-		this._conInfo = null;
 	}
 
 	render() {
