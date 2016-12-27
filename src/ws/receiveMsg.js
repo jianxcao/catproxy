@@ -8,6 +8,8 @@ import http from 'http';
 import https from 'https';
 import Promise from 'promise';
 import {Buffer} from 'buffer';
+import {sendConnDetail} from './sendMsg';
+import {getCacheFile} from '../monitor/cacheFile';
 /*
  * 
  *  所有接受到得消息是一个Object
@@ -93,6 +95,18 @@ let monitor = (monitor, ws) => {
 		log.error(e);
 		return error('更新配置失败');
 	}
+};
+
+
+export let getConDetail = (msg = {param: {}}, ws = {}) => {
+	let {param: {id}} = msg;
+	if (id) {
+		getCacheFile(id)
+		.then(data => {
+			sendConnDetail(data);
+		});
+	}
+	return  success('收到消息');
 };
 
 export let saveConfig = (msg = {}, ws = {}) => {

@@ -145,7 +145,7 @@ let proxyReq = function(options, reqInfo, resInfo, req) {
 		let {res} = resInfo;
 		// 数据太大的时候触发
 		let err = {
-			message: 'request entity too large',
+			message: '响应数据过大，无法显示',
 			status: STATUS.LIMIT_ERROR
 		};
 		let resBodyData = [], l = 0, isError = false, isFired = false;

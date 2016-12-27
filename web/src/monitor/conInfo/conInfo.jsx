@@ -4,6 +4,12 @@ import merge from 'lodash/merge';
 import ViewHeader from './viewHeader';
 import ReqData from './reqData';
 import DargResize from './dargResize';
+import {Provider,connect } from 'react-redux';
+import {bindActionCreators} from 'redux';
+import {fetchConData} from '../action/fetchAction';
+import Loading from '../loading';
+import cx from 'classnames';
+const isImage = /^image\/.+/;
 const defStyle = {
 	width: 600,
 	height: 300,
@@ -15,6 +21,7 @@ class ConInfo extends Component {
 		super();
 		this._onDargResize = this._onDargResize.bind(this);
 		this._handleClose = this._handleClose.bind(this);
+		this._changeTab = this._changeTab.bind(this);
 	}
 	/**
 	 * opt {
@@ -44,10 +51,11 @@ class ConInfo extends Component {
 
 		this.state = {
 			width,
-			height
-		};	
+			height,
+			currentTab: 0
+		};
 	}
-
+	// 拖拽改变详情的大小
 	_onDargResize(dargWidth, dargHeight) {
 		let {width} = this.state;
 		let {onDargResize} = this.props;
@@ -62,24 +70,26 @@ class ConInfo extends Component {
 			}
 		}
 	}
+	// 关闭详情
 	_handleClose() {
 		let {destory} = this.props;
 		destory();
 	}
-	// 渲染
-	render() {
-		let result;
+	// 详情tab切换
+	_changeTab(e) {
+		let target = e.currentTarget;
+		let id = target.getAttribute("data-id");
+		id = +id;
+		if (id >= 0) {
+			this.setState({
+				currentTab: id
+			});
+		}
+	}
+	// 渲染头部数据
+	renderHeaders () {
+		let {data} = this.props;
 		let headers = [];
-		let response = [];
-		let {onDargResize, width:w, height:h, style, data, ...props} = this.props;
-		let comStyle = merge({}, defStyle, style);
-		let {width, height} = this.state;
-		if (width) {
-			comStyle.width = width;
-		}
-		if (height) {
-			comStyle.height = height;
-		}
 		// 请求头
 		let reqHeads = data.get('reqHeaders');
 		// 响应头
@@ -120,21 +130,82 @@ class ConInfo extends Component {
 		if (reqBodyData) {
 			headers.push(<ReqData header="表单数据" content={reqBodyData} key="formData"/>);
 		}
+		return headers;
+	}
+	
+	// 渲染 响应的body数据
+	renderResponse() {
+		let {data, sendFetchConData, resBodyData} = this.props;
+		let id = data.get('resBodyDataId');
+		let bodyData = data.get('resBodyData');
+		let isResinary = data.get('isResinary');
+		let resHeaders = data.get('resHeaders');
+		let body = [];
+		// 这种情况可能是 文件过大，没有返回或者返回内容是空
+		// bodyData肯定是个字符串
+		if (bodyData !== null && bodyData !== undefined) {
+			return bodyData;
+		}
+		// 数据已经加载成功
+		if (resBodyData) {
+			// 二进制数据 - 看看是不是 图片如果是图片就 处理图片，否则就返回不认识
+			// 不存在id表示数据没有在后天存在
+			if (isResinary) {
+				if (resHeaders) {
+					let contentType = resHeaders.get("content-type");
+					if (isImage.test(contentType)) {
+						return "图片文件";
+					}
+				}
+				return "二进制数据，无法查看";
+			}
+		}
+		// 去加载数据
+		if (id) {
+			sendFetchConData(id);
+			return <Loading className="pageLoading" />;
+		}		
+		return body;
+	}
+
+	// 渲染
+	render() {
+		let result;
+		let {onDargResize, style} = this.props;
+		let comStyle = merge({}, defStyle, style);
+		let {width, height, currentTab} = this.state;
+		if (width) {
+			comStyle.width = width;
+		}
+		if (height) {
+			comStyle.height = height;
+		}
 		result = (
 			<div className="conInfo" style={comStyle}>
 				<DargResize onDargResize={this._onDargResize}></DargResize>
 				<span className="closeBtn" onClick={this._handleClose}><em></em></span>
 				<nav className="contTab">
-					<span className="active">头部</span>
-					<span>响应数据</span>
+					<span className={cx({active: currentTab == 0})} data-id="0" onClick={this._changeTab}>头部</span>
+					<span className={cx({active: currentTab == 1})} data-id="1" onClick={this._changeTab}>响应数据</span>
 				</nav>
 				<div className="contentTab">
-					<div className="headers">{headers}</div>
-					<div className="response"></div>
+					<div className={cx("headers", {active: currentTab == 0})}>{this.renderHeaders()}</div>
+					<div className={cx("response", {active: currentTab == 1})}>{this.renderResponse()}</div>
 				</div>
 			</div>);
 		return result;
 	}
 }
 
-export default ConInfo;
+function mapStateToProps(state) {
+	return {
+		resBodyData: state.get('resBodyData')
+	};
+}
+
+function mapDispatchToProps(dispatch) {
+	return {
+		sendFetchConData: bindActionCreators(fetchConData, dispatch)
+	};
+}
+export default connect(mapStateToProps, mapDispatchToProps)(ConInfo);

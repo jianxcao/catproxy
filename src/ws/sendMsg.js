@@ -1,7 +1,7 @@
 import log from '../log';
 import webCfg from '../config/webCfg';
 import {SUCC} from './status';
-import {addMonitorData, updateMonitorData} from './sendType';
+import {addMonitorData, updateMonitorData, getConDetail} from './sendType';
 let addMonitorArr = [];
 let updateMonitorArr = [];
 let addMonitorTimer;
@@ -26,7 +26,7 @@ let sendUpdateMonitor = (data) => {
 		wss.emit(updateMonitorData, result);
 	}
 };
-
+// 添加监控数据
 export let addMonitor = (data) => {
 	if (!wss) {
 		log.error("清先初始化monitor");
@@ -45,7 +45,7 @@ export let addMonitor = (data) => {
 		sendAddMonitor(data);
 	}, 100);	
 };
-
+// 更新监控数据
 export let updateMonitor = (data) => {
 	if (!wss) {
 		log.error("清先初始化monitor");
@@ -63,7 +63,16 @@ export let updateMonitor = (data) => {
 		sendUpdateMonitor(data);
 	}, 200);
 };
-
+// 发送监控详情数据
+export let sendConnDetail = (data) => {
+	if (wss) {
+		let result = {
+			result: data,
+			status: SUCC
+		};		
+		wss.emit(getConDetail, result);
+	}
+};
 // 启动项目的时候需要  群发一个消息，清除掉当前页面的记录，否则id会冲突--- 为了以防万一，id前面带个随机数？？
 
 /**

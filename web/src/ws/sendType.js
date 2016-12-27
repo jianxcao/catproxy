@@ -5,3 +5,5 @@ export const fetchConfig = "fetch_config";
 export const saveConfig = "save_config";
 // 远程上传
 export const remoteUpdateRule = "remote_update_rule";
+// 获取详情
+export const getConDetail = "get_con_detail";

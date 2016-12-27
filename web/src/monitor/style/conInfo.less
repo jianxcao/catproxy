@@ -70,9 +70,13 @@
 	// 所有得tab
 	.contentTab{
 		font-size: 14px;
+		height: 100%;
 		em{
 				font-style: normal;
-			}			
+			}
+		&>div{
+			display: none;
+		}
 		// 头部tab
 		.headers{
 			margin-left: 10px;
@@ -117,6 +121,16 @@
 						white-space: nowrap;
 					}
 				}
+			}
+		}
+		&>div.active {
+			display: block;
+		}
+		.response{
+			position: relative;
+			height: 100%;
+			.loading{
+				position: absolute;
 			}
 		}
 	}

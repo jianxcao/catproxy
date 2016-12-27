@@ -104,6 +104,15 @@ export let hiddenDataUrl = (status) => {
 	return send('saveConfig')(result);
 };
 
+export let getConDetail = (id) => {
+	let result = {
+		param: {
+			id: id
+		},
+		path: "getConDetail"
+	};
+	return send('getConDetail')(result);
+};
 
 export default {
 	fetchConfig,

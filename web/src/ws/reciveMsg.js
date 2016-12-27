@@ -24,6 +24,13 @@ export let updateRule = (message)=> {
 	}
 };
 
+export let getConDetail = (message)=> {
+	console.log(message);
+	if (message && message.status === status.SUCC) {
+		
+	}
+};
+
 export default {
 	addMonitorData,
 	updateMonitorData,

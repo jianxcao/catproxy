@@ -199,7 +199,7 @@ export let requestHandler = function(req, res) {
 			req.removeListener('data', data);
 			req.removeListener('end', end);
 			req.emit('reqBodyDataReady', {
-				message: 'request entity too large',
+				message: '请求数据头过大，无法显示',
 				status: STATUS.LIMIT_ERROR
 			}, Buffer.concat(reqBodyData));
 		}

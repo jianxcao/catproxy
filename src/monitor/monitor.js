@@ -1,7 +1,6 @@
 import log from '../log';
 import fse from 'fs-extra';
 import fs from 'fs';
-import path from 'path';
 import Promise from 'promise';
 import merge from 'merge';
 import isbinaryfile from 'isbinaryfile';
@@ -12,17 +11,7 @@ import {addMonitor, updateMonitor} from '../ws/sendMsg';
 import * as config from '../config/config';
 // 当前监控数据-- 记录文件的url和 resBodyData的文件生成的md5值
 var monitorList = {};
-export const fileCache = path.resolve('./fileCache');
 const resBodyName = "_res_body_";
-// 数据库缓存大小
-// 确定db目录存在
-fse.ensureDirSync(fileCache);
-// 清空db目录
-fse.emptyDirSync(fileCache);
-
-
-
-
 // 处理mulitpartData
 /** 数据格式
  * multipart/form-data; boundary=----WebKitFormBoundaryAxMpx9qwQiovE99R 659
@@ -136,10 +125,10 @@ export default function(catproxy) {
 							bodyData = detailMultipartData(contentType, bodyData);
 						} else {
 							// 不认识的二进制数据忽略
-							bodyData = "";
+							bodyData = "二进制数据!!!";
 						}
 					} else {
-						bodyData = "";
+						bodyData = "二进制数据!!!";
 					}
 				}
 				addMontiorData.reqBodyData = (bodyData || "").toString();
@@ -179,26 +168,35 @@ export default function(catproxy) {
 				let startTime = monitorList[result.id].startTime;
 				let {bodyData} = result;
 				let fileName;
+				let resBodyData;
 				if (bodyData && bodyData.length) {
 					let md5 = crypto.createHash('md5');
 					md5.update(bodyData);
 					fileName = md5.digest('hex');
 					fileName = resBodyName + fileName;
-					cacheFile(path.resolve(fileCache, fileName), bodyData)
-					.then(fileName => {
-						// 修改缓存数据
-						monitorList[result.id] = {
-							_cacheName: fileName
-						};
-					});
+					// 缓存文件
+					cacheFile(fileName, bodyData);
+				} else {
+					if (result.bodyDataErr) {
+						resBodyData = result.bodyDataErr;
+					} else {
+						// 可能是 302，等请求没有响应内容
+						resBodyData = "";
+					}
 				}
 				let updateData = {
 					id: result.id,
 					time: result.endTime - startTime,
 					status: result.statusCode,
-					size: bodyData ? bodyData.length : 0,
-					resBodyDataId: fileName
+					size: bodyData ? bodyData.length : 0
 				};
+				if (fileName) {
+					updateData.resBodyDataId = fileName;
+				}
+				if (resBodyData) {
+					updateData.resBodyData = resBodyData;
+				}
+				delete monitorList[result.id];
 				updateMonitor(updateData);
 			}
 		}

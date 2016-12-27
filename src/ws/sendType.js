@@ -4,3 +4,5 @@ export const addMonitorData = "add-monitor-data";
 
 // 获取更新监控数据
 export const updateMonitorData = "update-monitor-data";
+// 获取详情
+export const getConDetail = "get_con_detail";

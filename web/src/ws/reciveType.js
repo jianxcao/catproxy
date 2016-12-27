@@ -7,3 +7,6 @@ export const updateMonitorData = "update-monitor-data";
 
 // 更新规则，服务器主动推送规则更新
 export const updateRule = "update-rule";
+
+// 获取详情
+export const getConDetail = "get_con_detail";

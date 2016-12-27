@@ -1,6 +1,6 @@
 import { takeEvery, delay } from 'redux-saga';
 import { call, put, fork } from 'redux-saga/effects';
-import {fetchConfig} from "../../ws/sendMsg";
+import {fetchConfig, getConDetail} from "../../ws/sendMsg";
 import {FETCH_CONFIG, FETCH_CON_DATA} from '../action/fetchType';
 import {disCache as disCacheAction, monitorStatus, monitorFilterStatus} from '../action/navAction';
 import {loadingPage, loadingConData} from '../action/loadingAction';
@@ -31,9 +31,13 @@ function* fetchCfg(action) {
 };
 
 function* fetchConData(action) {
-	console.log('prepare fetchData', action);
-	// 先显示加载
-	yield put(loadingConData(true));
+	try {
+		// 只是发送请求，接受数据由ws中得getConDetail 接受
+		yield getConDetail(action.payload);;
+	} catch(e) {
+		console.error(e);
+	}	
+	
 }
 // 获取配置文件
 function* getALLCfg() {
