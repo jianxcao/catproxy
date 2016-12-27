@@ -14,7 +14,15 @@ export default {
 			let ids = [];
 			if (arrData && arrData.length) {
 				for(let val of arrData) {
-					state = state.set(val.id, Immutable.fromJS(val));
+					let cur = state.get(val.id);
+					// 这证明 已经有这条数据了，可能是update先回来了
+					// 如果不是，那证明数据有问题
+					// 证明证明是不是update先回来？ update数据是米有name字段的
+					if (cur && !cur.get('name')) {
+						state = state.set(val.id, cur.merge(Immutable.fromJS(val)));
+					} else {
+						state = state.set(val.id, Immutable.fromJS(val));
+					}
 					ids.push(val.id);
 				}
 			}
@@ -29,8 +37,12 @@ export default {
 			if (arrData && arrData.length) {
 				for(let val of arrData) {
 					let cur = state.get(val.id);
+					// 这里在更新数据的时候，如果发现数据的 add还没回来，先回来得时 update，则先将update数据保存
+					// 但是这个时候没有 seq对象，所以迭代不出这条数据，只有等add发生有seq的时候才能迭代
 					if (cur) {
 						state = state.set(val.id, cur.merge(Immutable.fromJS(val)));
+					} else {
+						state = state.set(val.id, Immutable.fromJS(val));
 					}
 				}
 			}

@@ -131,6 +131,7 @@ export default class DataList extends Component {
 		let data = monitorList.get(rowIndex);
 		let result;
 		let status = data.get("status") || "";
+		let name = data.get("name") || "";
 		let className = cs({
 			 "wrong_color": wrongCodeReg.test(status),
 			 "row_select": this.state.rowSelect === rowIndex
@@ -141,18 +142,19 @@ export default class DataList extends Component {
 			if (result === undefined || result === null) {
 				result = "Pending";
 			}
-		} else if (key === 'domain') {
-			result = (data.get("name") || "").match(getDomainReg);
+		} else if (key === 'domain') { 
+			result = name.match(getDomainReg);
 			if (result && result.length > 0) {
 				result = result[1];
 			} else {
-				result = "";
+				result = name;
 			}
 		} else {
 			result = data.get(key);
 		}
 		let myProp = {...props};
 		if (key === 'name') {
+			// 增加url tip提示
 			myProp['data-tip'] = result;
 		}
 		return (
@@ -238,17 +240,28 @@ export default class DataList extends Component {
 				text: "复制域名",
 				eventKey: "copyDomain",
 				copy: domain
-			},{
-				divider: true
-			},{
-				text: "复制请求头",
-				eventKey: "copyReqHeader",
-				copy: data.get('reqHeaders').toJS()
-			},{
-				text: "复制响应头",
-				eventKey: "copyResHeader",
-				copy: data.get('resHeaders').toJS()
 			}];
+			let reqHeaders = data.get('reqHeaders');
+			let resHeaders = data.get('resHeaders');
+			if (reqHeaders) {
+				menus.push({
+					text: "复制请求头",
+					eventKey: "copyReqHeader",
+					copy: reqHeaders.toJS()
+				});
+			}
+			if (resHeaders) {
+				menus.push({
+					text: "复制响应头",
+					eventKey: "copyResHeader",
+					copy: data.get('resHeaders').toJS()
+				});
+			}
+			if (menus.length >= 3) {
+				menus.splice(2, 0, {
+					divider: true
+				});
+			}
 			this.context.openRightMenu({
 				left: e.clientX,
 				top: e.clientY,
@@ -376,7 +389,7 @@ export default class DataList extends Component {
 	}
 	closeDetailCon() {
 		let {rowSelect} = this.state;
-		if (rowSelect && rowSelect != -1) {
+		if (rowSelect > -1) {
 			this.setState({
 				rowSelect: -1
 			});

@@ -84,9 +84,6 @@ class ConInfo extends Component {
 		let reqHeads = data.get('reqHeaders');
 		// 响应头
 		let resHeaders = data.get('resHeaders');
-		// 请求contentType --- 什么情况下有？？ post请求，或者表单提交
-		let reqContentType = reqHeads.get("content-type") || "";
-		let resContentType = resHeaders.get("content-type") || "";
 		let name = data.get('name') || "";
 
 		let general = {

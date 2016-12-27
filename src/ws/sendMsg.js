@@ -32,17 +32,18 @@ export let addMonitor = (data) => {
 		log.error("清先初始化monitor");
 		return;
 	}
-	if (typeof data === 'object' && data.id >= 0) {
+	if (typeof data === 'object' && data.id) {
 		addMonitorArr.push(data);
 	}
 	if (addMonitorTimer) {
 		clearTimeout(addMonitorTimer);
 	}
+	// 延迟比 update短点，保证先触发，如果后触发前端也会有特殊处理
 	addMonitorTimer = setTimeout(() => {
 		let data = addMonitorArr;
 		addMonitorArr = [];
 		sendAddMonitor(data);
-	}, 300);	
+	}, 100);	
 };
 
 export let updateMonitor = (data) => {
@@ -50,7 +51,7 @@ export let updateMonitor = (data) => {
 		log.error("清先初始化monitor");
 		return;
 	}
-	if (typeof data === 'object' && data.id >= 0) {
+	if (typeof data === 'object' && data.id) {
 		updateMonitorArr.push(data);
 	}
 	if (updateMonitorTimer) {
@@ -60,7 +61,7 @@ export let updateMonitor = (data) => {
 		let data = updateMonitorArr;
 		updateMonitorArr = [];
 		sendUpdateMonitor(data);
-	}, 300);
+	}, 200);
 };
 
 // 启动项目的时候需要  群发一个消息，清除掉当前页面的记录，否则id会冲突--- 为了以防万一，id前面带个随机数？？

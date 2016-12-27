@@ -1,6 +1,7 @@
 'use strict';
 import http from 'http';
 import https from 'https';
+import extendMime from './extendMime';
 import defCfg from './config/defCfg';
 import configInit, * as config from './config/config';
 import merge from 'merge';

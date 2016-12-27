@@ -53,7 +53,7 @@ fse.emptyDirSync(fileCache);
  */
 let detailMultipartData = function(contentType, bodyData) {
 	contentType = contentType || "";
-	var key  = contentType.split("boundary=");
+	var key  = contentType.toLowerCase().split("boundary=");
 	if (key && key.length > 0) {
 		let reg = /Content-Disposition\s*:\s*form-data;.+;\s*filename=.*/gi;
 		let isContentType = /^Content-Type.*/i;
@@ -166,6 +166,8 @@ export default function(catproxy) {
 			monitorList[result.id] = {
 				startTime: addMontiorData.startTime
 			};
+			// startTime不需要传递到前端
+			delete addMontiorData.startTime;
 			// 调用数据增加
 			addMonitor(addMontiorData);				
 		}
@@ -206,20 +208,18 @@ export default function(catproxy) {
 	catproxy.onPipeRequest(result => {
 		// 后面判断带得协议不准确，但是仅仅是为了通过正则，测试，正则中并不关系，请求的类型是ws还是wss
 		if (result && result.id && config.get('monitor:monitorStatus') && !checkIsInnerServer(`ws://${result.host}`)) {
-			if (result.protocol === 'ws' || result.protocol === 'wss'){
-				let addMontiorData = {
-					id: result.id,
-					name: (result.host || "").split(":")[0],
-					protocol: result.protocol,
-					method: "CONNECT",
-					time: "-",
-					status: 200,
-					size: 0,
-					type: "ws"
-				};	
-				// 调用数据增加
-				addMonitor(addMontiorData);					
-			}
+			let addMontiorData = {
+				id: result.id,
+				name: (result.host || "").split(":")[0],
+				protocol: result.protocol,
+				method: "CONNECT",
+				time: "-",
+				status: 200,
+				size: 0,
+				type: result.protocol === 'ws' || result.protocol === 'wss' ? "ws" : "other"
+			};
+			// 调用数据增加
+			addMonitor(addMontiorData);
 		}
 	});
 };

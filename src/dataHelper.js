@@ -12,7 +12,7 @@ var checkMetaCharset = /<meta(?:\s)+.*charset(?:\s)*=(?:[\s'"])*([^"']+)/i;
 const isFont = /(^font\/.+)|(^application\/x-font.+)|(^application\/font.+)/;
 const isDataUrl = /^data:.+/;
 const isImage = /^image\/.+/;
-const isMedia = /(^video\/.+)|(^video\/.+)/;
+const isMedia = /(^video\/.+)|(^audio\/.+)/;
 // 解压数据
 export const decodeCompress = (bodyData, encode) =>{
 	if (!Buffer.isBuffer(bodyData) || !encode) {
