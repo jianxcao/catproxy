@@ -70,11 +70,15 @@ class ConInfo extends Component {
 		};
 		// 设置state上的默认大小
 		this._stateSize();
-		let {sendFetchConData, data} = this.props;
+		let {sendFetchConData, data, sendLoadingConData} = this.props;
 		let id = data.get('resBodyDataId');
 		// 首次进入的时候发送请求
 		if (id) {
 			sendFetchConData(id);
+		} else {
+			if (!status) {
+				sendLoadingConData(true);
+			}
 		}
 	}
 	componentWillReceiveProps (nextProps) {
@@ -83,7 +87,7 @@ class ConInfo extends Component {
 		let {data, sendFetchConData, sendLoadingConData, loading} = this.props;
 		let loadingConData = loading.get('loadingConData');
 		let newData = nextProps.data;
-		let status = data.get('status');
+		let newStatus = newData.get('status');
 		// 旧id
 		let oldId = data.get('resBodyDataId');
 		let id = newData.get('resBodyDataId');
@@ -96,7 +100,7 @@ class ConInfo extends Component {
 			}
 		} else {
 			// status没有取到代表请求没有加载 完毕- 变成加载中
-			if (!status) {
+			if (!newStatus) {
 				if (!loadingConData) {
 					sendLoadingConData(true);
 				}
