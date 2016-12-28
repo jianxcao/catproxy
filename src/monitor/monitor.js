@@ -6,7 +6,7 @@ import merge from 'merge';
 import isbinaryfile from 'isbinaryfile';
 import crypto from 'crypto';
 import {cacheFile} from './cacheFile';
-import {isBinary, getReqType} from '../dataHelper';
+import {isBinary, getReqType, isImage} from '../dataHelper';
 import {addMonitor, updateMonitor} from '../ws/sendMsg';
 import * as config from '../config/config';
 // 当前监控数据-- 记录文件的url和 resBodyData的文件生成的md5值
@@ -170,12 +170,18 @@ export default function(catproxy) {
 				let fileName;
 				let resBodyData;
 				if (bodyData && bodyData.length) {
-					let md5 = crypto.createHash('md5');
-					md5.update(bodyData);
-					fileName = md5.digest('hex');
-					fileName = resBodyName + fileName;
-					// 缓存文件
-					cacheFile(fileName, bodyData);
+					let contentType = result.headers['content-type'];
+					// 是二进制数据并且是图片，或者不是二进制数据
+					if (!result.isBinary || (result.isBinary && isImage.test(contentType))) {
+						let md5 = crypto.createHash('md5');
+						md5.update(bodyData);
+						fileName = md5.digest('hex');
+						fileName = resBodyName + fileName;
+						// 缓存文件
+						cacheFile(fileName, bodyData);
+					} else {
+						resBodyData = "二进制数据!!!";
+					}
 				} else {
 					if (result.bodyDataErr) {
 						resBodyData = result.bodyDataErr;

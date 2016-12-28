@@ -9,10 +9,10 @@ import path from 'path';
 // <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 var checkMetaCharset = /<meta(?:\s)+.*charset(?:\s)*=(?:[\s'"])*([^"']+)/i;
 
-const isFont = /(^font\/.+)|(^application\/x-font.+)|(^application\/font.+)/;
-const isDataUrl = /^data:.+/;
-const isImage = /^image\/.+/;
-const isMedia = /(^video\/.+)|(^audio\/.+)/;
+export const isFont = /(^font\/.+)|(^application\/x-font.+)|(^application\/font.+)/;
+export const isDataUrl = /^data:.+/;
+export const isImage = /^image\/.+/;
+export const isMedia = /(^video\/.+)|(^audio\/.+)/;
 // 解压数据
 export const decodeCompress = (bodyData, encode) =>{
 	if (!Buffer.isBuffer(bodyData) || !encode) {
@@ -90,7 +90,7 @@ export const getReqType = (result) => {
 		type = "mainifest";
 	} else if (result.protocol === "ws" || result.protocol == "wss") {
 		type = "ws";
-	} else if (isFont.test(contentType)) {
+	} else if (isFont.test(contentType) || ext === 'ttf' || ext ==='woff' ) { // svg不能算是字体文件，因为svg可能是别的文件
 		// font/woff2  application/x-font-ttf 2种都是font
 		type = "font";
 	} else if (ext === 'js' || ext === 'jsx' || ext === 'es6'|| ext === 'json' || ext === 'map') {

@@ -23,7 +23,9 @@ const initialState = new Immutable.fromJS({
 	loading: {
 		loadingPage: true,
 		loadingConData: false
-	}
+	},
+	// 当前resBodydata的数据是个 arrayBuffer- utf-8编码
+	curConDetailData: null
 });
 // 组合所有reducers 
 let reducer = combineReducers(reducers);

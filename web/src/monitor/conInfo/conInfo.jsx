@@ -7,8 +7,10 @@ import DargResize from './dargResize';
 import {Provider,connect } from 'react-redux';
 import {bindActionCreators} from 'redux';
 import {fetchConData} from '../action/fetchAction';
+import {loadingConData} from '../action/loadingAction';
 import Loading from '../loading';
 import cx from 'classnames';
+import Immutable, {List, Map} from 'immutable';
 const isImage = /^image\/.+/;
 const defStyle = {
 	width: 600,
@@ -35,7 +37,11 @@ class ConInfo extends Component {
 		height: PropTypes.number.isRequired,
 		onDargResize: PropTypes.func,
 		data: PropTypes.object.isRequired,
-		destory: PropTypes.func.isRequired
+		destory: PropTypes.func.isRequired,
+		sendFetchConData: PropTypes.func,
+		sendLoadingConData: PropTypes.func,
+		// style: null,
+		// className: null,
 	};
 	static defaultProps = {
 	}
@@ -44,17 +50,77 @@ class ConInfo extends Component {
 		closeRightMenu: PropTypes.func.isRequired
 	}
 	
-	componentWillMount () {
+	_stateSize() {
 		let {width, height} = this.props;
 		width = +width || defStyle.width;
 		height = +height || defStyle.height;
-
-		this.state = {
+		this.setState({
 			width,
 			height,
-			currentTab: 0
+		});		
+	};
+
+	componentWillMount () {
+		// 设置默认state
+		this.state = {
+			currentTab: 0,
+			resBodyData: null,
+			// 加载状态默认是一个map
+			loading: new Map(),
 		};
+		// 设置state上的默认大小
+		this._stateSize();
+		let {sendFetchConData, data} = this.props;
+		let id = data.get('resBodyDataId');
+		// 首次进入的时候发送请求
+		if (id) {
+			sendFetchConData(id);
+		}
 	}
+	componentWillReceiveProps (nextProps) {
+		// 更新state上的width和height
+		this._stateSize();
+		let {data, sendFetchConData, sendLoadingConData, loading} = this.props;
+		let loadingConData = loading.get('loadingConData');
+		let newData = nextProps.data;
+		let status = data.get('status');
+		// 旧id
+		let oldId = data.get('resBodyDataId');
+		let id = newData.get('resBodyDataId');
+		// 存在id，数据有 resbodyData
+		if (id) {
+			// 去加载数据
+			// 判断当前并不是一个相同的id则直接从新加载数据
+			if(id && id !== oldId ) {
+				sendFetchConData(id);
+			}
+		} else {
+			// status没有取到代表请求没有加载 完毕- 变成加载中
+			if (!status) {
+				if (!loadingConData) {
+					sendLoadingConData(true);
+				}
+			} else {
+				// 没有取到id, 并且当前状态是加载中，这个时候重置成 非加载中，因为不需要加载，只有有id的时候才需要加载
+				if (loadingConData) {
+					sendLoadingConData(false);
+				}
+			}
+		}
+	}
+
+	shouldComponentUpdate (nextProps, nextState) {
+		// let state = this.state;
+		// let props = this.props;
+		// return state.width !== nextState.width ||
+		// 			 state.height !== nextState.height ||
+		// 			 state.currentTab !== nextState.currentTab ||
+		// 			 state.resBodyData !== nextState.resBodyData ||
+		// 			 props.className !== props.className ||
+		return true;
+
+	}
+	
 	// 拖拽改变详情的大小
 	_onDargResize(dargWidth, dargHeight) {
 		let {width} = this.state;
@@ -132,42 +198,54 @@ class ConInfo extends Component {
 		}
 		return headers;
 	}
-	
 	// 渲染 响应的body数据
 	renderResponse() {
-		let {data, sendFetchConData, resBodyData} = this.props;
+		let {data, resBodyData, loading} = this.props;
 		let id = data.get('resBodyDataId');
 		let bodyData = data.get('resBodyData');
 		let isResinary = data.get('isResinary');
 		let resHeaders = data.get('resHeaders');
+		let loadingConData = loading.get('loadingConData');
 		let body = [];
 		// 这种情况可能是 文件过大，没有返回或者返回内容是空
 		// bodyData肯定是个字符串
 		if (bodyData !== null && bodyData !== undefined) {
-			return bodyData;
+			if (bodyData === '') {
+				bodyData = "数据为空";
+			}
+			return <span className="dataNoParse">{bodyData}</span>;
 		}
-		// 数据已经加载成功
-		if (resBodyData) {
+		let defText = "二进制数据，无法查看";
+		// 数据已经单独冲后台加载成功 -- 并且就是当前打开tab得数据
+		if (resBodyData && resBodyData.data && resBodyData.id && resBodyData.id === id) {
+			let t = typeof resBodyData.data;
 			// 二进制数据 - 看看是不是 图片如果是图片就 处理图片，否则就返回不认识
 			// 不存在id表示数据没有在后天存在
 			if (isResinary) {
 				if (resHeaders) {
 					let contentType = resHeaders.get("content-type");
 					if (isImage.test(contentType)) {
-						return "图片文件";
+						let blob = new Blob([new Int8Array(resBodyData.data)], {'type': contentType});
+						let myURl = URL.createObjectURL(blob);
+						return (
+							<div className="imagePreview">
+								<img src={myURl} />
+							</div>
+						);
+					} else {
+						return defText;
 					}
 				}
-				return "二进制数据，无法查看";
+				return defText;
+			} else {
+				return t === "string" ? resBodyData.data : defText;
 			}
 		}
-		// 去加载数据
-		if (id) {
-			sendFetchConData(id);
+		if (loadingConData) {
 			return <Loading className="pageLoading" />;
-		}		
+		}	
 		return body;
 	}
-
 	// 渲染
 	render() {
 		let result;
@@ -199,12 +277,14 @@ class ConInfo extends Component {
 
 function mapStateToProps(state) {
 	return {
-		resBodyData: state.get('resBodyData')
+		loading: state.get('loading'),
+		resBodyData: state.get('curConDetailData')
 	};
 }
 
 function mapDispatchToProps(dispatch) {
 	return {
+		sendLoadingConData: bindActionCreators(loadingConData, dispatch),
 		sendFetchConData: bindActionCreators(fetchConData, dispatch)
 	};
 }

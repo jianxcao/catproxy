@@ -31,6 +31,8 @@ function* fetchCfg(action) {
 };
 
 function* fetchConData(action) {
+	// 先显示加载
+	yield put(loadingConData(true));
 	try {
 		// 只是发送请求，接受数据由ws中得getConDetail 接受
 		yield getConDetail(action.payload);;

@@ -1,8 +1,8 @@
 import Immutable, {OrderedMap, Map, List} from 'immutable';
 import keys from 'lodash/keys';
 import camelCase from 'lodash/camelCase';
-import {handleActions} from 'redux-actions';
-import monitorListType from "../action/monitorListType";
+import {handleActions, handleAction} from 'redux-actions';
+import monitorListType, {CUR_CON_DETAIL_DATA} from "../action/monitorListType";
 export default {
 	monitorList: handleActions({
 			// 增加数据
@@ -53,5 +53,13 @@ export default {
 			// 直接清空所有数据
 			return new Map();
 		}
-	}, [])
+	}, []),
+	curConDetailData: handleAction(CUR_CON_DETAIL_DATA, (state, {payload: data}) => {
+		// 出错  data 是错误字符串
+		// 正确  data是 {
+		// 	id： id
+		// 	data：data
+		// }
+		return data;
+	}, null)
 };

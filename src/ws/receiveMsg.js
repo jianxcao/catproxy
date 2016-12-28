@@ -103,10 +103,12 @@ export let getConDetail = (msg = {param: {}}, ws = {}) => {
 	if (id) {
 		getCacheFile(id)
 		.then(data => {
-			sendConnDetail(data);
+			sendConnDetail({
+				id,
+				data
+			});
 		});
 	}
-	return  success('收到消息');
 };
 
 export let saveConfig = (msg = {}, ws = {}) => {

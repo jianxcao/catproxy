@@ -258,7 +258,13 @@ var beforeRes = async function(resInfo) {
 var afterRes = function(result) {
 	let catProxy = this.catProxy;
 	if (catProxy && catProxy._afterResEvt.length) {
-		catProxy._afterResEvt.forEach(current => current.call(this, result));
+		catProxy._afterResEvt.forEach(current => {
+			try{ 
+				current.call(this, result);
+			} catch (e) {
+				log.error(e);
+			}
+		});
 	}
 	return result;
 };

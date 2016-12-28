@@ -6,6 +6,7 @@ import Promise from 'promise';
 import merge from 'merge';
 import isbinaryfile from 'isbinaryfile';
 import crypto from 'crypto';
+import {isBinary} from '../dataHelper';
 export const fileCache = path.resolve('./fileCache');
 // 数据库缓存大小
 // 确定db目录存在
@@ -59,15 +60,16 @@ export let cacheFile = async (id, data) => {
 };
 /**
  * id 文件名称
+ * encode指定编码打开文件
  */
-export let getCacheFile = (id) => {
+export let getCacheFile = (id, encode) => {
 	return new Promise(function(resolve, reject) {
 		let filePath = path.resolve(fileCache, id);
 		fs.readFile(filePath, (err, data) => {
 			if (err) {
-				reject(err);
+				reject(err.message);
 			};
-			resolve(data);
+			resolve(isBinary(data) ? data : data.toString());
 		});		
 	});
 };

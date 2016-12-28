@@ -22,9 +22,7 @@ let isStartHttps = /https/;
 import {beforeReq, afterRes, beforeRes} from './evt';
 // 发送代理请求钱触发
 let triggerBeforeRes = function(resInfo) {
-	let info = merge({}, resInfo);
-	delete info.res;
-	return beforeRes.call(this, info).then(result => {
+	return beforeRes.call(this, resInfo).then(result => {
 		return merge(resInfo, result);
 	});
 };
@@ -93,7 +91,7 @@ let detailHost = function(result, reqInfo, resInfo) {
 		});
 	}, err => {
 		let {res} = resInfo;
-		return triggerBeforeRes.call(com, merge({statusCode: 504}, resInfo, {bodyDataErr: err, headers: {}}))
+		return triggerBeforeRes.call(com, merge(resInfo, {statusCode: 504}, {bodyDataErr: err, headers: {}}))
 		.then(() => {
 			return Promise.reject(err);
 		});
@@ -166,7 +164,7 @@ let proxyReq = function(options, reqInfo, resInfo, req) {
 					let bodyData = null;
 					let bodyDataErr = err.message;
 					// 提前触发事件
-					return triggerBeforeRes.call(com, merge({}, resInfo, {bodyData, bodyDataErr}));					
+					return triggerBeforeRes.call(com, merge(resInfo, {bodyData, bodyDataErr}));					
 				} else {
 					res.write(chunk);
 				}
@@ -181,7 +179,7 @@ let proxyReq = function(options, reqInfo, resInfo, req) {
 			.then((bodyData) => {
 				// 文件大小没有出错的情况下
 				if (!isError) {
-					return triggerBeforeRes.call(com, merge({}, resInfo, {bodyData}))
+					return triggerBeforeRes.call(com, merge(resInfo, {bodyData}))
 						.then((resInfo) => {
 							let {statusCode, headers, bodyData} = resInfo;
 							headers['remote-url'] = querystring.escape(remoteUrl);
@@ -270,6 +268,7 @@ let remote = function(reqInfo, resInfo) {
 	});
 };
 export default function(reqInfo, resInfo){
+	// /******不要尝试取修改 resInfo的引用，会导致 isBinary取不到***************/
 	let self = this;
 	let res = resInfo.res;
 	let req = reqInfo.req;
@@ -359,6 +358,11 @@ export default function(reqInfo, resInfo){
 				writable: false,
 				value: id,
 				enumerable: true
+			},
+			isBinary: {
+				writable: false,
+				value: resInfo.isBinary,
+				enumerable: true			
 			}
 		});
 		return afterRes.call(self, result);

@@ -129,8 +129,19 @@
 		.response{
 			position: relative;
 			height: 100%;
+			.dataNoParse{
+				font-size: 32px;
+				padding: 10px;
+			}
 			.loading{
 				position: absolute;
+			}
+			.imagePreview{
+				text-align: center;
+				margin-top: 30px;
+				img{
+					display: inline-block;
+				}
 			}
 		}
 	}
@@ -140,6 +151,7 @@
 		left: 0;
 		height: 100%;
 		width:6px;
+		z-index: 6;
 		background: transparent;
 		&:hover{
 			cursor: ew-resize;
