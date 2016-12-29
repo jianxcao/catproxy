@@ -1,6 +1,6 @@
 import {Table, Column, Cell}  from 'fixed-data-table';
 import ReactDom, {render} from 'react-dom';
-import React, {PropTypes, Component, Children } from 'react';
+import React, {PropTypes, Component, Children, cloneElement} from 'react';
 import HeaderCell from './headerCell';
 import {computeColumnWidth, adjustColumnWidth} from './cellWidthHelper';
 import style from "fixed-data-table/dist/fixed-data-table-base.css";
@@ -13,6 +13,9 @@ import ConInfo from './conInfo/conInfo';
 const clsChec = /[^\x20\t\r\n\f]+/g ;
 const getDomainReg = /:\/\/([^:\/]+)/;
 const wrongCodeReg = /(^4)|(^5).+/;
+const conInfostyle = {
+	top: 66
+};
 export default class DataList extends Component {
 	constructor(props) {
 		super(props);
@@ -26,8 +29,7 @@ export default class DataList extends Component {
 		this._onHeaderCellMouseDown = this._onHeaderCellMouseDown.bind(this);
 		this._changeFilterList = this._changeFilterList.bind(this);
 		this._onScrollStart = this._onScrollStart.bind(this);
-		this._onDargDetailResize = this._onDargDetailResize.bind(this);
-		this.closeDetailCon = this.closeDetailCon.bind(this);
+		this._closeDetailCon = this._closeDetailCon.bind(this);
 		// 打开详情的宽度
 		this._conInfoWidth = null;
 	
@@ -44,8 +46,7 @@ export default class DataList extends Component {
 	static defaultProps = {
 		minCellWidth: 80,
 		minTableWidth: 800,
-		minTableHeight: 500,
-		rowSelect: -1
+		minTableHeight: 500
 	}
 	static contextTypes = {
 		openRightMenu: PropTypes.func.isRequired,
@@ -53,6 +54,9 @@ export default class DataList extends Component {
 	}
 	componentWillMount() {
 		this.init();
+		this.ConInfo = <ConInfo 
+					style={conInfostyle} 
+					data={{}} destory= {this._closeDetailCon}></ConInfo>;
 	}
 	
 	componentDidMount() {
@@ -64,11 +68,19 @@ export default class DataList extends Component {
 		} else {
 			win.onresize = this._onResize;
 		}
-		let width = +localStorage.getItem('conInfoWidth');
-		if (width > 0) {
-			this._conInfoWidth = width;
+		this._mountNode = document.createElement('div');
+		this._mountNode.className = "conInfoWrap";
+		document.body.appendChild(this._mountNode);
+	}
+	componentWillUnmount () {
+		if (this._mountNode) {
+			if (this._conInfoInstance) {
+				this._closeDetailCon();
+			}
+			document.body.removeChild(this._mountNode);
 		}
 	}
+	
 	componentDidUpdate(prevProps, prevState) {
 		// 组件更新后保存宽度
 		let refs = this.refs;
@@ -85,7 +97,7 @@ export default class DataList extends Component {
 	init() {
 		let tableWidth = window.innerWidth;
 		let tableHeight = window.innerHeight;
-		let {filterListFeild, minCellWidth, minTableHeight, rowSelect} = this.props;
+		let {filterListFeild, minCellWidth, minTableHeight} = this.props;
 		let showFeild;
 		// 从本地取到列，要显示的列和列的宽度
 		let customColums = localStorage.getItem("customColums");
@@ -105,25 +117,34 @@ export default class DataList extends Component {
 			showFeild = computeColumnWidth(filterListFeild, minCellWidth, tableWidth);
 		}
 		tableHeight = Math.max(tableHeight - 66, minTableHeight);
-		rowSelect = + rowSelect;
-		if (!(rowSelect > -1)) {
-			rowSelect = -1;
-		}		
 		this.state = {
 			tableHeight: tableHeight,
 			tableWidth: tableWidth,
 			hoverIndex: -1,
 			customColums: showFeild,
-			rowSelect
+			rowSelect: -1
 		};
 	}
 	componentWillReceiveProps (nextProps) {
-		let {monitorList} = this.props;
-		if (monitorList.size === 0) {
+		let {monitorList, monitorStatus} = nextProps;
+		let {rowSelect} = this.state;
+		if (!monitorList || monitorList.size === 0 || !monitorStatus) {
+			rowSelect = -1;
 			this.setState({
-				rowSelect: -1
+				rowSelect
 			});
+			this._closeDetailCon();
 		}
+		// 不是监控状态，如果 详情打开则关闭详情
+		if (rowSelect > -1) {
+			let newData = monitorList.get(rowSelect);
+			let oldData = this.props.monitorList.get(rowSelect);
+			// 如果当前打开详情页面的数据发生了变化则从新渲染详情
+			if (newData && oldData && !newData.equals(oldData)) {
+				this._renderConInfo(newData);
+			}
+		}
+		
 	}
 	
 	getTextCell ({rowIndex, columnKey: key, ...props}) {
@@ -193,15 +214,16 @@ export default class DataList extends Component {
 		}
 		let newHeight = win.innerHeight - 66;
 		newHeight = Math.max(newHeight, minTableHeight);
-		if (newHeight === tableHeight && newWidth === tableWidth) {
-			return this;
+		let s = {};
+		if (newHeight !== tableHeight) {
+			 s.tableHeight = newHeight;
+		}
+		if (newWidth !== tableWidth) {
+			s.tableWidth = newWidth;
+			s.customColums = adjustColumnWidth(customColums, minCellWidth, newWidth);
 		}
 		// 从新更新一次tab的height
-		this.setState({
-			tableWidth: newWidth,
-			tableHeight: newHeight,
-			customColums: adjustColumnWidth(customColums, minCellWidth, newWidth)
-		});
+		this.setState(s);
 	}
 	// 鼠标悬浮行
 	_onRowMouseEnter(e, index) {
@@ -275,8 +297,33 @@ export default class DataList extends Component {
 			this.setState({
 				rowSelect: index
 			});
+			if (data) {
+				this._renderConInfo(data);
+			}
 		}
 	}
+	// 渲染conInfo
+	_renderConInfo(data) {
+		let detail = "";
+		let width = this._conInfoWidth;
+		if (data) {
+			detail = cloneElement(this.ConInfo, {data});
+			// 先关闭上一个
+			this._closeDetailCon();
+			let conInfoInstance = ReactDom.unstable_renderSubtreeIntoContainer(
+				this, detail, this._mountNode
+			);
+			this._conInfoInstance = conInfoInstance;
+		}
+		
+	}
+	// 关闭conInfo
+	_closeDetailCon() {
+		if (this._mountNode && this._conInfoInstance) {
+			ReactDom.unmountComponentAtNode(this._mountNode);
+			this._conInfoInstance = null;
+		}
+	}	
 	// 修改显示字段
 	_changeFilterList(e) {
 		let ele = e.target;
@@ -377,24 +424,7 @@ export default class DataList extends Component {
 		closeRightMenu();
 		return false;
 	}
-	// 详情页面拖拽改大小
-	_onDargDetailResize(width) {
-		this._conInfoWidth = width;
-		if (this.__dargDetailResizeTimer) {
-			window.clearTimeout(this.__dargDetailResizeTimer);
-		}
-		this.__dargDetailResizeTimer = window.setTimeout(() => {
-			localStorage.setItem('conInfoWidth', this._conInfoWidth);
-		}, 500);
-	}
-	closeDetailCon() {
-		let {rowSelect} = this.state;
-		if (rowSelect > -1) {
-			this.setState({
-				rowSelect: -1
-			});
-		}
-	}
+
 	render() {
 		let {tableWidth, tableHeight, customColums, rowSelect} = this.state;
 		let {monitorStatus, monitorList} = this.props;
@@ -427,22 +457,6 @@ export default class DataList extends Component {
 			);
 			return all;
 		}, []);
-		let detail = "";
-		if (rowSelect > -1 && rowSelect < monitorList.size) {
-			let data = monitorList.get(rowSelect);
-			let width = this._conInfoWidth || parseInt(window.innerWidth * 0.5);
-			let style = {
-				top: 66
-			};
-			if (data) {
-				detail = 	<ConInfo 
-					width={width} 
-					height={tableHeight} 
-					style={style} 
-					onDargResize={this._onDargDetailResize} 
-					data={data} destory= {this.closeDetailCon}></ConInfo>;
-			}
-		}
 		return (
 			<div className="dataList">
 				<Table
@@ -459,7 +473,6 @@ export default class DataList extends Component {
 					height={tableHeight}>
 					{col}
 				</Table>
-				{detail}
 			</div>
 		);
 	}

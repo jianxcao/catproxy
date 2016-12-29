@@ -28,16 +28,19 @@
 }
 
 .conInfo{
-	position: absolute;
+	position: fixed;
 	top:0;
 	right:0;
 	min-width: 300px;
 	min-height: 300px;
+	height: 100%;
+	height: calc(~"100% - 30px");
+	width: 60%;
 	z-index: 5;
 	border-width: 1px;
 	border-style: solid;
 	margin-top:-2px;
-	overflow: auto;
+	overflow: hidden;
 	min-width: 300px;
 	border-bottom: 0px;
 	.closeBtn{
@@ -80,6 +83,9 @@
 		// 头部tab
 		.headers{
 			margin-left: 10px;
+			overflow: auto;
+			height: 100%;
+			position: relative;
 			.viewHeader{
 				border:1px solid transparent;
 				&:first-child{
@@ -128,6 +134,7 @@
 		}
 		.response{
 			position: relative;
+			overflow: auto;
 			height: 100%;
 			.dataNoParse{
 				font-size: 32px;

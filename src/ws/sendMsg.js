@@ -61,7 +61,7 @@ export let updateMonitor = (data) => {
 		let data = updateMonitorArr;
 		updateMonitorArr = [];
 		sendUpdateMonitor(data);
-	}, 150);
+	}, 15000);
 };
 // 发送监控详情数据
 export let sendConnDetail = (data) => {

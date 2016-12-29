@@ -32,11 +32,10 @@ let reducer = combineReducers(reducers);
 const sagaMiddleware = createSagaMiddleware();
 // 创建带有 调试和各种中间件的stroe
 let middleware = [thunk, promise, sagaMiddleware];
-middleware.push(createLogger());
 
-// if (window.config.env === 'dev') {
-// 	middleware.push(createLogger());
-// }
+if (window.config.env === 'dev') {
+	middleware.push(createLogger());
+}
 let store = createStore(reducer, initialState, compose(applyMiddleware(...middleware),
 	window.devToolsExtension ? window.devToolsExtension() : f => f
 ));

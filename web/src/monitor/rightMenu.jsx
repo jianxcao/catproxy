@@ -61,7 +61,7 @@ export default class RightMenu extends Component{
 		};
 		let copyItem = "";
 		if (document.getSelection && document.getSelection().toString() !== "") {
-			copyItem = <MenuItem  key="copy" eventKey="copy" data-index="copy" onSelect={this._onSelect}>&nbsp;&nbsp;&nbsp;&nbsp;复制</MenuItem>;
+			copyItem = <MenuItem  key="copy" eventKey="copy" data-index="copy" className="copy" onSelect={this._onSelect}>&nbsp;&nbsp;&nbsp;&nbsp;复制</MenuItem>;
 		}
 		let items = [];
 		// 直接传递了一个  react Element

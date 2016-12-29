@@ -13,8 +13,6 @@ import cx from 'classnames';
 import Immutable, {List, Map} from 'immutable';
 const isImage = /^image\/.+/;
 const defStyle = {
-	width: 600,
-	height: 300,
 	top: 0,
 	right: 0
 };
@@ -33,15 +31,13 @@ class ConInfo extends Component {
 	 * }
 	 */
 	static propTypes = {
-		width: PropTypes.number.isRequired,
-		height: PropTypes.number.isRequired,
+		width: PropTypes.number,
+		height: PropTypes.number,
 		onDargResize: PropTypes.func,
 		data: PropTypes.object.isRequired,
 		destory: PropTypes.func.isRequired,
 		sendFetchConData: PropTypes.func,
-		sendLoadingConData: PropTypes.func,
-		// style: null,
-		// className: null,
+		sendLoadingConData: PropTypes.func
 	};
 	static defaultProps = {
 	}
@@ -51,24 +47,30 @@ class ConInfo extends Component {
 	}
 	
 	_stateSize() {
+		let w = +localStorage.getItem('conInfoWidth') || window.innerWidth * 0.6;
 		let {width, height} = this.props;
-		width = +width || defStyle.width;
-		height = +height || defStyle.height;
-		this.setState({
-			width,
-			height,
-		});		
+		width = +width || w;
+		height = +height;
+		let s = {};
+		if (width) {
+			s.width = width;
+		}
+		if (height) {
+			s.height = height;
+		}
+		this.setState(s);		
 	};
 
 	componentWillMount () {
+		let currentTab = +localStorage.getItem('conInfoCurrentTab') || 0;		
 		// 设置默认state
 		this.state = {
-			currentTab: 0,
+			currentTab,
 			resBodyData: null,
 			// 加载状态默认是一个map
 			loading: new Map(),
 		};
-		// 设置state上的默认大小
+		// 将props上的width和height防盗state上
 		this._stateSize();
 		let {sendFetchConData, data, sendLoadingConData} = this.props;
 		let id = data.get('resBodyDataId');
@@ -112,29 +114,23 @@ class ConInfo extends Component {
 			}
 		}
 	}
-
-	shouldComponentUpdate (nextProps, nextState) {
-		// let state = this.state;
-		// let props = this.props;
-		// return state.width !== nextState.width ||
-		// 			 state.height !== nextState.height ||
-		// 			 state.currentTab !== nextState.currentTab ||
-		// 			 state.resBodyData !== nextState.resBodyData ||
-		// 			 props.className !== props.className ||
-		return true;
-
-	}
-	
 	// 拖拽改变详情的大小
 	_onDargResize(dargWidth, dargHeight) {
 		let {width} = this.state;
+		let winWidth = window.innerWidth;
 		let {onDargResize} = this.props;
 		width = width + dargWidth;
-		let winWidth = window.innerWidth;
 		if (winWidth - width > 100) {
 			this.setState({
 				width: width
 			});
+			// 保存到本地
+			if (this.__saveTimerConInfoWidth) {
+				window.clearTimeout(this.__saveTimerConInfoWidth);
+			}
+			this.__saveTimerConInfoWidth = window.setTimeout(function() {
+				localStorage.setItem('conInfoWidth', width + "");
+			}, 400);
 			if (onDargResize) {
 				onDargResize(width);
 			}
@@ -151,6 +147,7 @@ class ConInfo extends Component {
 		let id = target.getAttribute("data-id");
 		id = +id;
 		if (id >= 0) {
+			localStorage.setItem('conInfoCurrentTab', id + "");
 			this.setState({
 				currentTab: id
 			});
@@ -160,6 +157,9 @@ class ConInfo extends Component {
 	renderHeaders () {
 		let {data} = this.props;
 		let headers = [];
+		if (!data.get) {
+			return headers;
+		}
 		// 请求头
 		let reqHeads = data.get('reqHeaders');
 		// 响应头
@@ -205,6 +205,9 @@ class ConInfo extends Component {
 	// 渲染 响应的body数据
 	renderResponse() {
 		let {data, resBodyData, loading} = this.props;
+		if (!data.get) {
+			return [];
+		}
 		let id = data.get('resBodyDataId');
 		let bodyData = data.get('resBodyData');
 		let isResinary = data.get('isResinary');
@@ -263,7 +266,7 @@ class ConInfo extends Component {
 			comStyle.height = height;
 		}
 		result = (
-			<div className="conInfo" style={comStyle}>
+			<div className="conInfo" style={comStyle} ref="dargWrap">
 				<DargResize onDargResize={this._onDargResize}></DargResize>
 				<span className="closeBtn" onClick={this._handleClose}><em></em></span>
 				<nav className="contTab">

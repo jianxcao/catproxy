@@ -4,6 +4,7 @@ import * as reciveMsg from './reciveMsg';
 import * as sendType from './sendType';
 import * as status from './status';
 var ws, myMessage;
+var env = window.config.env;
 // 处理收到的事件
 // 接受处理
 let distributeReciveMethod = (ws) => {
