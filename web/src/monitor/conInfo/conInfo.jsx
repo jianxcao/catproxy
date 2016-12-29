@@ -11,7 +11,7 @@ import {loadingConData} from '../action/loadingAction';
 import Loading from '../loading';
 import cx from 'classnames';
 import Immutable, {List, Map} from 'immutable';
-const isImage = /^image\/.+/;
+import ViewResData from './viewResData';
 const defStyle = {
 	top: 0,
 	right: 0
@@ -35,12 +35,9 @@ class ConInfo extends Component {
 		height: PropTypes.number,
 		onDargResize: PropTypes.func,
 		data: PropTypes.object.isRequired,
-		destory: PropTypes.func.isRequired,
-		sendFetchConData: PropTypes.func,
-		sendLoadingConData: PropTypes.func
+		destory: PropTypes.func.isRequired
 	};
-	static defaultProps = {
-	}
+
 	static contextTypes = {
 		openRightMenu: PropTypes.func.isRequired,
 		closeRightMenu: PropTypes.func.isRequired
@@ -65,53 +62,17 @@ class ConInfo extends Component {
 		let currentTab = +localStorage.getItem('conInfoCurrentTab') || 0;		
 		// 设置默认state
 		this.state = {
-			currentTab,
-			resBodyData: null,
-			// 加载状态默认是一个map
-			loading: new Map(),
+			currentTab
 		};
 		// 将props上的width和height防盗state上
 		this._stateSize();
-		let {sendFetchConData, data, sendLoadingConData} = this.props;
-		let id = data.get('resBodyDataId');
-		// 首次进入的时候发送请求
-		if (id) {
-			sendFetchConData(id);
-		} else {
-			if (!status) {
-				sendLoadingConData(true);
-			}
-		}
 	}
 	componentWillReceiveProps (nextProps) {
-		// 更新state上的width和height
-		this._stateSize();
-		let {data, sendFetchConData, sendLoadingConData, loading} = this.props;
-		let loadingConData = loading.get('loadingConData');
-		let newData = nextProps.data;
-		let newStatus = newData.get('status');
-		// 旧id
-		let oldId = data.get('resBodyDataId');
-		let id = newData.get('resBodyDataId');
-		// 存在id，数据有 resbodyData
-		if (id) {
-			// 去加载数据
-			// 判断当前并不是一个相同的id则直接从新加载数据
-			if(id && id !== oldId ) {
-				sendFetchConData(id);
-			}
-		} else {
-			// status没有取到代表请求没有加载 完毕- 变成加载中
-			if (!newStatus) {
-				if (!loadingConData) {
-					sendLoadingConData(true);
-				}
-			} else {
-				// 没有取到id, 并且当前状态是加载中，这个时候重置成 非加载中，因为不需要加载，只有有id的时候才需要加载
-				if (loadingConData) {
-					sendLoadingConData(false);
-				}
-			}
+		let {width, height} = nextProps;
+		let {width: w, height: h} = this.props;
+		// 更新state上的width和height 高度或者宽度发生变化，则更新
+		if ((width || height) && (width !== w || height !== h)) {
+			this._stateSize();
 		}
 	}
 	// 拖拽改变详情的大小
@@ -205,15 +166,11 @@ class ConInfo extends Component {
 	// 渲染 响应的body数据
 	renderResponse() {
 		let {data, resBodyData, loading} = this.props;
-		if (!data.get) {
-			return [];
-		}
-		let id = data.get('resBodyDataId');
-		let bodyData = data.get('resBodyData');
-		let isResinary = data.get('isResinary');
-		let resHeaders = data.get('resHeaders');
-		let loadingConData = loading.get('loadingConData');
 		let body = [];
+		if (!data.get) {
+			return body;
+		}
+		let bodyData = data.get('resBodyData');
 		// 这种情况可能是 文件过大，没有返回或者返回内容是空
 		// bodyData肯定是个字符串
 		if (bodyData !== null && bodyData !== undefined) {
@@ -222,36 +179,7 @@ class ConInfo extends Component {
 			}
 			return <span className="dataNoParse">{bodyData}</span>;
 		}
-		let defText = "二进制数据，无法查看";
-		// 数据已经单独冲后台加载成功 -- 并且就是当前打开tab得数据
-		if (resBodyData && resBodyData.data && resBodyData.id && resBodyData.id === id) {
-			let t = typeof resBodyData.data;
-			// 二进制数据 - 看看是不是 图片如果是图片就 处理图片，否则就返回不认识
-			// 不存在id表示数据没有在后天存在
-			if (isResinary) {
-				if (resHeaders) {
-					let contentType = resHeaders.get("content-type");
-					if (isImage.test(contentType)) {
-						let blob = new Blob([new Int8Array(resBodyData.data)], {'type': contentType});
-						let myURl = URL.createObjectURL(blob);
-						return (
-							<div className="imagePreview">
-								<img src={myURl} />
-							</div>
-						);
-					} else {
-						return defText;
-					}
-				}
-				return defText;
-			} else {
-				return t === "string" ? resBodyData.data : defText;
-			}
-		}
-		if (loadingConData) {
-			return <Loading className="pageLoading" />;
-		}	
-		return body;
+		return <ViewResData data={data} ></ViewResData>;
 	}
 	// 渲染
 	render() {
@@ -282,17 +210,4 @@ class ConInfo extends Component {
 	}
 }
 
-function mapStateToProps(state) {
-	return {
-		loading: state.get('loading'),
-		resBodyData: state.get('curConDetailData')
-	};
-}
-
-function mapDispatchToProps(dispatch) {
-	return {
-		sendLoadingConData: bindActionCreators(loadingConData, dispatch),
-		sendFetchConData: bindActionCreators(fetchConData, dispatch)
-	};
-}
-export default connect(mapStateToProps, mapDispatchToProps)(ConInfo);
+export default ConInfo;

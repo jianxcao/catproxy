@@ -199,7 +199,7 @@ export default function(catproxy) {
 				if (fileName) {
 					updateData.resBodyDataId = fileName;
 				}
-				if (resBodyData) {
+				if (resBodyData !== undefined) {
 					updateData.resBodyData = resBodyData;
 				}
 				delete monitorList[result.id];
