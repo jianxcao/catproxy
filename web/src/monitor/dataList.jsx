@@ -63,10 +63,6 @@ export default class DataList extends Component {
 		var win = window;
 		if (win.addEventListener) {
 			win.addEventListener('resize', this._onResize, false);
-		} else if (win.attachEvent) {
-			win.attachEvent('onresize', this._onResize);
-		} else {
-			win.onresize = this._onResize;
 		}
 		this._mountNode = document.createElement('div');
 		this._mountNode.className = "conInfoWrap";
@@ -78,6 +74,10 @@ export default class DataList extends Component {
 				this._closeDetailCon();
 			}
 			document.body.removeChild(this._mountNode);
+		}
+		var win = window;
+		if (win.removeEventListener) {
+			win.removeEventListener('resize', this._onResize);
 		}
 	}
 	
@@ -200,11 +200,10 @@ export default class DataList extends Component {
 	}
 	// 页面大小发生变化
 	_onResize() {
-		clearTimeout(this._updateTimer);
-		this._updateTimer = setTimeout(this._update, 16);
+		requestAnimationFrame(this._update);
 	}
 	// 页面大小发生变化
-	_update() {
+	_update(timestamp) {
 		var win = window;
 		let {customColums, tableHeight, tableWidth} = this.state;
 		let {minTableWidth, minCellWidth, minTableHeight} = this.props;

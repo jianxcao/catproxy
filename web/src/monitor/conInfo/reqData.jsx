@@ -5,8 +5,7 @@ import ViewData from "./viewData";
 import {getPara} from '../util';
 import isEmpty from 'lodash/isEmpty';
 import JsonTreeView from './jsonTreeView';
-import {jsonParse} from '../util';
-const isJSONStr = /(^\[.*\]$)|(^\{.*\}$)/;
+import {jsonParse, isJSONStr} from '../util';
 export default class ReqData extends Component{
 	constructor() {
 		super();

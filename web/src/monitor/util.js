@@ -1,7 +1,7 @@
 import isArray from 'lodash/isArray';
 import isString from 'lodash/isString';
 import merge from 'lodash/merge';
-
+export const isJSONStr = /(^\[.*\]$)|(^\{.*\}$)/;
 export let keymirror = (...args) => {
 	return function middle(arr) {
 		return arr.reduce((result, arg) => {

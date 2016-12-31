@@ -1,0 +1,51 @@
+.close(@size:26;@color: #aaa;@background:transparent;@weight:1;@base-bet:1){
+	@lineSize: @size*@base-bet;
+  position: relative;
+  display: block;
+	width: @size/1px;
+	height: @size/1px;
+  overflow: hidden;
+  background: @background;
+  font-size: 0px;
+ 	transform: rotate(0deg);
+	&:before, &:after {
+	  content: '';
+	  position: absolute;
+	  height: @weight * 1px;
+	  width: @lineSize/1px;
+	  top: 50%;
+	  left: 50%;
+	  margin-left: @lineSize/-2px;
+	  margin-top: @weight/-2px;
+	  background: @color;
+	}
+	&:before {
+	  transform: rotate(45deg);
+	}
+	&:after {
+	  transform: rotate(-45deg);
+	}
+}
+
+.checkbox() {
+		label{
+			margin-left: 8px;
+			font-weight: normal;
+			font-size: 14px;
+			margin-bottom:0px;
+			margin-right: 8px;
+			padding: 6px;
+			border-radius: 3px;
+			position: relative;
+		}
+		input {
+			display: none;
+		}
+		input:checked + label:after	 {
+			content: '\2714';
+			font-size: 12px;
+			position: absolute;
+			top: -2px;
+			left: 1px;
+		}	
+}

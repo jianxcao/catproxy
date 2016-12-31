@@ -1,6 +1,5 @@
 import ReactDom, { render } from 'react-dom';
 import React, { PropTypes, Component, Children } from 'react';
-import merge from 'lodash/merge';
 import {Provider,connect } from 'react-redux';
 import {bindActionCreators} from 'redux';
 import {fetchConData} from '../action/fetchAction';
@@ -8,10 +7,16 @@ import {loadingConData} from '../action/loadingAction';
 import Loading from '../loading';
 import cx from 'classnames';
 import Immutable, {List, Map} from 'immutable';
+import ResToolBar from './resToolBar';
+import {jsonParse, isJSONStr} from '../util';
+import JsonTreeView from './jsonTreeView';
+import Editor from './editor';
+import {extLanguage} from './languageHelper';
 const isImage = /^image\/.+/;
 class ViewResData extends Component {
 	constructor() {
 		super();
+		this.changeJSONFormat = this.changeJSONFormat.bind(this);
 	}
 	static propTypes = {
 		data: PropTypes.object.isRequired,
@@ -29,27 +34,37 @@ class ViewResData extends Component {
 		let status = data.get('status');
 		this.state = {
 			loading: new Map(),
-			resBodyData: null
+			resBodyData: null,
+			jsonFormat: false,
+			formatCode: false
 		};
 		// 首次进入的时候发送请求
 		// 米有id有2种情况，一种是没有数据，一种是加载还没有返回成功
 		if (id) {
+			this.state.loading = true;
 			sendFetchConData(id);
 		} else {
 			if (!status) {
-				sendLoadingConData(true);
+				this.state.loading = true;
+			} else {
+				this.state.loading = false;
 			}
 		}
 	}
-	
+	changeJSONFormat(isFormat) {
+		this.setState({
+			jsonFormat: !!isFormat
+		});
+	}
 	render() {
-		let {data, resBodyData, loading} = this.props;
+		let {data, resBodyData} = this.props;
 		let isResinary = data.get('isResinary');
-		let resHeaders = data.get('resHeaders');
 		let id = data.get('resBodyDataId');
-		let loadingConData = loading.get('loadingConData');
+		let ext = data.get('ext');
+		let resHeaders = data.get('resHeaders');
 		let defText = <span className="dataNoParse">二进制数据!!!</span>;
-		let result = "";
+		let loading = this.state;
+		let result = <div></div>;
 		// 数据已经单独冲后台加载成功 -- 并且就是当前打开tab得数据
 		if (resBodyData && resBodyData.data && resBodyData.id && resBodyData.id === id) {
 			let t = typeof resBodyData.data;
@@ -73,28 +88,64 @@ class ViewResData extends Component {
 					result =  defText;
 				}
 			} else {
-				result =  t === "string" ? resBodyData.data : defText;
+
+				result =  t === "string" ? this.renderResData() : defText;
 			}
 		} else {
-			if (loadingConData) {
+			if (loading) {
 				result =  <Loading className="pageLoading" />;
 			}
-
 		}
-		return <div>{result}</div>;		
+		return result;		
+	}
+	renderResData() {
+		let {resBodyData, data} = this.props;
+		let {jsonFormat, formatCode} = this.state;
+		let ext = data.get('ext');
+		let language = extLanguage[ext];
+		let result;
+		let isLikeJSON = isJSONStr.test(resBodyData.data.trim());
+		if (isLikeJSON) {
+			language = "json";
+		}
+		if (jsonFormat) {
+			try{
+				let json = jsonParse(resBodyData.data);
+				result = <JsonTreeView isUrlDecode={false} json={json}></JsonTreeView>;
+			} catch(e) {
+				console.error(e);
+				result = <div>
+					<span>格式化json数据出错，json数据是</span>
+					<div>{resBodyData.data}</div>
+				</div>;
+			}
+		} else {
+			// 显示编辑器
+			result = <Editor data={resBodyData.data} language={language}></Editor>;
+		}
+		return (
+		<div className="codePreview">
+			<ResToolBar 
+				formatCode={formatCode} 
+				charset={resBodyData.charset || "utf8"} 
+				isJSONStr={isLikeJSON} 
+				jsonFormat={jsonFormat}
+				changeJSONFormat={this.changeJSONFormat}
+				>
+			</ResToolBar>
+			<div className="code">{result}</div>
+		</div>);		
 	}
 }
 
 function mapStateToProps(state) {
 	return {
-		loading: state.get('loading'),
 		resBodyData: state.get('curConDetailData')
 	};
 }
 
 function mapDispatchToProps(dispatch) {
 	return {
-		sendLoadingConData: bindActionCreators(loadingConData, dispatch),
 		sendFetchConData: bindActionCreators(fetchConData, dispatch)
 	};
 }

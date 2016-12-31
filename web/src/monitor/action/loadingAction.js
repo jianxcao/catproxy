@@ -8,11 +8,6 @@ export const {
 	 * @param boolean 是否正在加载
 	*/
 	loadingPage,
-	/**
-	 *  请求内容状态
-	 * @param boolean 是否正在加载
-	*/	
-	loadingConData,
 } = result;
 
 export default result;

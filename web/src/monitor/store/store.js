@@ -21,8 +21,7 @@ const initialState = new Immutable.fromJS({
 	hiddenDataUrl: false,
 	monitorList: {},
 	loading: {
-		loadingPage: true,
-		loadingConData: false
+		loadingPage: true
 	},
 	// 当前resBodydata的数据是个 arrayBuffer- utf-8编码
 	curConDetailData: null
@@ -33,9 +32,9 @@ const sagaMiddleware = createSagaMiddleware();
 // 创建带有 调试和各种中间件的stroe
 let middleware = [thunk, promise, sagaMiddleware];
 
-if (window.config.env === 'dev') {
-	middleware.push(createLogger());
-}
+// if (window.config.env === 'dev') {
+middleware.push(createLogger());
+// }
 let store = createStore(reducer, initialState, compose(applyMiddleware(...middleware),
 	window.devToolsExtension ? window.devToolsExtension() : f => f
 ));

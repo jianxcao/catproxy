@@ -1,38 +1,18 @@
-.close(@size:26;@color: #aaa;@background:transparent;@weight:1;@base-bet:1){
-	@lineSize: @size*@base-bet;
-  position: relative;
-  display: block;
-	width: @size/1px;
-	height: @size/1px;
-  overflow: hidden;
-  background: @background;
-  font-size: 0px;
- 	transform: rotate(0deg);
-	&:before, &:after {
-	  content: '';
-	  position: absolute;
-	  height: @weight * 1px;
-	  width: @lineSize/1px;
-	  top: 50%;
-	  left: 50%;
-	  margin-left: @lineSize/-2px;
-	  margin-top: @weight/-2px;
-	  background: @color;
-	}
-	&:before {
-	  transform: rotate(45deg);
-	}
-	&:after {
-	  transform: rotate(-45deg);
-	}
-}
+@import "./macro.less";
 
 .conInfo{
-	position: fixed;
+	pre{
+		background: transparent;
+		border: 0px;
+		border-radius:0px;
+		word-break: normal;
+		word-wrap: normal;
+	}
+	position: absolute;
 	top:0;
 	right:0;
-	min-width: 300px;
-	min-height: 300px;
+	min-width: 600px;
+	min-height: 500px;
 	height: 100%;
 	height: calc(~"100% - 30px");
 	width: 60%;
@@ -41,7 +21,6 @@
 	border-style: solid;
 	margin-top:-2px;
 	overflow: hidden;
-	min-width: 300px;
 	border-bottom: 0px;
 	.closeBtn{
 		em{
@@ -132,10 +111,12 @@
 		&>div.active {
 			display: block;
 		}
+		// 响应数据
 		.response{
 			position: relative;
 			overflow: auto;
 			height: 100%;
+			// 没有数据情况下地查看
 			.dataNoParse{
 				font-size: 32px;
 				padding: 10px;
@@ -143,11 +124,76 @@
 			.loading{
 				position: absolute;
 			}
+			// 图片情况的查看
 			.imagePreview{
 				text-align: center;
 				margin-top: 30px;
 				img{
 					display: inline-block;
+				}
+			}
+			// 代码预览
+			.codePreview{
+				.split{
+					height: 16px;
+					width: 1px;
+					margin: 0 10px;
+					display: block;
+					transform: translate(0px, 0px);
+				}
+				// 工具条
+				.resToolBar{
+					-moz-user-select:none;
+					-webkit-user-select:none;
+					user-select:none;    
+					height: 32px;
+					-webkit-display: flex;
+					display: flex;
+					padding-left: 10px;
+					align-items: center;
+					border-bottom-width: 1px;
+					border-bottom-style: solid;
+					position: relative;
+					.formatCode {
+						span{
+							.checkbox();
+							label{
+								top: 2px;
+							}
+						}
+					}
+					.jsonFormat{
+						span{
+							input{
+								display: none;
+							}
+							label{
+								margin: 0px 2px;
+								padding: 1px 3px;
+								border-radius: 7px;
+							}					
+						}
+					}
+					.charset{
+						& > a{
+							height: 30px;
+							line-height: 30px;
+							&:hover,&,&:visited{
+								color:@baseFontColor;
+								padding: 0px;
+							}
+						}
+					}
+				}
+				// 代码
+				.code {
+					.jsonTree{
+						margin-left: 15px;
+						height: 100%;
+						width: 100%;
+						position: absolute;
+						overflow: auto;
+					}
 				}
 			}
 		}
@@ -158,7 +204,7 @@
 		left: 0;
 		height: 100%;
 		width:6px;
-		z-index: 6;
+		z-index: 11;
 		background: transparent;
 		&:hover{
 			cursor: ew-resize;
@@ -212,6 +258,68 @@
 					}			
 				}
 			}
+			// 代码预览
+			.codePreview{
+				position: absolute;
+				height: 100%;
+				width: 100%;
+				top:0px;
+				left: 0px;
+				overflow: hidden;
+				.split{
+					color: @split;
+					background-color: @split;					
+				}
+				// 工具条
+				.resToolBar{
+					position: absolute;
+					top:0px;
+					left: 0px;
+					background-color: @resBarBgColor;
+					border-color:@baseBorderColor;
+					height: 30px;
+					width: 100%;
+					z-index: 10;
+					.formatCode{
+						span {
+							label{
+								border: 1px solid @formatCodeBorderColor;
+								box-shadow: @formatCodeBoxShadow;
+								background-color: @formatCodeBgColor;
+							}
+							input:checked + label:after{
+								color: @formatCodeCheckColor;
+							}							
+						}
+					}
+					.jsonFormat{
+						span{
+							input{
+								&:checked+label{
+									background: @jsonFormatBgColor;
+									color:@jsonFormatColor;
+								}
+							}
+							label{
+								font-weight: normal;
+								&:hover{
+									background: @jsonFormatHoverBgColor;
+									color:@jsonFormatColor;				
+								}				 
+							}				
+						}
+					}
+				}
+				// 代码
+				.code {
+					z-index: 9;
+					position: absolute;
+					padding-top: 30px;
+					height: 100%;
+					width: 100%;
+				}
+			}			
+
 		}
 	}
 };
@@ -228,8 +336,27 @@
 	@navItemHoverColor: #e5e5e5;
 	// title上的源的颜色
 	@titleSourceColor: #737373;
+	// 关闭按钮颜色
 	@closeBtnColor: @baseFontColor;
+	// 关闭按钮悬浮颜色
 	@closeBtnHoverColor: #fff;
+	// 关闭按钮悬浮背景色
 	@closeBtnHoverBgColor: #e89590;
+	// 编辑器导航背景色
+	@resBarBgColor:#f3f3f3;
+
+	// 格式化样式复写
+	@formatCodeBorderColor: #a5a5a5;
+	@formatCodeBoxShadow: 0px 0px 2px 0px #a5a5a5;
+	@formatCodeBgColor: #e7e7e7;
+	@formatCodeCheckColor: #444444;
+
+	//json格式化复写
+	@jsonFormatBgColor: #ababab;
+	@jsonFormatColor: #fff;
+	@jsonFormatHoverBgColor: #c2c2c2;
+
+	//split color: 
+	@split: #777;
 	.conInfoTheme();
 }

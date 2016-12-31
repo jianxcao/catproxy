@@ -1,4 +1,4 @@
-
+@import "./macro.less";
 // navbar 相关
 .navbar {
 	-moz-user-select:none;
@@ -97,26 +97,7 @@
 		float: left;
 		height: 32px;
 		.disCache{
-			label{
-				margin-left: 8px;
-				font-weight: normal;
-				font-size: 14px;
-				margin-bottom:0px;
-				margin-right: 8px;
-				padding: 6px;
-				border-radius: 3px;
-				position: relative;
-			}
-			input {
-				display: none;
-			}
-			input:checked + label:after	 {
-				content: '\2714';
-				font-size: 12px;
-				position: absolute;
-				top: -2px;
-				left: 1px;
-			}		
+			.checkbox();
 		}
 		.split{
 			transform: translate(0px, 0px);
