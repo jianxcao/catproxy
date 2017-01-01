@@ -25,7 +25,7 @@ export let updateRule = (message)=> {
 };
 
 export let getConDetail = (message)=> {
-	monitorStore.dispatch(curConDetailData(message.result));
+	monitorStore.dispatch(curConDetailData(message.result, message.status));
 };
 
 export default {

@@ -17,6 +17,8 @@ class ViewResData extends Component {
 	constructor() {
 		super();
 		this.changeJSONFormat = this.changeJSONFormat.bind(this);
+		this.changeCharset = this.changeCharset.bind(this);
+		this.changeFormatCode = this.changeCharset.bind(this);
 	}
 	static propTypes = {
 		data: PropTypes.object.isRequired,
@@ -32,6 +34,9 @@ class ViewResData extends Component {
 		let {sendFetchConData, data, sendLoadingConData} = this.props;
 		let id = data.get('resBodyDataId');
 		let status = data.get('status');
+		// 文件后缀发送给后端
+		let ext = data.get('ext');
+		let resHeaders = data.get('resHeaders');
 		this.state = {
 			loading: new Map(),
 			resBodyData: null,
@@ -42,7 +47,7 @@ class ViewResData extends Component {
 		// 米有id有2种情况，一种是没有数据，一种是加载还没有返回成功
 		if (id) {
 			this.state.loading = true;
-			sendFetchConData(id);
+			sendFetchConData({id, ext});
 		} else {
 			if (!status) {
 				this.state.loading = true;
@@ -51,10 +56,19 @@ class ViewResData extends Component {
 			}
 		}
 	}
+	// 改变是否格式化成json树
 	changeJSONFormat(isFormat) {
 		this.setState({
 			jsonFormat: !!isFormat
 		});
+	}
+	// 修改编码
+	changeCharset() {
+
+	}
+	// 是否格式化（美化代码 仅仅js css html有用）
+	changeFormatCode() {
+
 	}
 	render() {
 		let {data, resBodyData} = this.props;
@@ -131,6 +145,8 @@ class ViewResData extends Component {
 				isJSONStr={isLikeJSON} 
 				jsonFormat={jsonFormat}
 				changeJSONFormat={this.changeJSONFormat}
+				changeFormatCode = {this.changeFormatCode}
+				changeCharset= {this.changeCharset}
 				>
 			</ResToolBar>
 			<div className="code">{result}</div>

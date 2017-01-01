@@ -10,6 +10,7 @@ import Promise from 'promise';
 import {Buffer} from 'buffer';
 import {sendConnDetail} from './sendMsg';
 import {getCacheFile} from '../monitor/cacheFile';
+import {decodeData, isBinary, betuifyCode} from '../dataHelper';
 /*
  * 
  *  所有接受到得消息是一个Object
@@ -99,10 +100,25 @@ let monitor = (monitor, ws) => {
 
 
 export let getConDetail = (msg = {param: {}}, ws = {}) => {
-	let {param: {id}} = msg;
+	let {param: {id, ext, contentType, charset, formatCode}} = msg;
 	if (id) {
 		getCacheFile(id)
 		.then(data => {
+			// 不是2进制数据就解码数据
+			return isBinary(data) ? data : decodeData(data, charset);
+		})
+		.then(function(data) {
+			if (ext && typeof data === 'string' && formatCode) {
+				return betuifyCode(data, ext);
+			}
+			return data;
+		})
+		.then(function(data) {
+			sendConnDetail({
+				id,
+				data
+			});
+		}, function(data) {
 			sendConnDetail({
 				id,
 				data

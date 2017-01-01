@@ -5,10 +5,12 @@ import mime from 'mime';
 import iconv from 'iconv-lite';
 import isbinaryfile from 'isbinaryfile';
 import path from 'path';
+import betuify from 'js-beautify';
+import Promise from 'promise';
 // <meta charset="gb2312">
 // <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 var checkMetaCharset = /<meta(?:\s)+.*charset(?:\s)*=(?:[\s'"])*([^"']+)/i;
-
+export const isJSONStr = /(^\[.*\]$)|(^\{.*\}$)/;
 export const isFont = /(^font\/.+)|(^application\/x-font.+)|(^application\/font.+)/;
 export const isDataUrl = /^data:.+/;
 export const isImage = /^image\/.+/;
@@ -105,53 +107,49 @@ export const getReqType = (result) => {
 	return type;
 };
 
+const supportEncode = ["UTF-8", "GBK", "GB2312", "UTF8"];
+const supportBetuifyType = {
+	js: ["javascript", "js", "es6", "jsx"],
+	css: ["css", "less", "scass"],
+	html: ["html", 'htm']
+};
 /**
- *  解码数据--- 暂时无用
+ * 按照指定格式美化代码 js-betuify
  */
-var decodeContent = (resInfo) => {
-	let bodyData = resInfo.bodyData;
-	let contentType = resInfo.headers['content-type'] || "";
-	return Promise.resolve(bodyData)
-	.then(function(bodyData) {
-		// 默认编码是utf8
-		let charset = 'UTF-8', tmp;
-		let ext = resInfo.ext;
-		// 在取一次编码
-		if(contentType) {
-			// 如果contenttype上又编码，则重新设置编码
-			tmp = contentType.match(/charset=([^;]+)/);
-			if (tmp && tmp.length > 0) {
-				charset = tmp[1].toUpperCase();
-			}
+export let betuifyCode = function(code, ext) {
+	let some = current => ext === current;
+	let is = "";
+	console.log('in betuifyCode');
+	for (let type in supportBetuifyType) {
+		if (supportBetuifyType[type].some(some)) {
+			is = type;
+			break;
 		}
-		if (Buffer.isBuffer(bodyData)) {
-			// 其他编码先尝试用 iconv去解码
-			if (charset !== 'UTF-8' && iconv.encodingExists(charset)) {
-				bodyData = iconv.decode(bodyData, charset);
-				// 如果是一个文档，在取一次编码
-			} else if(contentType &&  (ext === 'html' || ext === 'htm')) {
-				let strBodyData = bodyData.toString();
-				// 在内容中再次找寻编码
-				let tmp = strBodyData.match(checkMetaCharset);
-				if (tmp && tmp[1]) {
-					tmp[1] = tmp[1].toUpperCase();
-					if (tmp[1]!== "UTF-8" && iconv.encodingExists(tmp[1])) {
-						charset = tmp[1];
-						bodyData = iconv.decode(bodyData, tmp[1]);
-					} else {
-						bodyData = strBodyData;
-					}
-				} else {
-					bodyData = strBodyData;
-				}
-			} else {
-				bodyData = bodyData.toString();
-			}
+	}
+	console.log('betuifyCode', is);
+	if (is === 'js') {
+		return betuify(code);
+	} else if (is === 'css') {
+		return betuify.css(code);
+	} else if (is === 'html') {
+		return betuify.html(code);
+	}
+};
+
+/**
+ * 按照指定编码解码文件
+ * 
+ */
+export let decodeData = (data, charset = "utf8") => {
+	return new Promise(function(resolve, reject) {
+		let is = supportEncode.some(cur => charset.toUpperCase() === cur);
+		if (!is) {
+			reject("不支持当前的编码方式：" + charset);
 		}
-		// 再次加编码传递到页面
-		return {
-			bodyData,
-			charset
-		};
+		try {
+			resolve(iconv.decode(data, charset));
+		} catch(e) {
+			reject("解码数据出错");
+		}
 	});
 };
