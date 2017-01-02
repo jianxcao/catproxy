@@ -158,7 +158,7 @@ class ViewResData extends Component {
 				changeCharset= {this.changeCharset}
 				>
 			</ResToolBar>
-			<div className="code">{result}</div>
+			<div className="code"><div>{result}</div></div>
 		</div>);		
 	}
 }
