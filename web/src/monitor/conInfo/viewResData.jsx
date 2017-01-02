@@ -18,12 +18,11 @@ class ViewResData extends Component {
 		super();
 		this.changeJSONFormat = this.changeJSONFormat.bind(this);
 		this.changeCharset = this.changeCharset.bind(this);
-		this.changeFormatCode = this.changeCharset.bind(this);
+		this.changeFormatCode = this.changeFormatCode.bind(this);
 	}
 	static propTypes = {
 		data: PropTypes.object.isRequired,
 		sendFetchConData: PropTypes.func,
-		sendLoadingConData: PropTypes.func,
 		loading: PropTypes.object,
 		resBodyData: PropTypes.object
 	}
@@ -31,23 +30,20 @@ class ViewResData extends Component {
 		resBodyData: null
 	}
 	componentWillMount() {
-		let {sendFetchConData, data, sendLoadingConData} = this.props;
+		let {sendFetchConData, data} = this.props;
 		let id = data.get('resBodyDataId');
 		let status = data.get('status');
-		// 文件后缀发送给后端
-		let ext = data.get('ext');
-		let resHeaders = data.get('resHeaders');
 		this.state = {
 			loading: new Map(),
 			resBodyData: null,
 			jsonFormat: false,
-			formatCode: false
+			formatCode: true
 		};
 		// 首次进入的时候发送请求
 		// 米有id有2种情况，一种是没有数据，一种是加载还没有返回成功
 		if (id) {
 			this.state.loading = true;
-			sendFetchConData({id, ext});
+			this.fetchData(this.state.formatCode);
 		} else {
 			if (!status) {
 				this.state.loading = true;
@@ -56,6 +52,17 @@ class ViewResData extends Component {
 			}
 		}
 	}
+	fetchData(formatCode) {
+		let {sendFetchConData, data} = this.props;
+		let id = data.get('resBodyDataId');
+		let ext = data.get('ext');
+		// let contentType = data.getIn(['resHeaders', 'content-type']);
+		sendFetchConData({
+			id, 
+			ext,
+			formatCode
+		});		
+	}
 	// 改变是否格式化成json树
 	changeJSONFormat(isFormat) {
 		this.setState({
@@ -63,12 +70,17 @@ class ViewResData extends Component {
 		});
 	}
 	// 修改编码
-	changeCharset() {
+	changeCharset(charset) {
 
 	}
 	// 是否格式化（美化代码 仅仅js css html有用）
-	changeFormatCode() {
-
+	changeFormatCode(formatCode) {
+		this.setState({
+			formatCode,
+			loading: true,
+			resBodyData: null,
+		});
+		this.fetchData(formatCode);
 	}
 	render() {
 		let {data, resBodyData} = this.props;
@@ -78,7 +90,7 @@ class ViewResData extends Component {
 		let resHeaders = data.get('resHeaders');
 		let defText = <span className="dataNoParse">二进制数据!!!</span>;
 		let loading = this.state;
-		let result = <div></div>;
+		let result = <div></div>;	
 		// 数据已经单独冲后台加载成功 -- 并且就是当前打开tab得数据
 		if (resBodyData && resBodyData.data && resBodyData.id && resBodyData.id === id) {
 			let t = typeof resBodyData.data;
@@ -102,13 +114,10 @@ class ViewResData extends Component {
 					result =  defText;
 				}
 			} else {
-
 				result =  t === "string" ? this.renderResData() : defText;
 			}
 		} else {
-			if (loading) {
-				result =  <Loading className="pageLoading" />;
-			}
+			result = <Loading className="pageLoading" />;;
 		}
 		return result;		
 	}

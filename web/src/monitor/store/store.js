@@ -5,6 +5,8 @@ import promise from 'redux-promise';
 import createLogger from 'redux-logger';
 import createSagaMiddleware from 'redux-saga';
 import rootSaga from '../sagas/saga';
+import ws from '../../ws/ws';
+import {clearMonitorList} from '../action/monitorListAction';
 import {
     combineReducers
 } from 'redux-immutable';
@@ -38,6 +40,12 @@ middleware.push(createLogger());
 let store = createStore(reducer, initialState, compose(applyMiddleware(...middleware),
 	window.devToolsExtension ? window.devToolsExtension() : f => f
 ));
+// 重新连接，清空数据
+ws().then(function(wws) {
+	wws.on('disconnect', function() {
+		store.dispatch(clearMonitorList());
+	});
+});
 window.store = store;
 window.Immutable = Immutable;
 sagaMiddleware.run(rootSaga);

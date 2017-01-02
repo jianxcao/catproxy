@@ -47,6 +47,12 @@ class MyNav extends Component{
 			return false;
 		});	
 	}
+	componentWillUnmount () {
+		// 清除快捷
+		keymaster.unbind('⌘+k,ctrl+k');	
+		// 停止 启动  快捷
+		keymaster.unbind('⌘+e,ctrl+e');			
+	}
 	
 	// 切换当前的监听状态
 	changeMonitorStatus (e) {
@@ -102,7 +108,7 @@ class MyNav extends Component{
 					<span className="disCache">
 						<input type="checkbox"
 							checked={disCache} 
-							onChange={this.changeDisCache} id="disCache"/><label htmlFor="disCache"></label>禁止缓存</span>
+							onChange={this.changeDisCache} id="disCache"/><label htmlFor="disCache">禁止缓存</label></span>
 					<div className="split"></div>
 				</div>
 				<Nav>

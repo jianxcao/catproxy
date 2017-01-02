@@ -130,12 +130,17 @@
 		.selfNav{
 			.disCache{
 				label{
+					margin-right: 0px;
+				}
+				label::before{
 					border: 1px solid @disCacheBorderColor;
 					box-shadow: @disCacheBoxShadow;
 					background-color: @disCacheBgColor;
+					top:2px;
 				}
 				input:checked + label:after{
 					color: @disCacheCheckColor;
+					top:2px;
 				}
 			}
 		}

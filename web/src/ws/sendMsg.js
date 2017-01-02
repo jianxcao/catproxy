@@ -104,12 +104,9 @@ export let hiddenDataUrl = (status) => {
 	return send('saveConfig')(result);
 };
 
-export let getConDetail = ({id, ext}) => {
+export let getConDetail = (param) => {
 	let result = {
-		param: {
-			id,
-			ext
-		},
+		param,
 		path: "getConDetail"
 	};
 	return send('getConDetail')(result);

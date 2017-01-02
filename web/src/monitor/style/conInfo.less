@@ -156,9 +156,14 @@
 					position: relative;
 					.formatCode {
 						span{
-							.checkbox();
+							input{
+								display: none;
+							}
 							label{
-								top: 2px;
+								font-weight: normal;
+								margin: 0px 2px;
+								padding: 1px 3px;
+								border-radius: 7px;
 							}
 						}
 					}
@@ -282,14 +287,18 @@
 					z-index: 10;
 					.formatCode{
 						span {
-							label{
-								border: 1px solid @formatCodeBorderColor;
-								box-shadow: @formatCodeBoxShadow;
-								background-color: @formatCodeBgColor;
+							input{
+								&:checked+label{
+									background: @formatCodeBgColor;
+									color:@formatCodeColor;
+								}
 							}
-							input:checked + label:after{
-								color: @formatCodeCheckColor;
-							}							
+							label{
+								&:hover{
+									background: @formatCodeHoverBgColor;
+									color:@formatCodeColor;				
+								}				 
+							}
 						}
 					}
 					.jsonFormat{
@@ -346,11 +355,9 @@
 	@resBarBgColor:#f3f3f3;
 
 	// 格式化样式复写
-	@formatCodeBorderColor: #a5a5a5;
-	@formatCodeBoxShadow: 0px 0px 2px 0px #a5a5a5;
-	@formatCodeBgColor: #e7e7e7;
-	@formatCodeCheckColor: #444444;
-
+	@formatCodeBgColor: #ababab;
+	@formatCodeColor: #fff;
+	@formatCodeHoverBgColor: #c2c2c2;
 	//json格式化复写
 	@jsonFormatBgColor: #ababab;
 	@jsonFormatColor: #fff;

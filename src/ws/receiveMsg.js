@@ -98,7 +98,6 @@ let monitor = (monitor, ws) => {
 	}
 };
 
-
 export let getConDetail = (msg = {param: {}}, ws = {}) => {
 	let {param: {id, ext, contentType, charset, formatCode}} = msg;
 	if (id) {
@@ -108,6 +107,7 @@ export let getConDetail = (msg = {param: {}}, ws = {}) => {
 			return isBinary(data) ? data : decodeData(data, charset);
 		})
 		.then(function(data) {
+			console.log(formatCode);
 			if (ext && typeof data === 'string' && formatCode) {
 				return betuifyCode(data, ext);
 			}

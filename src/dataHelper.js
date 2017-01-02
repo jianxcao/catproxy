@@ -119,14 +119,12 @@ const supportBetuifyType = {
 export let betuifyCode = function(code, ext) {
 	let some = current => ext === current;
 	let is = "";
-	console.log('in betuifyCode');
 	for (let type in supportBetuifyType) {
 		if (supportBetuifyType[type].some(some)) {
 			is = type;
 			break;
 		}
 	}
-	console.log('betuifyCode', is);
 	if (is === 'js') {
 		return betuify(code);
 	} else if (is === 'css') {

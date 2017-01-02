@@ -68,7 +68,7 @@ export default class ResToolBar extends Component {
 			result["bar3"] =(<div className="split"></div>);
 			result["bar4"] = (<div className="formatCode">
 						<span><input type="checkbox" name="type" id="resToolBarFormatCode" value="format" defaultChecked={!!formatCode} onChange={this._changeFormat}/>
-						<label htmlFor="resToolBarFormatCode"></label>格式化</span>
+						<label htmlFor="resToolBarFormatCode">美化</label></span>
 				</div>);
 		}
 		result = createFragment(result);
