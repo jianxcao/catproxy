@@ -30,6 +30,7 @@ export default class DataList extends Component {
 		this._changeFilterList = this._changeFilterList.bind(this);
 		this._onScrollStart = this._onScrollStart.bind(this);
 		this._closeDetailCon = this._closeDetailCon.bind(this);
+		this.closeCon = this.closeCon.bind(this);
 		// 打开详情的宽度
 		this._conInfoWidth = null;
 	
@@ -56,7 +57,7 @@ export default class DataList extends Component {
 		this.init();
 		this.ConInfo = <ConInfo 
 					style={conInfostyle} 
-					data={{}} destory= {this._closeDetailCon}></ConInfo>;
+					data={{}} destory= {this.closeCon}></ConInfo>;
 	}
 	
 	componentDidMount() {
@@ -142,6 +143,11 @@ export default class DataList extends Component {
 			// 如果当前打开详情页面的数据发生了变化则从新渲染详情
 			if (newData && oldData && !newData.equals(oldData)) {
 				this._renderConInfo(newData);
+			} else {
+				this.setState({
+					rowSelect: -1
+				});
+				this._closeDetailCon();
 			}
 		}
 		
@@ -245,6 +251,7 @@ export default class DataList extends Component {
 	// 鼠标按下 某一行，弹出右键菜单
 	_onRowMouseDown(e, index) {
 		let {monitorStatus, monitorList} = this.props;
+		let {rowSelect} = this.state;
 		let data = monitorList.get(index);
 		if (e.button == 2) {
 			let domain = (data.get("name") || "").match(getDomainReg);
@@ -293,11 +300,13 @@ export default class DataList extends Component {
 			if (!id) {
 				return this;
 			}
-			this.setState({
-				rowSelect: index
-			});
-			if (data) {
-				this._renderConInfo(data);
+			if (index !== rowSelect) {
+				this.setState({
+					rowSelect: index
+				});
+				if (data) {
+					this._renderConInfo(data);
+				}
 			}
 		}
 	}
@@ -316,11 +325,17 @@ export default class DataList extends Component {
 		}
 		
 	}
+	closeCon() {
+		this.setState({
+			rowSelect: -1
+		});
+		this._closeDetailCon();
+	}
 	// 关闭conInfo
 	_closeDetailCon() {
 		if (this._mountNode && this._conInfoInstance) {
 			ReactDom.unmountComponentAtNode(this._mountNode);
-			this._conInfoInstance = null;
+			this._conInfoInstance = null;	
 		}
 	}	
 	// 修改显示字段

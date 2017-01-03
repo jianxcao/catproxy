@@ -19,6 +19,7 @@ class ViewResData extends Component {
 		this.changeJSONFormat = this.changeJSONFormat.bind(this);
 		this.changeCharset = this.changeCharset.bind(this);
 		this.changeFormatCode = this.changeFormatCode.bind(this);
+		this.editorDidMount = this.editorDidMount.bind(this);
 	}
 	static propTypes = {
 		data: PropTypes.object.isRequired,
@@ -35,9 +36,9 @@ class ViewResData extends Component {
 		let status = data.get('status');
 		this.state = {
 			loading: new Map(),
-			resBodyData: null,
 			jsonFormat: false,
-			formatCode: true
+			formatCode: false,
+			charset: 'utf8'
 		};
 		// 首次进入的时候发送请求
 		// 米有id有2种情况，一种是没有数据，一种是加载还没有返回成功
@@ -52,16 +53,50 @@ class ViewResData extends Component {
 			}
 		}
 	}
+	componentWillReceiveProps(nextProps) {
+		let {width, resBodyData} = this.props;
+		let {width: w, resBodyData: nextResBodyData} = nextProps;
+		if (this.editor && (width !== w || this._checkResBodyData(resBodyData, nextResBodyData))) {
+			this.editor.layout();
+		}
+	}
+	// 检测resBodyData是否发生变化
+	_checkResBodyData(oldData, newData) {
+		if (oldData && newData) {
+			return oldData.id !== newData.id ||
+						 oldData.data !== newData.data;
+		} else {
+			return oldData !== newData;
+		}
+	}
+	shouldComponentUpdate(nextProps, nextState) {
+		let {resBodyData, data} = this.props;
+		// nextResBodyData 是异步获取的，所以需要检测 nextResBodyData 的id和 nextData的id
+		let {resBodyData: nextResBodyData = {}, data: nextData} = nextProps;
+		let {loading, formatCode, jsonFormat, charset} = this.state;
+		let {loading: nextLoading, formatCode: nextFormatCode, jsonFormat: nextJsonFormat, charset: nextCharset} = nextState;
+		return loading !== nextLoading ||
+						this._checkResBodyData(resBodyData, nextResBodyData) ||
+						formatCode !== nextFormatCode ||
+						jsonFormat !== nextJsonFormat ||
+						charset !== nextCharset ||
+						(data && nextData ? !nextData.equals(data) : data !== nextData);
+	}
+
+	componentWillUnmount () {
+		this.editor = null;
+	}
+
 	fetchData(formatCode) {
 		let {sendFetchConData, data} = this.props;
 		let id = data.get('resBodyDataId');
 		let ext = data.get('ext');
 		// let contentType = data.getIn(['resHeaders', 'content-type']);
 		sendFetchConData({
-			id, 
+			id,
 			ext,
 			formatCode
-		});		
+		});
 	}
 	// 改变是否格式化成json树
 	changeJSONFormat(isFormat) {
@@ -90,7 +125,7 @@ class ViewResData extends Component {
 		let resHeaders = data.get('resHeaders');
 		let defText = <span className="dataNoParse">二进制数据!!!</span>;
 		let loading = this.state;
-		let result = <div></div>;	
+		let result = <div></div>;
 		// 数据已经单独冲后台加载成功 -- 并且就是当前打开tab得数据
 		if (resBodyData && resBodyData.data && resBodyData.id && resBodyData.id === id) {
 			let t = typeof resBodyData.data;
@@ -119,11 +154,15 @@ class ViewResData extends Component {
 		} else {
 			result = <Loading className="pageLoading" />;;
 		}
-		return result;		
+		return result;
+	}
+	// 编辑器已经加载
+	editorDidMount(editor) {
+		this.editor = editor;
 	}
 	renderResData() {
 		let {resBodyData, data} = this.props;
-		let {jsonFormat, formatCode} = this.state;
+		let {jsonFormat, formatCode, charset} = this.state;
 		let ext = data.get('ext');
 		let language = extLanguage[ext];
 		let result;
@@ -143,15 +182,19 @@ class ViewResData extends Component {
 				</div>;
 			}
 		} else {
+			// 如果格式化代码则带换行，否则不带
+			let opt = {
+				wrappingColumn: formatCode ? 300: -1
+			};
 			// 显示编辑器
-			result = <Editor data={resBodyData.data} language={language}></Editor>;
+			result = <Editor data={resBodyData.data} language={language} editorDidMount={this.editorDidMount} opt={opt}></Editor>;
 		}
 		return (
 		<div className="codePreview">
-			<ResToolBar 
-				formatCode={formatCode} 
-				charset={resBodyData.charset || "utf8"} 
-				isJSONStr={isLikeJSON} 
+			<ResToolBar
+				formatCode={formatCode}
+				charset={charset}
+				isJSONStr={isLikeJSON}
 				jsonFormat={jsonFormat}
 				changeJSONFormat={this.changeJSONFormat}
 				changeFormatCode = {this.changeFormatCode}
@@ -159,7 +202,7 @@ class ViewResData extends Component {
 				>
 			</ResToolBar>
 			<div className="code"><div>{result}</div></div>
-		</div>);		
+		</div>);
 	}
 }
 

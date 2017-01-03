@@ -9,7 +9,19 @@
 		<div id="g-wrap"></div>
 		<script>
 			window.config = <%-JSON.stringify(locals.uiOption)%>
+			window.requireConfig = {
+				url: config.cdnBasePath + "/lib/monaco-editor/vs/loader.js",
+				paths: {
+					'vs': config.cdnBasePath + "/lib/monaco-editor/vs"
+				}	
+			};			
 		</script>
+		<script src="<%=locals.uiOption.cdnBasePath%>/lib/monaco-editor/vs/loader.js"></script>
+		<script>
+			require.config(requireConfig);
+		</script>
+		<script src="<%=locals.uiOption.cdnBasePath%>/lib/monaco-editor/vs/editor/editor.main.nls.js"></script>
+		<script src="<%=locals.uiOption.cdnBasePath%>/lib/monaco-editor/vs/editor/editor.main.js"></script>
 		<script src="<%=locals.uiOption.cdnBasePath%>/monitor/monitor.js"></script>
 	</body>
 </html>

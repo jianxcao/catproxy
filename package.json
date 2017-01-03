@@ -80,7 +80,6 @@
     "react-bootstrap": "^0.30.6",
     "react-dom": "^15.4.0",
     "react-hot-loader": "^3.0.0-beta.6",
-    "react-monaco-editor": "^0.7.1",
     "react-promise": "^1.1.2",
     "react-redux": "^4.4.6",
     "react-tap-event-plugin": "^2.0.1",

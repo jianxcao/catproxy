@@ -166,6 +166,7 @@ class ConInfo extends Component {
 	// 渲染 响应的body数据
 	renderResponse() {
 		let {data, resBodyData, loading} = this.props;
+		let {width, currentTab} = this.state;
 		let body = [];
 		if (!data.get) {
 			return body;
@@ -179,7 +180,8 @@ class ConInfo extends Component {
 			}
 			return <span className="dataNoParse">{bodyData}</span>;
 		}
-		return <ViewResData data={data} ></ViewResData>;
+		// 如果显示就给下面得组件width，否则就是0
+		return <ViewResData data={data} width={currentTab === 1 ? width: 0}></ViewResData>;
 	}
 	// 渲染
 	render() {

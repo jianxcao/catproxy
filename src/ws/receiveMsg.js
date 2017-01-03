@@ -107,7 +107,6 @@ export let getConDetail = (msg = {param: {}}, ws = {}) => {
 			return isBinary(data) ? data : decodeData(data, charset);
 		})
 		.then(function(data) {
-			console.log(formatCode);
 			if (ext && typeof data === 'string' && formatCode) {
 				return betuifyCode(data, ext);
 			}
