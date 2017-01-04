@@ -3,21 +3,31 @@ import React, { PropTypes, Component, Children } from 'react';
 import {Navbar, Nav, NavItem, NavDropdown, MenuItem} from 'react-bootstrap';
 import createFragment from 'react-addons-create-fragment';
 import shallowCompare from 'react-addons-shallow-compare';
+const allLanguage = ["plaintext", "typescript", "javascript", "json", "bat",
+	"coffeescript", "c", "cpp", "csharp", "dockerfile", "fsharp", "go", "handlebars", 
+	"html", "ini", "jade", "java", "lua", "markdown", "objective-c", 
+	"postiats", "php", "powershell", "python", "r", "razor", "ruby", "swift", 
+	"sql", "vb", "xml", "less", "scss", "css", "yaml"];
+
 export default class ResToolBar extends Component {
 	constructor() {
 		super();
 		this._changeFormat = this._changeFormat.bind(this);
 		this._changeCharset = this._changeCharset.bind(this);
+		this._changeLanguage = this._changeLanguage.bind(this);
 	}
 	static propTypes = {
 		formatCode: PropTypes.bool,
 		charset: PropTypes.string.isRequired,
 		changeFormatCode: PropTypes.func,
 		changeCharset: PropTypes.func,
+		changeLanguage: PropTypes.func,
+		language: PropTypes.string.isRequired
 	}
 	static defaultProps = {
 		charset: "utf-8",
 		formatCode: false,
+		language: null
 	}	
 
 	shouldComponentUpdate (nextProps, nextState) {
@@ -35,11 +45,18 @@ export default class ResToolBar extends Component {
 		 if (changeCharset) {
 			 changeCharset(eventKey);
 		 }
-	}	
+	}
+
+	_changeLanguage(eventKey) {
+		 let {changeLanguage} = this.props;
+		 if (changeLanguage) {
+			 changeLanguage(eventKey);
+		 }		
+	}
 
 	render() {
 		// 格式化成json树，可以没有这个字段，比如html是无法格式化成json树得
-		let {charset, formatCode, jsonFormat} = this.props;
+		let {charset, formatCode, jsonFormat, language} = this.props;
 		let result = {};
 		result["bar0"] = (
 			<Nav>
@@ -49,6 +66,13 @@ export default class ResToolBar extends Component {
 					<MenuItem eventKey="gbk">gb2312</MenuItem>
 				</NavDropdown>			
 			</Nav>
+		);
+		let lan = allLanguage.map(current => <MenuItem eventKey={current} key={current}>{current}</MenuItem>);
+		result["bar1"] =(<div className="split"></div>);
+		result["bar2"] = (
+			<Nav><NavDropdown eventKey={"language"} title={language} className="language" id="language" onSelect={this._changeLanguage}>
+					{lan}
+				</NavDropdown></Nav>
 		);
 		// 美化按钮一定有，但是可能点击了没有效果
 		result["bar3"] =(<div className="split"></div>);
