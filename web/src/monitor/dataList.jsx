@@ -262,7 +262,12 @@ export default class DataList extends Component {
 				domain = "";
 			}		
 			let menus =  [{
-				text: "复制url",
+				text: "打开链接",
+				eventKey: "openUrl",
+				href: data.get("name"),
+				target: "_blank"
+			},{
+				text: "复制链接",
 				eventKey: "copyUrl",
 				copy: data.get("name")
 			},{

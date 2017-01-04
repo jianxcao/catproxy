@@ -18,11 +18,11 @@ export default class RightMenu extends Component{
 		let {menus} = this.props;
 		this.clipborad = new Clipboard('.dropdown-menu a[data-index]', {
 			text: function(trigger) {
-				let index = trigger.getAttribute('data-index');
+				let index = trigger.getAttribute('data-copy');
 				if (index === 'copy') {
 					return document.getSelection().toString();
 				} else {
-					let copy = menus[index].copy || "";
+					let copy = (menus[index] || "").copy || "";
 					if (copy) {
 						if (typeof copy === 'object') {
 							copy = JSON.stringify(copy);
@@ -61,7 +61,7 @@ export default class RightMenu extends Component{
 		};
 		let copyItem = "";
 		if (document.getSelection && document.getSelection().toString() !== "") {
-			copyItem = <MenuItem  key="copy" eventKey="copy" data-index="copy" className="copy" onSelect={this._onSelect}>&nbsp;&nbsp;&nbsp;&nbsp;复制</MenuItem>;
+			copyItem = <MenuItem  key="copy" eventKey="copy" data-copy="copy" data-index="copy" className="copy" onSelect={this._onSelect}>复制</MenuItem>;
 		}
 		let items = [];
 		// 直接传递了一个  react Element
@@ -85,8 +85,16 @@ export default class RightMenu extends Component{
 					if (current.eventKey) {
 						props.eventKey = current.eventKey;
 					}
-					if (!props.href) {
+					if (!current.href) {
 						props.href = "javascript:void(0);";
+					} else {
+						props.href = current.href;
+					}
+					if (current.copy) {
+						props["data-copy"] = index;
+					}
+					if (current.target) {
+						props.target = current.target;
 					}
 					return (<MenuItem {...props} key={index} data-index={index} onSelect={this._onSelect}>{current.text}</MenuItem>);
 				}

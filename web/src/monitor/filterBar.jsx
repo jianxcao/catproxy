@@ -37,9 +37,12 @@ class FilterBar extends Component{
 	
 	// 改变监控的 类型
 	changeMonitorFilterType(e) {
-		let {sendMonitorFilterType} = this.props;
-		sendMonitorFilterType(e.target.value);
-		sendMsg.monitorFilterType(e.target.value);
+		let {sendMonitorFilterType, monitorFilterType} = this.props;
+		let val = e.target.value;
+		if (monitorFilterType !== val) {
+			sendMonitorFilterType(val);
+			sendMsg.monitorFilterType(val);
+		}
 	}
 	// 改变监控的条件
 	changeMonitorFilterCondition(e) {
