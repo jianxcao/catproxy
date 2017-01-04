@@ -30,19 +30,20 @@ export default class ResToolBar extends Component {
 			 changeFormatCode(e.currentTarget.checked);
 		 }
 	}
-	_changeCharset(e) {
+	_changeCharset(eventKey, e) {
 		 let {changeCharset} = this.props;
 		 if (changeCharset) {
-			 changeCharset();
+			 changeCharset(eventKey);
 		 }
 	}	
+
 	render() {
 		// 格式化成json树，可以没有这个字段，比如html是无法格式化成json树得
 		let {charset, formatCode, jsonFormat} = this.props;
 		let result = {};
 		result["bar0"] = (
 			<Nav>
-				<NavDropdown eventKey={"Dropdown"} title={charset} className="charset" id="charset">
+				<NavDropdown eventKey={"charset"} title={charset} className="charset" id="charset" onSelect={this._changeCharset}>
 					<MenuItem eventKey="utf8">utf8</MenuItem>
 					<MenuItem eventKey="gbk">gbk</MenuItem>
 					<MenuItem eventKey="gbk">gb2312</MenuItem>

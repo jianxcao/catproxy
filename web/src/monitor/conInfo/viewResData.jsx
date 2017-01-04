@@ -43,7 +43,10 @@ class ViewResData extends Component {
 		// 米有id有2种情况，一种是没有数据，一种是加载还没有返回成功
 		if (id) {
 			this.state.loading = true;
-			this.fetchData(this.state.formatCode);
+			this.fetchData({
+				formatCode: this.state.formatCode,
+				charset: this.state.charset
+			});
 		} else {
 			if (!status) {
 				this.state.loading = true;
@@ -80,22 +83,42 @@ class ViewResData extends Component {
 	componentWillUnmount () {
 		this.editor = null;
 	}
-
-	fetchData(formatCode) {
-		let {sendFetchConData, data} = this.props;
+	/**
+	 * 参数对象
+	 * 
+	 */
+	fetchData({formatCode, charset}) {
+		let {sendFetchConData} = this.props;
+		let {data} = this.props;
 		let id = data.get('resBodyDataId');
+		let status = data.get('status');
 		let ext = data.get('ext');
-		let contentType = data.getIn(['resHeaders', 'content-type']);
+		let contentType = data.getIn(['resHeaders', 'content-type']);	
+		if (formatCode === undefined) {
+			formatCode = this.state.formatCode;
+		}	
+		if (charset === undefined) {
+			charset = this.state.charset;
+		}
 		sendFetchConData({
+			formatCode,
+			charset,
 			id,
 			ext,
-			formatCode,
 			contentType
 		});
 	}
 	// 修改编码
 	changeCharset(charset) {
-
+		this.setState({
+			charset,
+			loading: true,
+			resBodyData: null,
+		});
+		
+		this.fetchData({
+			charset
+		});		
 	}
 	// 是否格式化（美化代码 仅仅js css html有用）
 	changeFormatCode(formatCode) {
@@ -103,8 +126,10 @@ class ViewResData extends Component {
 			formatCode,
 			loading: true,
 			resBodyData: null,
+		});	
+		this.fetchData({
+			formatCode
 		});
-		this.fetchData(formatCode);
 	}
 	render() {
 		let {data, resBodyData} = this.props;
