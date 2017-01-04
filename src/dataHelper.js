@@ -10,11 +10,12 @@ import Promise from 'promise';
 // <meta charset="gb2312">
 // <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 var checkMetaCharset = /<meta(?:\s)+.*charset(?:\s)*=(?:[\s'"])*([^"']+)/i;
-export const isJSONStr = /(^\[.*\]$)|(^\{.*\}$)/;
+export const isJSONStr = /(^(?:\s*\[)[\s\S]*(?:\]\s*)$|(^(?:\s*\{)[\s\S]*(?:\}\s*)$))/;
 export const isFont = /(^font\/.+)|(^application\/x-font.+)|(^application\/font.+)/;
 export const isDataUrl = /^data:.+/;
 export const isImage = /^image\/.+/;
 export const isMedia = /(^video\/.+)|(^audio\/.+)/;
+
 // 解压数据
 export const decodeCompress = (bodyData, encode) =>{
 	if (!Buffer.isBuffer(bodyData) || !encode) {
@@ -109,9 +110,9 @@ export const getReqType = (result) => {
 
 const supportEncode = ["UTF-8", "GBK", "GB2312", "UTF8"];
 const supportBetuifyType = {
-	js: ["javascript", "js", "es6", "jsx"],
+	js: ["javascript", "js", "es6", "jsx", "json", "jsonp"],
 	css: ["css", "less", "scass"],
-	html: ["html", 'htm']
+	html: ["html", 'htm', "ejs"]
 };
 /**
  * 按照指定格式美化代码 js-betuify
@@ -131,9 +132,17 @@ export let betuifyCode = function(code, ext) {
 		return betuify.css(code);
 	} else if (is === 'html') {
 		return betuify.html(code);
+	} else {
+		return code;
 	}
 };
 
+export let updateExt = function(ext, contentType, data = "") {
+	if (isJSONStr.test(data)) {
+		return "json";
+	}
+	return ext;
+};
 /**
  * 按照指定编码解码文件
  * 

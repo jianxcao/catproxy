@@ -9,6 +9,7 @@ import reduce from 'lodash/reduce';
 import {upperFirstLetter} from './util';
 import {MONITOR_FILTER_TYPES} from './constant';
 import * as sendMsg from "../ws/sendMsg";
+import shallowCompare from 'react-addons-shallow-compare'; // ES6
 import cs from 'classnames';
 class FilterBar extends Component{
 	constructor(...arg) {
@@ -30,6 +31,10 @@ class FilterBar extends Component{
 	static defaultProps = {
 		monitorFilterCondition: ""
 	}
+	shouldComponentUpdate(nextProps, nextState) {
+		return shallowCompare(this, nextProps, nextState);
+	}
+	
 	// 改变监控的 类型
 	changeMonitorFilterType(e) {
 		let {sendMonitorFilterType} = this.props;

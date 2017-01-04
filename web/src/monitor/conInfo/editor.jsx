@@ -1,9 +1,11 @@
 import ReactDom, { render } from 'react-dom';
 import React, { PropTypes, Component, Children } from 'react';
-import MonacoEditor from './monacoEditor';
 import merge from 'lodash/merge';
-const config = window.config;
-const requireConfig = window.requireConfig;
+import isEmptyObject from "lodash/isEmpty";
+import {shouldEqual} from '../util';
+import Promise from 'promise';
+const win = window;
+const container = document.createElement('div');
 // 编辑器主题
 const options = {
 	readOnly: true,
@@ -21,6 +23,33 @@ const options = {
 		useShadows: true
 	}
 };
+
+// 全局编辑器
+var editor;
+const getMonaco = () => {
+	return new Promise(function(resolve, reject) {
+		if (win.monaco) {
+			resolve(win.monaco);
+		} else {
+			win.require(['vs/editor/editor.main'], function() {
+				resolve(win.monaco);
+			});
+		}
+	});	
+};
+const getBaseEditor = () => {
+	return getMonaco()
+	.then(function(monaco) {
+		// 内存中创建编辑器，
+		// 前提是编辑器已经加载成功了
+		var editor = monaco.editor.create(container, merge({
+			model: null,
+		}, options));		
+		window.editor = editor;
+		return editor;
+	});
+};
+
 export default class Eidtor extends Component {
 	constructor() {
 		super();
@@ -28,7 +57,6 @@ export default class Eidtor extends Component {
 		this.resize = this.resize.bind(this);
 	}
 	static proptTypes = {
-		formatCode: PropTypes.bool,
 		// 主题
 		theme: React.PropTypes.oneOf(['vs', 'vs-dark']),
 		// 数据
@@ -40,59 +68,88 @@ export default class Eidtor extends Component {
 	}
 	static defaultPorps = {
 		theme: "vs",
-		formatCode: false,
 		language: "plaintext"
 	}
+		
 	shouldComponentUpdate (nextProps, nextState) {
-		return true;
+		// 永远不更新-- editor 自己控制
+		return nextProps.editorDidMount !== this.props.editorDidMount;
 	}
-	
+	componentWillReceiveProps (nextProps) {
+		let {theme, data, language, opt} = this.props;
+		let {theme: nextTheme, data: nextData, language: nextLanguage, opt: nextOpt} = nextProps;
+		let my = {};
+		// 主题变
+		if (theme !== nextTheme) {
+			my.theme = nextTheme;
+		}
+		// opt发生变化
+		if (!shouldEqual(opt, nextOpt)) {
+			// 更新所有字段
+			my = merge({}, options, my, opt, nextOpt);
+		}
+		if (!isEmptyObject(my)) {
+			editor.updateOptions(my);
+		}
+		// 内容或者 语言发生变化，重置model
+		if (data !== nextData || language !== nextLanguage) {
+			this._initModel(nextData, nextLanguage);
+		}
+	}
 	componentDidMount() {
 		var win = window;
 		if (win.addEventListener) {
 			win.addEventListener('resize', this.resize, false);
 		}
-	}
-
-	componentWillUnmount() {
-		var win = window;
-		if (win.addEventListener) {
-			win.removeEventListener('resize', this.resize);
-		}
-		if (this.editor) {
-			this.editor = null;
-		}
-	}
-	resize() {
-		if (this.editor) {
-			this.editor.layout();
+		if (!editor) {
+			getBaseEditor()
+			.then((ed) => {
+				editor = ed;
+				this._editorDidMount();
+			});
+		} else {
+			this._editorDidMount();
 		}
 	}
-	// 编辑器加载成功，获得焦点
-	_editorDidMount(editor, monaco) {
-		let {editorDidMount} = this.props;
-		window.editor = editor;
+	_initModel(data = "", language) {
+		var oldModel = editor.getModel();
+		var newModel = win.monaco.editor.createModel(data, language);
+		editor.setModel(newModel);
+		if (oldModel) {
+			oldModel.dispose();
+		}		
+	}
+	_editorDidMount() {
+		let {editorDidMount, data = "", language} = this.props;
+		let {editorContainer} = this.refs;
+		this._initModel(data, language);
+		editorContainer.appendChild(container);
+		editor.layout();
 		// 检测当前设置的 language, 如果language不能识别就设置成文本
 		editor.focus();
 		if (editorDidMount) {
 			editorDidMount(editor);
 		}
-		this.editor = editor;
+	}
+	componentWillUnmount() {
+		var win = window;
+		if (win.addEventListener) {
+			win.removeEventListener('resize', this.resize);
+		}
+		let div = document.createElement('div');
+		div.appendChild(container);
+		div = null;
 	}
 
+	resize() {
+		if (editor) {
+			editor.layout();
+		}
+	}
+	
 	render() {
-		let {data = "", language, opt} = this.props;
-		opt = merge({}, opt, options);
 		return (
-			<MonacoEditor
-				width="100%"
-				height="100%"
-				language={language}
-				value={data}
-				options={opt}
-				editorDidMount={this._editorDidMount}
-				requireConfig = {requireConfig}
-			/>
+			<div ref="editorContainer" className="editorContainer"></div>
 		);
 	}
 }

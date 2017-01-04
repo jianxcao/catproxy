@@ -121,7 +121,6 @@ export default class DataList extends Component {
 		this.state = {
 			tableHeight: tableHeight,
 			tableWidth: tableWidth,
-			hoverIndex: -1,
 			customColums: showFeild,
 			rowSelect: -1
 		};
@@ -141,13 +140,15 @@ export default class DataList extends Component {
 			let newData = monitorList.get(rowSelect);
 			let oldData = this.props.monitorList.get(rowSelect);
 			// 如果当前打开详情页面的数据发生了变化则从新渲染详情
-			if (newData && oldData && !newData.equals(oldData)) {
-				this._renderConInfo(newData);
+			if (newData) {
+				if (oldData && !oldData.equals(newData) || !oldData) {
+					this._renderConInfo(newData);
+				}
 			} else {
 				this.setState({
 					rowSelect: -1
 				});
-				this._closeDetailCon();
+				this._closeDetailCon();				
 			}
 		}
 		

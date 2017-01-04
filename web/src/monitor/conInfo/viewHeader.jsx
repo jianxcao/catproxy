@@ -2,12 +2,15 @@ import ReactDom, { render } from 'react-dom';
 import React, { PropTypes, Component, Children } from 'react';
 import cx from 'classnames';
 import ViewData from "./viewData";
+import {shouldEqual} from '../util';
 export default class ViewHeader extends Component{
 	constructor() {
 		super();
 		this._handleEncodeClick = this._handleEncodeClick.bind(this);
 	}
-	
+	shouldComponentUpdate (nextProps, nextState) {
+		return !shouldEqual(this.props, nextProps) && shouldEqual(this.state, nextState);
+	}
 	componentWillMount () {
 		this.state = {
 			// 是否编码

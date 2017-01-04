@@ -44,14 +44,15 @@ class ConInfo extends Component {
 	}
 	
 	_stateSize() {
-		let w = +localStorage.getItem('conInfoWidth') || window.innerWidth * 0.6;
+		let winWidth = window.innerWidth;
+		let defWidth = parseInt(winWidth * 0.6);
+		let maxWidth = parseInt(winWidth * 0.9);
+		let w = +localStorage.getItem('conInfoWidth') || defWidth;
 		let {width, height} = this.props;
 		width = +width || w;
 		height = +height;
 		let s = {};
-		if (width) {
-			s.width = width;
-		}
+		s.width = Math.min(maxWidth, width);
 		if (height) {
 			s.height = height;
 		}

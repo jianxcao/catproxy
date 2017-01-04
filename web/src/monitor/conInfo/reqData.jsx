@@ -2,10 +2,10 @@ import ReactDom, { render } from 'react-dom';
 import React, { PropTypes, Component, Children } from 'react';
 import cx from 'classnames';
 import ViewData from "./viewData";
-import {getPara} from '../util';
 import isEmpty from 'lodash/isEmpty';
 import JsonTreeView from './jsonTreeView';
-import {jsonParse, isJSONStr} from '../util';
+import {jsonParse, isJSONStr, getPara} from '../util';
+import shallowCompare from 'react-addons-shallow-compare';
 export default class ReqData extends Component{
 	constructor() {
 		super();
@@ -14,6 +14,11 @@ export default class ReqData extends Component{
 	}
 	static defaultProps = {
 	}
+
+	shouldComponentUpdate (nextProps, nextState) {
+		return shallowCompare(this, nextProps, nextState);
+	}
+		
 	componentWillMount () {
 		this.state = {
 			// 在是url传 比如 & 相链接的时候，或者是个字符串的时候,该字段有效

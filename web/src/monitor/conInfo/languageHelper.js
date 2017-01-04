@@ -3,6 +3,7 @@ export const extLanguage = {
 	"ts": "typescript",
 	"js": "javascript",
 	"json": "json",
+	"jsonp": "javascript",
 	"bat": "bat",
 	"coffee": "coffeescript",
 	'c': "c",
@@ -28,6 +29,9 @@ export const extLanguage = {
 	"sql": "sql",
 	"yaml": "yaml",
 	"rb": "ruby",
-	"swift": "swift"
+	"swift": "swift",
+	"jsx": "javascript",
+	"vue": "javascript",
+	"ejs": "html"
 };
 

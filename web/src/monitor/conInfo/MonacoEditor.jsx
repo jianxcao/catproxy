@@ -20,6 +20,11 @@ class MonacoEditor extends React.Component {
 			this.__prevent_trigger_change_event = false;
 		}
 	}
+	// shouldComponentUpdate (nextProps, nextState) {
+	// 	// let {width, height, value, defaultValue, language, theme, options, editorDidMount, editorWillMount, onChange, requireConfig};
+	// 	return true;
+	// }
+	
 	editorWillMount(monaco) {
 		const { editorWillMount } = this.props;
 		editorWillMount(monaco);
@@ -113,7 +118,7 @@ MonacoEditor.defaultProps = {
 	height: '100%',
 	value: null,
 	defaultValue: '',
-	language: 'javascript',
+	language: "plaintext",
 	theme: 'vs',
 	options: {},
 	editorDidMount: noop,

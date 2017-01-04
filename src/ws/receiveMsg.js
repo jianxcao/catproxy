@@ -10,7 +10,7 @@ import Promise from 'promise';
 import {Buffer} from 'buffer';
 import {sendConnDetail} from './sendMsg';
 import {getCacheFile} from '../monitor/cacheFile';
-import {decodeData, isBinary, betuifyCode} from '../dataHelper';
+import {decodeData, isBinary, betuifyCode, updateExt} from '../dataHelper';
 /*
  * 
  *  所有接受到得消息是一个Object
@@ -107,20 +107,24 @@ export let getConDetail = (msg = {param: {}}, ws = {}) => {
 			return isBinary(data) ? data : decodeData(data, charset);
 		})
 		.then(function(data) {
-			if (ext && typeof data === 'string' && formatCode) {
+			if (typeof data === 'string' && formatCode) {
+				ext = updateExt(ext, contentType, data);
 				return betuifyCode(data, ext);
 			}
+			data = data || "";
 			return data;
 		})
 		.then(function(data) {
 			sendConnDetail({
 				id,
-				data
+				data,
+				ext
 			});
 		}, function(data) {
 			sendConnDetail({
 				id,
-				data
+				data,
+				ext
 			});
 		});
 	}

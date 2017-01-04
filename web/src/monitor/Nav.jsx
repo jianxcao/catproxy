@@ -11,6 +11,7 @@ import {upperFirstLetter} from './util';
 import cs from 'classnames';
 import * as sendMsg from "../ws/sendMsg";
 import keymaster from 'keymaster';
+import shallowCompare from 'react-addons-shallow-compare'; // ES6
 keymaster.filter = (event) => {
 	return true;
 };
@@ -33,6 +34,10 @@ class MyNav extends Component{
 	}
 	static contextTypes = {
 	}
+	shouldComponentUpdate (nextProps, nextState) {
+		return shallowCompare(this, nextProps, nextState);
+	}
+	
 	componentDidMount () {
 		// 清除快捷
 		keymaster('⌘+k,ctrl+k', () =>{
