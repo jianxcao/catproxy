@@ -34,11 +34,13 @@ class ViewResData extends Component {
 	componentWillMount() {
 		let {sendFetchConData, data} = this.props;
 		let id = data.get('resBodyDataId');
+		let charset = data.get('resCharset') || "utf8";
 		let status = data.get('status');
+		charset = charset.toLowerCase();
 		this.state = {
 			loading: new Map(),
 			formatCode: true,
-			charset: 'utf8',
+			charset,
 			// 默认的时候language是null
 			language: null
 		};

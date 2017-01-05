@@ -3,11 +3,13 @@ import React, { PropTypes, Component, Children } from 'react';
 import {Navbar, Nav, NavItem, NavDropdown, MenuItem} from 'react-bootstrap';
 import createFragment from 'react-addons-create-fragment';
 import shallowCompare from 'react-addons-shallow-compare';
-const allLanguage = ["plaintext", "typescript", "javascript", "json", "bat",
-	"coffeescript", "c", "cpp", "csharp", "dockerfile", "fsharp", "go", "handlebars", 
-	"html", "ini", "jade", "java", "lua", "markdown", "objective-c", 
-	"postiats", "php", "powershell", "python", "r", "razor", "ruby", "swift", 
-	"sql", "vb", "xml", "less", "scss", "css", "yaml"];
+const allLanguage = ["javascript", "json", 
+	"html", "plaintext", "less", "scss", "css", "typescript", "bat",
+	"coffeescript", "c", "cpp", "csharp", "dockerfile",
+	"fsharp", "go", "handlebars", "ini", "jade", "java",
+	"lua", "markdown", "objective-c", "postiats", "php",
+	 "powershell", "python", "r", "razor", "ruby", "swift", 
+	"sql", "vb", "xml", "yaml"];
 
 export default class ResToolBar extends Component {
 	constructor() {
@@ -61,9 +63,9 @@ export default class ResToolBar extends Component {
 		result["bar0"] = (
 			<Nav>
 				<NavDropdown eventKey={"charset"} title={charset} className="charset" id="charset" onSelect={this._changeCharset}>
-					<MenuItem eventKey="utf8">utf8</MenuItem>
+					<MenuItem eventKey="utf-8">utf-8</MenuItem>
 					<MenuItem eventKey="gbk">gbk</MenuItem>
-					<MenuItem eventKey="gbk">gb2312</MenuItem>
+					<MenuItem eventKey="gb2312">gb2312</MenuItem>
 				</NavDropdown>			
 			</Nav>
 		);

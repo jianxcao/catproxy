@@ -202,7 +202,7 @@ var beforeRes = async function(resInfo) {
 	let com = this;
 	let contentEncoding = resInfo.headers['content-encoding'];
 	let contentType = resInfo.headers['content-type'];
-	resInfo.ext = (path.extname(URL.parse(resInfo.originalUrl|| "").pathname || "") || "").slice(1) || mime.extension(contentType || "");
+	resInfo.ext = mime.extension(contentType || "") || (path.extname(URL.parse(resInfo.originalUrl|| "").pathname || "") || "").slice(1);
 	// 禁止缓存
 	resInfo = await disCache(resInfo);
 	try {

@@ -194,8 +194,11 @@ export default function(catproxy) {
 					id: result.id,
 					time: result.endTime - startTime,
 					status: result.statusCode,
-					size: bodyData ? bodyData.length : 0
+					size: bodyData ? bodyData.length : 0,
 				};
+				if (result.charset) {
+					updateData.resCharset = result.charset;
+				}
 				if (fileName) {
 					updateData.resBodyDataId = fileName;
 				}

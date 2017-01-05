@@ -35,7 +35,7 @@ let checkFileExits = (filePath) => {
 };
 let saveFile = (filePath, data) => {
 	return new Promise((resolve, reject) => {
-		fse.outputFile(filePath, data, function(err) {
+		fs.writeFile(filePath, data, function(err) {
 			if (err) {
 				return reject(err);
 			}

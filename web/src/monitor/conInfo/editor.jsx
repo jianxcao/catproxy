@@ -23,7 +23,7 @@ const options = {
 		useShadows: true
 	}
 };
-
+var modelTimer = null;
 // 全局编辑器
 var editor;
 const getMonaco = () => {
@@ -112,21 +112,32 @@ export default class Eidtor extends Component {
 		}
 	}
 	_initModel(data = "", language) {
-		var oldModel = editor.getModel();
-		var newModel = win.monaco.editor.createModel(data, language);
-		editor.setModel(newModel);
-		if (oldModel) {
-			oldModel.dispose();
-		}		
+		// 不延迟切换编辑器的时候有可能会报错, 特别快速的切换编辑器-只保留最后一个
+		modelTimer = 	setTimeout(() => {
+			var oldModel = editor.getModel();
+			if (oldModel) {
+				oldModel.dispose();
+			}
+			if (modelTimer) {
+				clearTimeout(modelTimer);
+				modelTimer = null;
+			}
+			var newModel = win.monaco.editor.createModel(data, language);
+			editor.setModel(newModel);
+		}, 100);
 	}
 	_editorDidMount() {
 		let {editorDidMount, data = "", language} = this.props;
 		let {editorContainer} = this.refs;
+		if (!language) {
+			language = "plaintext";
+		}
 		this._initModel(data, language);
 		editorContainer.appendChild(container);
 		editor.layout();
 		// 检测当前设置的 language, 如果language不能识别就设置成文本
-		editor.focus();
+		// 直接focus有问题，会导致 input框失去焦点
+		// editor.focus();
 		if (editorDidMount) {
 			editorDidMount(editor);
 		}
@@ -139,6 +150,7 @@ export default class Eidtor extends Component {
 		let div = document.createElement('div');
 		div.appendChild(container);
 		div = null;
+		
 	}
 
 	resize() {

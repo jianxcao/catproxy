@@ -365,6 +365,12 @@ export default function(reqInfo, resInfo){
 				enumerable: true			
 			}
 		});
+		if (resInfo.charset) {
+			Object.defineProperty(result, "charset", {
+				writable: false,
+				value: resInfo.charset
+			});
+		}
 		return afterRes.call(self, result);
 	});
 	req.on('reqBodyDataReady', (err, reqBodyData) => {
