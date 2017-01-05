@@ -78,16 +78,14 @@
 				&:first-child{
 					border: 0px;
 				}
-				padding: 5px 0px;
+				padding-bottom: 5px;
 				.headerTitle{
 					font-weight: 700;
 					.source, .encode{
 						font-weight: normal;
 						display: inline-block;
-						padding-left: 30px;
-						font-size: 12px;
-						height: 20px;
-						line-height: 20px;						
+						padding: 5px 10px 0px 30px;
+						font-size: 12px;					
 					}
 					&:before{
 						content: " ";
@@ -135,7 +133,11 @@
 			// 图片情况的查看
 			.imagePreview{
 				text-align: center;
-				margin-top: 30px;
+				padding-top: 30px;
+				position: relative;
+				height: 100%;
+				width: 100%;
+				overflow: auto;
 				img{
 					display: inline-block;
 				}

@@ -9,7 +9,7 @@ export default class ViewHeader extends Component{
 		this._handleEncodeClick = this._handleEncodeClick.bind(this);
 	}
 	shouldComponentUpdate (nextProps, nextState) {
-		return !shouldEqual(this.props, nextProps) && shouldEqual(this.state, nextState);
+		return !(shouldEqual(this.props, nextProps) && shouldEqual(this.state, nextState));
 	}
 	componentWillMount () {
 		this.state = {

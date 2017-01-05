@@ -12,9 +12,13 @@ import Promise from 'promise';
 var checkMetaCharset = /<meta(?:\s)+.*charset(?:\s)*=(?:[\s'"])*([^"']+)/i;
 export const isJSONStr = /(^(?:\s*\[)[\s\S]*(?:\]\s*)$|(^(?:\s*\{)[\s\S]*(?:\}\s*)$))/;
 export const isFont = /(^font\/.+)|(^application\/x-font.+)|(^application\/font.+)/;
+export const isXml =/^\s*\<\?xml.*/;
 export const isDataUrl = /^data:.+/;
 export const isImage = /^image\/.+/;
 export const isMedia = /(^video\/.+)|(^audio\/.+)/;
+// 这么判断并不准确，最好是用ast，语法树，但是怕性能有问题，就用这个了
+// ()中间的参数并不匹配??
+export const isJSONP = /^\s*[a-zA-Z$_]+[\w$]*\s*\(([\s\S]*)(\)|(?:\)[\s;]*))$/;
 
 // 解压数据
 export const decodeCompress = (bodyData, encode) =>{
@@ -140,6 +144,10 @@ export let betuifyCode = function(code, ext) {
 export let updateExt = function(ext, contentType, data = "") {
 	if (isJSONStr.test(data)) {
 		return "json";
+	} else if (isJSONP.test(data)) {
+		return "jsonp";
+	} else if (isXml.test(data)) {
+		return 'xml';
 	}
 	return ext;
 };

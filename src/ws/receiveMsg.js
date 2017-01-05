@@ -107,20 +107,27 @@ export let getConDetail = (msg = {param: {}}, ws = {}) => {
 			return isBinary(data) ? data : decodeData(data, charset);
 		})
 		.then(function(data) {
-			if (typeof data === 'string' && formatCode) {
+			if (typeof data === 'string' && data) {
 				ext = updateExt(ext, contentType, data);
+			}
+			return data;
+		})
+		.then(function(data) {
+			if (typeof data === 'string' && formatCode) {
 				return betuifyCode(data, ext);
 			}
 			data = data || "";
 			return data;
 		})
 		.then(function(data) {
+			data = data || "";
 			sendConnDetail({
 				id,
 				data,
 				ext
 			});
 		}, function(data) {
+			data = data || "";
 			sendConnDetail({
 				id,
 				data,

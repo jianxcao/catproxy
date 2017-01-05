@@ -123,8 +123,8 @@ class MyNav extends Component{
 					</NavDropdown>
 					<NavItem eventKey={"clear"} href="javascript:;" className="split"></NavItem>
 					<NavDropdown eventKey={"Dropdown"} title="帮助" id="helpMenu">
-						<MenuItem eventKey={3.1}>github</MenuItem>
-						<MenuItem eventKey={3.2}>帮助</MenuItem>
+						<MenuItem eventKey={3.1} href="https://github.com/jianxcao/catproxy" target="_blank">github</MenuItem>
+						<MenuItem eventKey={3.2} href="https://github.com/jianxcao/catproxy" target="_blank">帮助</MenuItem>
 					</NavDropdown>
 				</Nav>
 		</Navbar>);

@@ -37,7 +37,7 @@ class ViewResData extends Component {
 		let status = data.get('status');
 		this.state = {
 			loading: new Map(),
-			formatCode: false,
+			formatCode: true,
 			charset: 'utf8',
 			// 默认的时候language是null
 			language: null
@@ -189,7 +189,7 @@ class ViewResData extends Component {
 		// 需要修正，其次有些请求的contentType和实际内容太也不同，需要修正，这里只修正json和jsonp
 		let ext = resBodyData.ext;
 		// state 取不到就取默认
-		language = language || extLanguage[ext];
+		language = language || extLanguage[ext] || "plaintext";
 		let result = "";
 		// 如果格式化代码则带换行，否则不带
 		let opt = {

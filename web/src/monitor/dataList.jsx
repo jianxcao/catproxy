@@ -467,6 +467,7 @@ export default class DataList extends Component {
 					align={"center"}
 					header={<HeaderCell ref={current.shortName + "Header"} data-tip={current.tip} onMouseDown={this._onHeaderCellMouseDown}>{current.name}</HeaderCell>}
 					key={index}
+					allowCellsRecycling={true}
 					columnKey={current.shortName}
 					width={width}
 					minWidth={80}

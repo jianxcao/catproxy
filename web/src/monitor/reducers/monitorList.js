@@ -8,7 +8,7 @@ export default {
 			// 增加数据
 		ADD_MONITOR_LIST: (state , {payload: arrData}) => {
 			// 数据量限定在5000
-			if (state.size > 5000) {
+			if (state.size > 100000) {
 				state = new Map();
 			}
 			let ids = [];

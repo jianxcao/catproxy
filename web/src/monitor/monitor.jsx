@@ -17,6 +17,7 @@ import {fetchConfig} from './action/fetchAction';
 import {clearMonitorList} from './action/monitorListAction';
 import {monitorStatus} from './action/navAction';
 import {isRegStr, isDataUrl} from './util';
+import ws from '../ws/ws';
 injectTapEventPlugin();
 const pageUrl = window.config.host + "/m";
 class Monitor extends Component{
@@ -39,6 +40,12 @@ class Monitor extends Component{
 	}
 
 	componentDidMount () {
+		// 重新连接，清空数据
+		ws().then(function(wws) {
+			wws.on('disconnect', function() {
+				store.dispatch(clearMonitorList());
+			});
+		});		
 		document.body.querySelector('#g-wrap').addEventListener('contextmenu', (e) => {
 			e.preventDefault();
 			e.stopPropagation();

@@ -5,7 +5,6 @@ import promise from 'redux-promise';
 import createLogger from 'redux-logger';
 import createSagaMiddleware from 'redux-saga';
 import rootSaga from '../sagas/saga';
-import ws from '../../ws/ws';
 import {clearMonitorList} from '../action/monitorListAction';
 import {
     combineReducers
@@ -34,19 +33,11 @@ const sagaMiddleware = createSagaMiddleware();
 // 创建带有 调试和各种中间件的stroe
 let middleware = [thunk, promise, sagaMiddleware];
 
-// if (window.config.env === 'dev') {
-middleware.push(createLogger());
-// }
+if (window.config.env === 'dev') {
+	middleware.push(createLogger());
+}
 let store = createStore(reducer, initialState, compose(applyMiddleware(...middleware),
 	window.devToolsExtension ? window.devToolsExtension() : f => f
 ));
-// 重新连接，清空数据
-ws().then(function(wws) {
-	wws.on('disconnect', function() {
-		store.dispatch(clearMonitorList());
-	});
-});
-window.store = store;
-window.Immutable = Immutable;
 sagaMiddleware.run(rootSaga);
 export default store;
