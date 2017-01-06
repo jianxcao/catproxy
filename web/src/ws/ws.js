@@ -21,12 +21,23 @@ let distributeReciveMethod = (ws) => {
 };
 export default myMessage = () => {
 	if (ws) {
-		return Promise.resolve(ws);
+		if (!ws.connected) {
+			return new Promise(function(resolve, reject) {
+				ws.once('connect', function () {
+					console.log('connect');
+					distributeReciveMethod(ws);
+					resolve(ws);
+				});			
+			});
+		} else {
+			return Promise.resolve(ws);
+		}
 	}
 	ws = io.connect(window.config.wsServerUrl);
-
+	 ;
 	return new Promise((resolve)=> {
 		ws.once('connect', function () {
+			console.log('connect');
 			distributeReciveMethod(ws);
 			resolve(ws);
 		});

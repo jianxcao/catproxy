@@ -4,6 +4,9 @@ import net from 'net';
 import dns from 'dns';
 import Promise from 'promise';
 import {localIps} from './getLocalIps';
+import dnscache  from 'dnscache';
+// 增加dns缓存
+dnscache({"enable": true, "ttl": 300, "cachesize": 1000});
 export default (hostname, isServerPort) => {
 	if (net.isIP(hostname)) {
 		return Promise.resolve(hostname);
