@@ -12,6 +12,8 @@ import Loading from '../loading';
 import cx from 'classnames';
 import Immutable, {List, Map} from 'immutable';
 import ViewResData from './viewResData';
+import Scrollbars from '../scrollBar';
+
 const defStyle = {
 	top: 0,
 	right: 0
@@ -205,7 +207,9 @@ class ConInfo extends Component {
 					<span className={cx({active: currentTab == 1})} data-id="1" onClick={this._changeTab}>响应数据</span>
 				</nav>
 				<div className="contentTab">
-					<div className={cx("headers", {active: currentTab == 0})}>{this.renderHeaders()}</div>
+					<Scrollbars >
+						<div className={cx("headers", {active: currentTab == 0})}>{this.renderHeaders()}</div>
+					</Scrollbars>
 					<div className={cx("response", {active: currentTab == 1})}>{this.renderResponse()}</div>
 				</div>
 			</div>);

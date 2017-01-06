@@ -65,14 +65,13 @@
 				font-style: normal;
 			}
 		&>div{
-			display: none;
 			height: 100%;
 			width: 100%;		
 		}
 		// 头部tab
 		.headers{
 			padding-left: 10px;
-			overflow: auto;
+			display:none;
 			.viewHeader{
 				border:1px solid transparent;
 				&:first-child{
@@ -114,11 +113,12 @@
 				}
 			}
 		}
-		&>div.active {
+		& div.active {
 			display: block;
 		}
 		// 响应数据
 		.response{
+			display: none;
 			position: relative;
 			overflow: hidden;
 			height: 100%;
