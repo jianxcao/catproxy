@@ -2,6 +2,8 @@ import log from './log';
 import childProcess from 'child_process';
 import myPort from 'empty-port';
 import Promise from 'promise';
+import net from 'net';
+
 export let getUrl = ({port, path: pathname, protocol, hostname, host})=> {
 	if (protocol && (hostname || host)) {
 		hostname = hostname || host;
@@ -32,11 +34,11 @@ export let writeErr = (err) => {
 let portReg = /EADDRINUSE\s*[^0-9]*([0-9]+)/i;
 
 export let error = err => {
-	if (err.message && err.message.indexOf("EACCES") > -1) {
+	if (err.code === 'EACCES' || err.message && err.message.indexOf("EACCES") > -1) {
 		log.error("请用sudo管理员权限打开");
 		process.exit(1);
-	} else if (err.message.indexOf("EADDRINUSE") > -1) {
-		let port = err.message.match(portReg);
+	} else if (err.code === "EADDRINUSE" || err.message.indexOf("EADDRINUSE") > -1) {
+		let port = err.port || err.message.match(portReg);
 		port  = port && port.length > 1 ? port[1] : "";
 		log.error(`端口${port}被占用，请检查端口占用情况`);
 		process.exit(1);
@@ -97,20 +99,6 @@ export let sendErr = (res, err, uri) => {
 	res.end(message);
 };
 
-export let getPort =  function(startPort) {
-	return new Promise(function(resolve, reject) {
-		myPort({
-			startPort: startPort || 10001
-		}, (err, port) => {
-			if (err) {
-				reject(err);
-			} else {
-				resolve(port);
-			}
-		});		
-	});
-};
-
 export let getGuids = (start) => {
 	start = +start || 1;
 	return () => {
@@ -118,4 +106,19 @@ export let getGuids = (start) => {
 	};
 };
 
+export let getPort = () => {
+	return new Promise(function (resolve, reject) {
+		var server = net.createServer();
+		server.unref();
+		server.on('error', reject);
+		server.listen(0, function () {
+			var port = server.address().port;
+			server.close(function () {
+				resolve(port);
+			});
+		});
+	});
+};
+
 export let getMonitorId = getGuids(+new Date());
+
