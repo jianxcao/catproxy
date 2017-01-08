@@ -18,6 +18,7 @@ import {clearMonitorList} from './action/monitorListAction';
 import {monitorStatus} from './action/navAction';
 import {isRegStr, isDataUrl} from './util';
 import ws from '../ws/ws';
+import Scrollbars from './scrollBar';
 injectTapEventPlugin();
 const pageUrl = window.config.host + "/m";
 class Monitor extends Component{
@@ -124,7 +125,8 @@ function mapDispatchToProps(dispatch) {
 };
 const ConnectMonitor = connect(mapStateToProps, mapDispatchToProps)(Monitor);
 ReactDom.render(
+	<Scrollbars autoHide={true} hideTracksWhenNotNeeded={true}>
 	<Provider store={store}>
 		<ConnectMonitor/>
-	</Provider>, 
+	</Provider></Scrollbars>, 
 	document.getElementById('g-wrap'));

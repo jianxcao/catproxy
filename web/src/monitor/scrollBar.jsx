@@ -3,8 +3,9 @@ import ReactDom, {render} from 'react-dom';
 import React, {PropTypes, Component} from 'react';
 export default class CustomScrollbars extends Component {
 	render() {
+		let props = this.props;
 		return (
-			<Scrollbars
+			<Scrollbars {...props}
 				renderTrackHorizontal={props => <div {...props} className="trackHorizontal"/>}
 				renderTrackVertical={props => <div {...props} className="trackVertical"/>}
 				renderThumbHorizontal={props => <div {...props} className="thumbHorizontal"/>}
