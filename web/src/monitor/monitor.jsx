@@ -91,9 +91,13 @@ class Monitor extends Component{
 		if (loadingPage) {
 			out = <Loading className="pageLoading"/>;
 		} else {
+			let style = {
+				'minWidth': 800,
+				'minHeight': 500
+			}
 			out = (<RightMenuProvider>
 					<ToolTipProvider>
-						<div>
+						<div style={style}>
 							<MyNav/>
 							<FilterBar/>
 							<DataList 

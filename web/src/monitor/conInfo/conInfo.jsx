@@ -208,7 +208,7 @@ class ConInfo extends Component {
 				</nav>
 				<div className="contentTab">
 					<div className={cx("headers", {active: currentTab == 0})}>
-							<Scrollbars><div>{this.renderHeaders()}</div></Scrollbars>
+							<Scrollbars  autoHide={true} hideTracksWhenNotNeeded={true}><div>{this.renderHeaders()}</div></Scrollbars>
 					</div>
 					<div className={cx("response", {active: currentTab == 1})}>{this.renderResponse()}</div>
 				</div>
