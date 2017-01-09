@@ -1,0 +1,68 @@
+.qrcodeWrap{
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	z-index: 99999;
+	left: 0px;
+	top: 0px;
+	.qrMask{
+		position: fixed;
+		width: 100%;
+		height: 100%;		
+		left: 0px;
+		top: 0px;
+		background: rgba(0, 0, 0, .5);		
+	}
+	.qrcode{
+		height: 300px;
+		width: 300px;
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		background-color: #fff;
+	  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.9);
+    border-radius: 3px;	
+		&> div:last-child{
+			margin-left: 22px;
+			margin-top: 22px;
+		}
+	}
+	.closeBtn {
+		right: 3px;
+    top: 5px;
+    position: absolute;
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    overflow: hidden;
+		cursor: pointer;
+	}
+	.closeBtn:hover::before, .closeBtn:hover::after {
+		background: rgba(0, 0, 0, 0.9);
+	}
+	.closeBtn::before, .closeBtn::after {
+		content: '';
+		position: absolute;
+		height: 2px;
+		width: 100%;
+		top: 50%;
+		left: 0;
+		margin-top: -1px;
+		background: #000;
+	}
+	.closeBtn::before {
+		-webkit-transform: rotate(45deg);
+		-moz-transform: rotate(45deg);
+		-ms-transform: rotate(45deg);
+		-o-transform: rotate(45deg);
+		transform: rotate(45deg);
+	}
+	.closeBtn::after {
+		-webkit-transform: rotate(-45deg);
+		-moz-transform: rotate(-45deg);
+		-ms-transform: rotate(-45deg);
+		-o-transform: rotate(-45deg);
+		transform: rotate(-45deg);
+	}	
+}

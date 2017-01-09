@@ -12,6 +12,7 @@ export default class QrCode extends React.Component{
 		opt: {}
 	}
 	render() {
-		return (<div ref="qrcode"></div>);
+		let {opt, ...props} = this.props;
+		return (<div ref="qrcode" {...props}></div>);
 	}
 }

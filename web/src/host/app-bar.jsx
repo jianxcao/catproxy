@@ -13,9 +13,8 @@ import sendMsg from '../ws/sendMsg';
 import store from './store/store';
 import {resetHosts, remoteUpdateRuleUrl} from './action/actions';
 import LinkItem from './LinkItem';
-import QrCode from '../lib/qrcode/qrcode';
 import TextField from 'material-ui/TextField';
-
+import qrcode from '../lib/qrcode/qrcodeDialog';
 let getIcon = (props = {}, className ="", style = {}) => {
 	let defStyle ={
 		padding: "0px",
@@ -149,16 +148,12 @@ class Header extends React.Component {
 	handleShowCertQrcode = () => {
 		let {dialog} = this.context;
 		let opt = {
-			text: 'http://' + location.host + "/c/downloadcert.html"
+			text: location.protocol + '//' + location.host + "/c/downloadcert.html"
 		};
-		dialog({
-			title: '证书二维码',
-			msg: (<QrCode opt={opt} ></QrCode>),
-			btn: ["关闭"]
-		});
+		qrcode(opt);
 	}
 	render() {
-		let host = 'http://' + location.host;
+		let host = location.protocol + '//' + location.host;
 		let downloadrule = "/c/downloadrule.html";
 		let downloadcert = "/c/downloadcert.html";
 		return (<AppBar

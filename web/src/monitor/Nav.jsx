@@ -12,6 +12,7 @@ import cs from 'classnames';
 import * as sendMsg from "../ws/sendMsg";
 import keymaster from 'keymaster';
 import shallowCompare from 'react-addons-shallow-compare'; // ES6
+import qrcode from '../lib/qrcode/qrcodeDialog';
 keymaster.filter = (event) => {
 	return true;
 };
@@ -88,6 +89,13 @@ class MyNav extends Component{
 		sendMsg.disCache(!disCache)
 		.then(null, (err) => console.log(err));
 	}
+	changeCert(key) {
+		if (key === 'qrcode') {
+			qrcode({
+				text: location.protocol + '//' + location.host + "/c/downloadcert.html"
+			});
+		}
+	}
 	render() {
 		let pageUrl = window.config.host + "/m";
 		let {disCache, monitorStatus, monitorFilterStatus} = this.props;
@@ -103,10 +111,10 @@ class MyNav extends Component{
 					</Navbar.Brand>
 				</Navbar.Header>
 				<Nav>
-					<NavItem eventKey={"record"} href="javascript:;" className={recordCls} data-tip={recordTip + " Ctrl+e ⌘+e"} onClick={this.changeMonitorStatus}></NavItem>
-					<NavItem eventKey={"clear"} href="javascript:;" className="navBtn clear" data-tip="清除全部 Ctrl+K ⌘+K" onClick={this.clearMonitorList}></NavItem>
-					<NavItem eventKey={"clear"} href="javascript:;" className="split"></NavItem>
-					<NavItem eventKey={"toolbar"} href="javascript:;" className={toobarCls} title="显示隐藏过滤" onClick={this.changeMonitorFilterStatus}></NavItem>
+					<NavItem eventKey="record" href="javascript:;" className={recordCls} data-tip={recordTip + " Ctrl+e ⌘+e"} onClick={this.changeMonitorStatus}></NavItem>
+					<NavItem eventKey="clear" href="javascript:;" className="navBtn clear" data-tip="清除全部 Ctrl+K ⌘+K" onClick={this.clearMonitorList}></NavItem>
+					<NavItem eventKey="clear" href="javascript:;" className="split"></NavItem>
+					<NavItem eventKey="toolbar" href="javascript:;" className={toobarCls} title="显示隐藏过滤" onClick={this.changeMonitorFilterStatus}></NavItem>
 				</Nav>
 				<div className="split"></div>
 				<div className="selfNav">
@@ -117,14 +125,15 @@ class MyNav extends Component{
 					<div className="split"></div>
 				</div>
 				<Nav>
-					<NavDropdown eventKey={"Dropdown"} title="证书" id="certMenu">
-						<MenuItem eventKey={3.1}>下载证书</MenuItem>
-						<MenuItem eventKey={3.2}>证书二维码</MenuItem>
+					<NavDropdown eventKey="certCenter" title="证书" id="certMenu" onSelect={this.changeCert}>
+						<MenuItem eventKey="host" href="/c/downloadrule.html">下载host文件</MenuItem>
+						<MenuItem eventKey="cert" href="/c/downloadcert.html">下载证书</MenuItem>
+						<MenuItem eventKey="qrcode">证书二维码</MenuItem>
 					</NavDropdown>
-					<NavItem eventKey={"clear"} href="javascript:;" className="split"></NavItem>
-					<NavDropdown eventKey={"Dropdown"} title="帮助" id="helpMenu">
-						<MenuItem eventKey={3.1} href="https://github.com/jianxcao/catproxy" target="_blank">github</MenuItem>
-						<MenuItem eventKey={3.2} href="https://github.com/jianxcao/catproxy" target="_blank">帮助</MenuItem>
+					<NavItem eventKey="clear" href="javascript:;" className="split"></NavItem>
+					<NavDropdown eventKey="help" title="帮助" id="helpMenu">
+						<MenuItem eventKey="github" href="https://github.com/jianxcao/catproxy" target="_blank">github</MenuItem>
+						<MenuItem eventKey="help" href="https://github.com/jianxcao/catproxy" target="_blank">帮助</MenuItem>
 					</NavDropdown>
 				</Nav>
 		</Navbar>);
