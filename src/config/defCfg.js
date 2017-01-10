@@ -6,10 +6,13 @@ export const DEFAULT_TYPE = 'http';
 export const DEFAULT_PORT = 80;
 export const DEFAULT_HTTPS_PORT = 443;
 export const DEFAULT_UI_PORT = 8001;
+// weinrePort
+export const DEFAULT_WEINRE_PORT = 8002;
 // https服务器启动时候需要的证书
 export const  DEFAULT_CERT_HOST = 'localhost';
 export const DEFAULT_BREAK_HTTPS = true;
 export const LIMIT_SIZE = 1024 * 1024 * 1;
+
 export const SIN = 1;
 // 自动打开管理界面
 export const AUTO_OPEN = true;
@@ -35,6 +38,7 @@ export default {
 	uiPort: DEFAULT_UI_PORT,
 	autoOpen: AUTO_OPEN,
 	sni: SIN,
+	weinrePort: DEFAULT_WEINRE_PORT,
 	monitor: {
 		monitorStatus: MONITOR_STATUS,
 		monitorFilterStatus: MONITOR_FILTER_STATUS,

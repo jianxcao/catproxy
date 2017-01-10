@@ -2,7 +2,8 @@ const ruleType = {
 	host: "host",
 	localFile: "localFile",
 	localDir: "localDir",
-	remoteFile: "remoteFile"
+	remoteFile: "remoteFile",
+	weinre: "weinre"
 };
 
 let checkRules = (branch) => {

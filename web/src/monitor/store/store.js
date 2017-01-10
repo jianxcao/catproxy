@@ -39,6 +39,5 @@ if (window.config.env === 'dev') {
 let store = createStore(reducer, initialState, compose(applyMiddleware(...middleware),
 	window.devToolsExtension ? window.devToolsExtension() : f => f
 ));
-window.store = store;
 sagaMiddleware.run(rootSaga);
 export default store;

@@ -44,8 +44,7 @@ const getBaseEditor = () => {
 		// 前提是编辑器已经加载成功了
 		var editor = monaco.editor.create(container, merge({
 			model: null,
-		}, options));		
-		window.editor = editor;
+		}, options));
 		return editor;
 	});
 };

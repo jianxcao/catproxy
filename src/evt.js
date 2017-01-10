@@ -13,6 +13,7 @@ import requestIp from 'request-ip';
 import {localIps} from './getLocalIps';
 import ip from 'ip';
 import URL from 'url';
+import {insertWeinreScript} from './weinreServer';
 // 自动解析类型，其他类型一律保存的是 Buffer
 var autoDecodeRegs = /text\/.+|(?:application\/(?:json.*|.*javascript))/i;
 
@@ -225,6 +226,14 @@ var beforeRes = async function(resInfo) {
 	if (!resInfo.isBinary) {
 		// 设置默认编码
 		resInfo.charset = getCharset(resInfo);
+		if (resInfo.weinre) {
+			try {
+				resInfo.bodyData = await insertWeinreScript(resInfo.bodyData, resInfo.charset);
+			} catch (error) {
+				console.log(error);
+				log.error(error);	
+			}
+		}
 	}
 	// 触发事件
 	let result = await callBeforeResEvt(catProxy, resInfo, com);

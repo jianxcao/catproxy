@@ -59,7 +59,13 @@ export let parseRule = messageInfo => {
 			param: [current, messageInfo]
 		};
 	}))
-	.then(result => result ? result : messageInfo);
+	.then(result => {
+		if (result) {
+			delete result.__match;
+			return result;
+		}
+		return messageInfo;
+	});
 };
 
 parseOneRule = (group, messageInfo) => {
@@ -102,11 +108,20 @@ parseOneBranch = (rule, messageInfo, groupName, branchName) => {
 	}
 	// 将test转换成正则
 	test = new RegExp(test);
-	let currentUrl = getUrl(messageInfo);
+	let currentUrl = messageInfo.originalFullUrl;
 	// 测试没有通过
 	if (!test.test(currentUrl) || rule.disable) {
 		return;
 	}
+	// 设置了 weinre
+	if (type === 'weinre') {
+		messageInfo.weinre = true;
+	}
+	// 已经匹配了
+	if (messageInfo.__match) {
+		return;
+	}
+	messageInfo.__match = true;
 	log.debug(`解析规则,当前url:${currentUrl}, 规则类型:${type},规则正则${test},规则执行${exec}`);
 	switch(type){
 		// host模式下只能修改 host protocol port
@@ -182,9 +197,11 @@ standardUrl = (originalUrl, protocol) => {
  * 	fun: fun,
  * 	param: [param]
  * }]
+ * index 从第几个开始执行
+ * 每个函数会得到多个参数，参数的最后一个是 前一个 任务得执行结果
  * @return {[promise]}        [promise]
  */
-execParse = (tasks, index) => {
+execParse = (tasks, index, preResult) => {
 	if (!tasks || !tasks.length) {
 		return Promise.resolve();
 	}
@@ -195,22 +212,23 @@ execParse = (tasks, index) => {
 	let next = tasks[index + 1];
 	let result = null;
 	if (typeof current === 'function') {
-		result = current();
+		if (preResult) {
+			result = current.apply(null, [preResult]);
+		} else {
+			result = current.apply(null, []);
+		}
 	} else {
-		result = current.fun.apply(null, current.param);
+		let param = current.param || [];
+		if (preResult) {
+			param.push(preResult);
+		}
+		result = current.fun.apply(null, param);
 	}
-	// 如果当前任务有返回结果，并且结果不是一个promise
-	if (result !== null && result !== undefined && !result.then) {
-		return Promise.resolve(result);
-	}
-	if (result === undefined || result === null) {
-		result = Promise.resolve(result);
-	}
+	result = Promise.resolve(result);
 	return result.then(res => {
-		return res!== null && res !== undefined  ? res : (next ? execParse(tasks, index + 1) : undefined);
+		return next ? execParse(tasks, index + 1, res) : res;
 	});
 };
-
 // test===========
 
 // let messageInfo = {

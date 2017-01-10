@@ -27,7 +27,8 @@ const rulesKeys = {
 	localFile: "本地文件",
 	localDir: "本地目录",
 	remoteFile: "远程文件",
-	redirect: "重定向"
+	redirect: "重定向",
+	weinre: "weinre"
 };
 const targetTips = {
 	host: "请输入目标host或ip",
@@ -148,13 +149,22 @@ export default class EditRule extends React.Component{
 			}
 		}
 		let virtualPath = null;
-		if (rule.get('type') === 'localDir') {
+		let type = rule.get('type');
+		if ( type === 'localDir') {
 			virtualPath = <TextField name="virtualPath" 
 			onChange={this.handleChange}
 			style={fieldStyle} underlineShow={true}
 			fullWidth={true}
 			value={rule.get('virtualPath')}
 			hintText="请输入虚拟部分路径" />;
+		}
+		let exec = null;
+		if (type !== 'weinre') {
+			exec = <TextField name="exec"
+				onChange={this.handleChange}
+				style={fieldStyle} underlineShow={true}
+				fullWidth={true}  value={rule.get('exec')}
+				hintText={targetTips[rule.get('type')]} />
 		}
 		return (
 			<Paper zDepth={1} style={paperStyle} {...newProps}>
@@ -165,12 +175,8 @@ export default class EditRule extends React.Component{
 					style={fieldStyle} underlineShow={true}
 					fullWidth={true}  value={rule.get('test')}
 					hintText="请输入源地址" />
-				<TextField name="exec"
-					onChange={this.handleChange}
-					style={fieldStyle} underlineShow={true}
-					fullWidth={true}  value={rule.get('exec')}
-					hintText={targetTips[rule.get('type')]} />
-					{virtualPath}
+				{exec}
+				{virtualPath}
 				<div style={divStyle}>{this.renderIcon()}</div>
 			</Paper>
 		);

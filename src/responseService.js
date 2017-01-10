@@ -379,8 +379,9 @@ export default function(reqInfo, resInfo){
 		// 请求前拦截一次--所有的拦截都在evt.js中处理
 		Promise.resolve(beforeReq.call(self, reqInfo))
 		.then((result) => {
-			if (result && result.res) {
-				reqInfo = result;
+			// 引用发生变化
+			if (result !== reqInfo) {
+				reqInfo = merge(result, reqInfo);
 			}
 			Object.defineProperties(resInfo, {
 				host: {
@@ -409,6 +410,11 @@ export default function(reqInfo, resInfo){
 					enumerable: true
 				}			
 			});
+			// 将是否设置weinre传递到 resInfo
+			if (typeof reqInfo.weinre === 'boolean') {
+				resInfo.weinre = reqInfo.weinre;
+				delete reqInfo.weinre;
+			}			
 			return {reqInfo, resInfo};
 		})
 		.then(({reqInfo, resInfo}) => {

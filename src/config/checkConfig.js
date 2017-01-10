@@ -6,7 +6,8 @@ const ruleType = {
 	localFile: 'localFile',
 	localDir: 'localDir',
 	remoteFile: 'remoteFile',
-	redirect: 'redirect'
+	redirect: 'redirect',
+	weinre: 'weinre'
 };
 let checkRules = (branch) => {
 	let rules = branch.rules;
@@ -151,7 +152,7 @@ export default function(cfg) {
 			if (cfg[cur] !== undefined) {
 				if (cur === 'hosts') {
 					status = !!checkHosts(cfg[cur]);
-				} else if (cur === "port" || cur === 'httpsPort' || cur === 'uiPort') {
+				} else if (cur === "port" || cur === 'httpsPort' || cur === 'uiPort' || cur === 'weinrePort') {
 					cfg[cur] = + cfg[cur];
 					status = !isNaN(cfg[cur]);
 				} else if (cur === 'type' || cur === 'log' || cur === 'sni') {

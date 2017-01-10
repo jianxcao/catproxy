@@ -1,6 +1,5 @@
 import log from './log';
 import childProcess from 'child_process';
-import myPort from 'empty-port';
 import Promise from 'promise';
 import net from 'net';
 
@@ -43,7 +42,7 @@ export let error = err => {
 		log.error(`端口${port}被占用，请检查端口占用情况`);
 		process.exit(1);
 	} else {
-		log.error("出现错误：" + err.stack);
+		log.error("出现错误：" + (err && err.stack ? err.stack : err));
 	}
 };
 
