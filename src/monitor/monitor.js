@@ -8,7 +8,9 @@ import crypto from 'crypto';
 import {cacheFile} from './cacheFile';
 import {isBinary, getReqType, isImage} from '../dataHelper';
 import {addMonitor, updateMonitor} from '../ws/sendMsg';
+import {weinreId} from '../tools';
 import * as config from '../config/config';
+import {WEINRE_PATH} from '../config/defCfg';
 // 当前监控数据-- 记录文件的url和 resBodyData的文件生成的md5值
 var monitorList = {};
 const resBodyName = "_res_body_";
@@ -84,9 +86,9 @@ export default function(catproxy) {
 		throw new Error("catproxy是必须得");
 	}
 	// 检测是不是本地的一个服务器
-	// 只要ip是localhost就忽略
+	// 只要ip是localhost 或者是weinre的请求就忽略
 	let checkIsInnerServer = (originalUrl) => {
-		return catproxy.localUiReg.test(originalUrl);
+		return catproxy.localUiReg.test(originalUrl) || originalUrl.toLowerCase().indexOf(WEINRE_PATH + "/" + weinreId) >= 0;
 	};
 	// 请求发送前
 	catproxy.onBeforeReq((result) => {

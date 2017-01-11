@@ -8,6 +8,7 @@ export const DEFAULT_HTTPS_PORT = 443;
 export const DEFAULT_UI_PORT = 8001;
 // weinrePort
 export const DEFAULT_WEINRE_PORT = 8002;
+export const WEINRE_PATH = "/__jianxcao__";
 // https服务器启动时候需要的证书
 export const  DEFAULT_CERT_HOST = 'localhost';
 export const DEFAULT_BREAK_HTTPS = true;

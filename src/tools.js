@@ -2,7 +2,8 @@ import log from './log';
 import childProcess from 'child_process';
 import Promise from 'promise';
 import net from 'net';
-
+import uuid from 'node-uuid';
+export const hostReg = /:(\/\/([^\/]+))/;
 export let getUrl = ({port, path: pathname, protocol, hostname, host})=> {
 	if (protocol && (hostname || host)) {
 		hostname = hostname || host;
@@ -98,13 +99,6 @@ export let sendErr = (res, err, uri) => {
 	res.end(message);
 };
 
-export let getGuids = (start) => {
-	start = +start || 1;
-	return () => {
-		return start++;
-	};
-};
-
 export let getPort = () => {
 	return new Promise(function (resolve, reject) {
 		var server = net.createServer();
@@ -119,5 +113,14 @@ export let getPort = () => {
 	});
 };
 
+let getGuids = (start) => {
+	start = +start || 1;
+	return () => {
+		return start++;
+	};
+};
+// 监控要用的id
 export let getMonitorId = getGuids(+new Date());
 
+// weinre要用得id
+export let weinreId = uuid.v4();

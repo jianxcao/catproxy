@@ -88,8 +88,9 @@ export const getCharset = (resInfo) => {
 export const getReqType = (result) => {
 	let contentType = result.resHeaders['content-type'] || "";
 	let type = "other";
+	let headers = result.reqHeaders;
 	let ext = result.ext;
-	if(result.reqHeaders['x-requested-with']) {
+	if(headers['x-requested-with']) {
 		type = 'xhr';
 	} else if (isImage.test(contentType)) {
 		type = 'img';

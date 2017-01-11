@@ -6,16 +6,61 @@ import iconv from 'iconv-lite';
 import {Buffer} from 'buffer';
 import Promise from 'promise';
 import path from 'path';
-import {getMonitorId} from './tools'; 
+import {getMonitorId, weinreId, hostReg} from './tools'; 
 import {decodeCompress, isBinary, getCharset} from './dataHelper';
 import mime from 'mime';
 import requestIp from 'request-ip';
 import {localIps} from './getLocalIps';
 import ip from 'ip';
 import URL from 'url';
+import merge from 'merge';
+import {WEINRE_PATH} from './config/defCfg';
 import {insertWeinreScript} from './weinreServer';
 // 自动解析类型，其他类型一律保存的是 Buffer
 var autoDecodeRegs = /text\/.+|(?:application\/(?:json.*|.*javascript))/i;
+
+
+let detailBeforeReq = async function(reqInfo) {
+	let catProxy = this.catProxy;
+	let com = this;
+	// 等待解析url
+	// weinre解析直接转走
+	// 6d902c89-aee6-4428-9357-b71c7242359f/ws/target|/b97a96cd-cd88-48dd-9d4f-7d41401aa4d8/target/target-script-min.js
+	if (reqInfo.originalUrl.toLowerCase().indexOf(WEINRE_PATH + "/" + weinreId) >= 0) {
+		let port = config.get('weinrePort');
+		reqInfo.host = "127.0.0.1";
+		reqInfo.port = port;
+		reqInfo.protocol = "http";
+		reqInfo.path = (reqInfo.path || "").replace(WEINRE_PATH + "/" + weinreId, "");
+	} else {
+		let result = await parseRule(reqInfo);
+		reqInfo = result || reqInfo;
+	}
+	//添加 clientIp，目前还有bug-- 这段 clientIp总是获取不对
+	let {req, headers} = reqInfo;
+	let clientIp = requestIp.getClientIp(req); 
+	// clientIp获取不对，就设置成 机器ip？？？
+	// let xForwardedFor = headers['x-forwarded-for'];
+	// if (!xForwardedFor) {
+	// 	headers['x-forwarded-for'] = clientIp + "," + localIps[0];
+	// } else {
+	// 	headers['x-forwarded-for'] = "," + localIps[0];
+	// }
+	reqInfo.clientIp = clientIp;
+	// 自定义事件调用
+	let arr = catProxy._beforeReqEvt;
+	if (arr.length) {
+		for(let cur of arr) {
+			// 这里调用如果出错，最后直接抛出 -- 也可以考虑哪一步出错，哪一步单独抛出，其余步骤继续， 下面得 beforeRes同理
+			let result = await cur.call(com, reqInfo);
+			// 修改了引用
+			if (reqInfo !== result) {
+				reqInfo = merge(reqInfo, result);
+			}
+		}
+	}
+	return reqInfo;
+}
 
 /**
  * 代理请求发出前
@@ -64,58 +109,32 @@ var autoDecodeRegs = /text\/.+|(?:application\/(?:json.*|.*javascript))/i;
  *    //重定向到某个url，--有这个，就会忽略远程的调用即host设置之类的都无效
  *    reqInfo.redirect
  */
+/**
+ *   test code 
+ * 	 reqInfo.headers['test-cjx'] = 111;
+ *   reqInfo.path = '/hyg/mobile/common/base/base.34b37a3c0b.js';
+ *   reqInfo.port = 9090;
+ *   reqInfo.protocol = "https";
+ *   reqInfo.path = "/a/b?c=d";
+ *   reqInfo.method = "post";
+ *   reqInfo.headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
+ *   reqInfo.bodyData = new Buffer('a=b&c=d');
+ *   reqInfo.sendToFile = "D:/project/gitWork/catproxy/bin.js";
+ *   reqInfo.serverIp ="127.0.1" *   真实地服务器ip地址，请不要修改
+ *   log.debug(reqInfo.headers);
+ *   log.debug(reqInfo.bodyData.toString());
+ *   if (reqInfo.host.indexOf('pimg1.126.net') > -1) {
+ *   	reqInfo.host = '114.113.198.187';
+ *   }
+ */
 var beforeReq = function(reqInfo) {
-	// reqInfo.headers['test-cjx'] = 111;
-	// reqInfo.path = '/hyg/mobile/common/base/base.34b37a3c0b.js';
-	// reqInfo.port = 9090;
-	// reqInfo.protocol = "https";
-	// reqInfo.path = "/a/b?c=d";
-	// reqInfo.method = "post";
-	// reqInfo.headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
-	// reqInfo.bodyData = new Buffer('a=b&c=d');
-	// reqInfo.sendToFile = "D:/project/gitWork/catproxy/bin.js";
-	// reqInfo.serverIp ="127.0.1" // 真实地服务器ip地址，请不要修改
-	// log.debug(reqInfo.headers);
-	// log.debug(reqInfo.bodyData.toString());
-	// if (reqInfo.host.indexOf('pimg1.126.net') > -1) {
-	// 	reqInfo.host = '114.113.198.187';
-	// }
-	let catProxy = this.catProxy;
-	let com = this;
-	return parseRule(reqInfo)
-	.then(result => result || reqInfo)
-	.then(reqInfo => {
-		let {req, headers} = reqInfo;
-		let clientIp = requestIp.getClientIp(req); 
-		// clientIp获取不对，就设置成 机器ip？？？
-		// let xForwardedFor = headers['x-forwarded-for'];
-		// if (!xForwardedFor) {
-		// 	headers['x-forwarded-for'] = clientIp + "," + localIps[0];
-		// } else {
-		// 	headers['x-forwarded-for'] = "," + localIps[0];
-		// }
-		reqInfo.clientIp = clientIp;
-		return reqInfo;
-	})
-	.then(function(reqInfo) {
-		let arr = catProxy._beforeReqEvt;
-		if (!arr.length) {
+		return detailBeforeReq.call(this, reqInfo)
+		.then(null, function(err) {
+			// 如果出错忽略所有数据
+			// 如果改了reqInfo引用上的数据就没救了
+			log.error(err);
 			return reqInfo;
-		}
-		var p = Promise.resolve(arr[0].call(com, reqInfo));
-		for (let i = 1; i < arr.length; i++) {
-			p.then(function() {
-				return arr[i].call(com, reqInfo);
-			});
-		}
-		return p;
-	})
-	.then(function(result) {
-		return result || reqInfo;
-	}, (err) => {
-		log.error(err);
-		return reqInfo;
-	});
+		})
 };
 
 /** 
@@ -173,19 +192,19 @@ var callBeforeResEvt = function(catProxy, resInfo, context) {
  * @param  {[type]} resInfo [响应信息]
  *  *  resInfo包含的信息
  *  {
- *    headers: "请求头 --- 代理请求已经发出并受到，无法修改"
+ *    headers: "响应头 --- 代理请求已经发出并受到，无法修改"
  *		host: "请求地址,包括端口，默认端口省略 --- 代理请求已经发出并受到，无法修改"
  *		method: "请求方法 --- 代理请求已经发出并受到，无法修改"
  *		protocol: "请求协议 --- 代理请求已经发出并受到，无法修改"
  *		originalFullUrl: "原始请求地址，包括参数 --- 代理请求已经发出并受到，无法修改"
- *		req: "请求对象，请勿删除 --- 代理请求已经发出并受到，无法修改"
+ *		res: "请求对象，请勿删除 --- 代理请求已经发出并受到，无法修改"
  *		port: "请求端口 --- 代理请求已经发出并受到，无法修改"
  *		startTime: "请求开始时间 --- 代理请求已经发出并受到，无法修改"
  *		path: "请求路径，包括参数 --- 代理请求已经发出并受到，无法修改"
  *		originalUrl: "原始的请求地址,不包括参数,请不要修改 --- 代理请求已经发出并受到，无法修改", 
 
  *    statusCode: "响应状态码, 可以修改"
- *    headers: "请求头,可修改"
+ *    headers: "响应头,可修改"
  *    ---注意如果有bodyData则会直接用bodyData的数据返回
  *		bodyData: "buffer 数据",
  *		bodyDataErr: "请求出错，目前如果是大文件会触发这个,这个时候bodyData为空，且不可以设置"
@@ -228,9 +247,9 @@ var beforeRes = async function(resInfo) {
 		resInfo.charset = getCharset(resInfo);
 		if (resInfo.weinre) {
 			try {
-				resInfo.bodyData = await insertWeinreScript(resInfo.bodyData, resInfo.charset);
+				// 传递域名过去
+				resInfo.bodyData = await insertWeinreScript(resInfo.bodyData, resInfo.charset,  WEINRE_PATH);
 			} catch (error) {
-				console.log(error);
 				log.error(error);	
 			}
 		}

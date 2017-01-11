@@ -30,28 +30,46 @@ import changeHost from '../changeHost';
 // console.log(b.match(checkMetaCharset));
 // console.log(a.match(checkMetaCharset));
 
-var server;
-var localIps = [];
-let getScriptStr = function() {
-	console.log(server);
-	let a = server.port;
-	let port = (server || {}).___port || "";
-	let ip = localIps[0] || "";
-	return `<head><script src="http://${ip}:${port}/target/target-script-min.js#anonymous"></script>`;
-};
-/**
- * 插入weinre代码
- */
-export let insertWeinreScript = async function(data = "") {
-	let strData = data.toString();
-	if (true) {
-		getScriptStr();
-		return data;
-	}
-	return data;
-};
+// var server;
+// var localIps = [];
+// let getScriptStr = function() {
+// 	console.log(server);
+// 	let a = server.port;
+// 	let port = (server || {}).___port || "";
+// 	let ip = localIps[0] || "";
+// 	return `<head><script src="http://${ip}:${port}/target/target-script-min.js#anonymous"></script>`;
+// };
+// /**
+//  * 插入weinre代码
+//  */
+// export let insertWeinreScript = async function(data = "") {
+// 	let strData = data.toString();
+// 	if (true) {
+// 		getScriptStr();
+// 		return data;
+// 	}
+// 	return data;
+// };
 
-insertWeinreScript("<head>")
-.then(null, function(err) {
-	console.log(err);
-});
+// insertWeinreScript("<head>")
+// .then(null, function(err) {
+// 	console.log(err);
+// });
+var index = 0;
+var time = function() {
+	return new Promise(function(resolve, reject) {
+		setTimeout(function() {
+			console.log(index);
+			resolve(index);
+			index++; }
+		, 300)
+	});
+}
+
+var a = async function() {
+		for(let i = 0; i < 5; i++) {
+			let result = await time();
+			console.log(result);
+		}
+};
+a();
