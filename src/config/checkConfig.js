@@ -7,7 +7,8 @@ const ruleType = {
 	localDir: 'localDir',
 	remoteFile: 'remoteFile',
 	redirect: 'redirect',
-	weinre: 'weinre'
+	weinre: 'weinre',
+	regReplace: 'regReplace'
 };
 let checkRules = (branch) => {
 	let rules = branch.rules;

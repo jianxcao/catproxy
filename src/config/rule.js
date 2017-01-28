@@ -53,6 +53,8 @@ export let parseRule = messageInfo => {
 	if (!rules || !rules.length) {
 		return Promise.resolve(messageInfo);
 	}
+	// 多个信息以|| 分割
+	messageInfo.ruleInfo = [];
 	return execParse(rules.map(current => {
 		return {
 			fun: parseOneRule,
@@ -62,6 +64,10 @@ export let parseRule = messageInfo => {
 	.then(result => {
 		if (result) {
 			delete result.__match;
+			messageInfo.ruleInfo = 	messageInfo.ruleInfo.join('||');
+			if (!messageInfo.ruleInfo) {
+				delete messageInfo.ruleInfo;
+			}
 			return result;
 		}
 		return messageInfo;
@@ -72,7 +78,7 @@ parseOneRule = (group, messageInfo) => {
 	let branches;
 	branches = group.branch;
 	// 如果禁用这个分组直接跳出,不存在分支
-	if (group.disable || !branches || !branches.length) {
+	if (group.disable || !branches || !branches.length  || messageInfo.__match) {
 		return;
 	}
 	return execParse(branches.map(current => {
@@ -86,7 +92,7 @@ parseOneRule = (group, messageInfo) => {
 
 parseBranch = (branch, messageInfo, name) => {
 	let rules = branch.rules;
-	if (branch.disable || !rules || !rules.length) {
+	if (branch.disable || !rules || !rules.length || messageInfo.__match) {
 		return;
 	}
 	return execParse(rules.map(current => {
@@ -108,7 +114,8 @@ parseOneBranch = (rule, messageInfo, groupName, branchName) => {
 	}
 	// 将test转换成正则
 	test = new RegExp(test);
-	let currentUrl = messageInfo.originalFullUrl;
+	// 如果url被替换过，则使用replaceUrl
+	let currentUrl = messageInfo.replaceUrl || messageInfo.originalFullUrl;
 	// 测试没有通过
 	if (!test.test(currentUrl) || rule.disable) {
 		return;
@@ -116,6 +123,21 @@ parseOneBranch = (rule, messageInfo, groupName, branchName) => {
 	// 设置了 weinre
 	if (type === 'weinre') {
 		messageInfo.weinre = true;
+	}
+	// 正则替换，即用正则替换url
+	// 替换后还可以执行下一个规则
+	// 使用exec替换test
+	if (type === 'regReplace') {
+		let newUrl = currentUrl.replace(test, exec);
+		log.debug('replace url:' + newUrl);
+		let execObj = standardUrl(newUrl, messageInfo.protocol);
+		messageInfo.host = execObj.host;
+		messageInfo.protocol = execObj.protocol.split(':')[0];
+		messageInfo.port = execObj.port ? execObj.port : (messageInfo.protocol === 'https' ? 443 : 80);
+		messageInfo.path = type === 'host' ? messageInfo.path : execObj.path;	
+		messageInfo.replaceUrl = execObj.href;
+		messageInfo.ruleInfo.push( `正则替换url：${newUrl}`);
+		return;
 	}
 	// 已经匹配了
 	if (messageInfo.__match) {
@@ -136,7 +158,7 @@ parseOneBranch = (rule, messageInfo, groupName, branchName) => {
 			messageInfo.port = execObj.port ? execObj.port : (messageInfo.protocol === 'https' ? 443 : 80);
 			messageInfo.path = type === 'host' ? messageInfo.path : execObj.path;
 			// log.debug('', messageInfo.protocol, messageInfo.port, exec);
-			messageInfo.ruleInfo = `分组:${groupName}-分支:${branchName}-规则类型:${type}-规则正则:${test}-规则执行:${exec}`;
+			messageInfo.ruleInfo.push(`分组:${groupName}-分支:${branchName}-规则类型:${type}-规则正则:${test}-规则执行:${exec}`);
 		} else  {
 				// 没有配置exec如果是 host就访问线上，如果是 remoteFile就跳过
 			if (type === 'host') {
@@ -157,13 +179,13 @@ parseOneBranch = (rule, messageInfo, groupName, branchName) => {
 	case('redirect') :
 		if (exec) {
 			messageInfo.redirect = isStartHttp.test(exec) ? exec : messageInfo.protocol + '://' + exec;
-			messageInfo.ruleInfo = `分组:${groupName}-分支:${branchName}-规则类型:${type}-规则正则:${test}-规则执行:${exec}`;
+			messageInfo.ruleInfo.push(`分组:${groupName}-分支:${branchName}-规则类型:${type}-规则正则:${test}-规则执行:${exec}`);
 		}
 		break;
 	case('localFile'):
 		if (exec) {
 			messageInfo.sendToFile = exec;
-			messageInfo.ruleInfo = `分组:${groupName}-分支:${branchName}-规则类型:${type}-规则正则:${test}-规则执行:${exec}`;
+			messageInfo.ruleInfo.push(`分组:${groupName}-分支:${branchName}-规则类型:${type}-规则正则:${test}-规则执行:${exec}`);
 		}
 		break;
 	case('localDir'):
@@ -176,7 +198,7 @@ parseOneBranch = (rule, messageInfo, groupName, branchName) => {
 			}
 			p = p.replace(new RegExp('^' + virtualPath), '');
 			messageInfo.sendToFile = path.join(exec, p);
-			messageInfo.ruleInfo = `分组:${groupName}-分支:${branchName}-规则类型:${type}-规则正则:${test}-规则执行:${exec}`;
+			messageInfo.ruleInfo.push(`分组:${groupName}-分支:${branchName}-规则类型:${type}-规则正则:${test}-规则执行:${exec}`);
 		}
 		break;
 	default:

@@ -28,14 +28,16 @@ const rulesKeys = {
 	localDir: "本地目录",
 	remoteFile: "远程文件",
 	redirect: "重定向",
-	weinre: "weinre"
+	weinre: "weinre",
+	regReplace: 'url正则替换'
 };
 const targetTips = {
 	host: "请输入目标host或ip",
 	localFile: "请输入目标文件绝对路径",
 	localDir: "请输入目标目录绝对路径",
 	remoteFile: "请输入远程文件url地址,包括参数哦",
-	redirect: "请输入重定向的目标地址"
+	redirect: "请输入重定向的目标地址",
+	regReplace: "请输入替换内容，可以用$1,$2等替换"
 };
 
 const subheaderStyle = {
@@ -166,15 +168,21 @@ export default class EditRule extends React.Component{
 				fullWidth={true}  value={rule.get('exec')}
 				hintText={targetTips[rule.get('type')]} />
 		}
+		let title = '规则' + (this.props.ruleId + 1);
+		if (type === 'weinre' || type === 'regReplace') {
+			title += '--' + '并集规则,后续可继续匹配';
+		} else {
+			title += '--' + '先匹配先执行规则,后续规则不回在匹配';
+		}
 		return (
 			<Paper zDepth={1} style={paperStyle} {...newProps}>
-				<Subheader inset={true} style={subStyle} {...this.props.switchProps} data-id={this.props.ruleId}>规则{this.props.ruleId + 1} </Subheader>
+				<Subheader inset={true} style={subStyle} {...this.props.switchProps} data-id={this.props.ruleId}>{title} </Subheader>
 				<SelectField value={rule.get('type')} style={fieldStyle} onChange={this.handleTypeChange}>{menuRulesTypeList}</SelectField>
 				<TextField  name="test" 
 					onChange={this.handleChange}
 					style={fieldStyle} underlineShow={true}
 					fullWidth={true}  value={rule.get('test')}
-					hintText="请输入源地址" />
+					hintText="请输入源地址,或者增则字符串，会自动以^开头" />
 				{exec}
 				{virtualPath}
 				<div style={divStyle}>{this.renderIcon()}</div>
