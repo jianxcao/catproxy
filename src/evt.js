@@ -47,17 +47,11 @@ let detailBeforeReq = async function(reqInfo) {
 	// 	headers['x-forwarded-for'] = "," + localIps[0];
 	// }
 	reqInfo.clientIp = clientIp;
-	// 自定义事件调用
-	let arr = catProxy._beforeReqEvt;
-	if (arr.length) {
-		for(let cur of arr) {
-			// 这里调用如果出错，最后直接抛出 -- 也可以考虑哪一步出错，哪一步单独抛出，其余步骤继续， 下面得 beforeRes同理
-			let result = await cur.call(com, reqInfo);
-			// 修改了引用
-			if (reqInfo !== result) {
-				reqInfo = merge(reqInfo, result);
-			}
-		}
+	// 触发事件
+	let result = await catProxy.triggerBeforeReq(reqInfo, this);
+	// 修改了引用
+	if (reqInfo !== result) {
+		reqInfo = merge(reqInfo, result);
 	}
 	return reqInfo;
 }
@@ -168,26 +162,6 @@ var disCache = function (resInfo) {
 };
 
 /**
- * 触发事件调用用户事件
- */
-var callBeforeResEvt = function(catProxy, resInfo, context) {
-	let arr = catProxy._beforeResEvt;
-	if (!arr.length) {
-		return resInfo;
-	}
-	var p = Promise.resolve(arr[0].call(context, resInfo));
-	for (let i = 1; i < arr.length; i++) {
-		p.then(function() {
-			return arr[i].call(context, resInfo);
-		});
-	}
-	p.then(() => {
-		return resInfo;
-	});
-	return p;	
-};
-
-/**
  * 准备响应请求前
  * @param  {[type]} resInfo [响应信息]
  *  *  resInfo包含的信息
@@ -255,8 +229,11 @@ var beforeRes = async function(resInfo) {
 		}
 	}
 	// 触发事件
-	let result = await callBeforeResEvt(catProxy, resInfo, com);
-	resInfo = result || resInfo;
+	let result = await catProxy.triggerBeforeRes(resInfo, this);
+	// 修改了引用
+	if (resInfo !== result) {
+		resInfo = merge(resInfo, result);
+	}
 	return resInfo;
 };
 
@@ -286,15 +263,7 @@ var beforeRes = async function(resInfo) {
  */
 var afterRes = function(result) {
 	let catProxy = this.catProxy;
-	if (catProxy && catProxy._afterResEvt.length) {
-		catProxy._afterResEvt.forEach(current => {
-			try{ 
-				current.call(this, result);
-			} catch (e) {
-				log.error(e);
-			}
-		});
-	}
+	catProxy.triggerAfterRes(result, this);
 	return result;
 };
 
@@ -302,9 +271,8 @@ var afterRes = function(result) {
 var pipeRequest = function(result) {
 	result.id = getMonitorId();
 	let catProxy = this.catProxy;
-	if (catProxy && catProxy._pipeRequestEvt.length) {
-		catProxy._pipeRequestEvt.forEach(current => current.call(this, result));
-	}
+	catProxy.triggerPipeReq(result, this);
+	return result;
 };
 export {
 	beforeReq,

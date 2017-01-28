@@ -46,7 +46,29 @@ const getLocalUiReg = (port) => {
 		return result;
 	}, "^(?:http|ws)(?:s?)://");
 };
-class CatProxy extends EventEmitter{
+/**
+ * 按顺序调用数组，每个步骤返回promise
+ * @arr 表示要执行的数据
+ * @result表示执行的结果，结果会进行合并，结果必须是一个object
+ * @context 表示执行的上下文
+ */
+const execArrByStep = async function (arr, result, context) {
+	result = result || {};
+	if (!arr || !arr.length) {
+		return result;
+	}
+	for(let cur of arr) {
+		// 这里调用如果出错，最后直接抛出 -- 也可以考虑哪一步出错，哪一步单独抛出
+		// 检测cur是够是一个函数？？
+		let newRes = await cur.call(context, result);
+		// 修改了引用
+		if (newRes !== result) {
+			result = merge(result, newRes);
+		}
+	}
+	return result;
+};
+class CatProxy{
 	/**
 	 * 
 	 * @param  {[type]} option 
@@ -65,7 +87,6 @@ class CatProxy extends EventEmitter{
 	 *
 	 */
 	constructor(opt, saveProps) {
-		super();
 		this.option = {};
 		// 初始化配置文件
 		configInit();
@@ -347,6 +368,54 @@ class CatProxy extends EventEmitter{
 	}
 	onPipeRequest(...fun) {
 		fun.forEach(f => util.isFunction(f) && this._pipeRequestEvt.push(f));
+	}
+	/**
+	 * 触发req事件，result表示参数，context表示上下文
+	 * result 格式看evt中的格式
+	 */
+	triggerBeforeReq (result, context) {
+		return execArrByStep(this._beforeReqEvt, result, context);
+	}
+	/**
+	 * 触发 请求前事件
+	 *  result 格式看evt中的格式
+	 *  context为上下文
+	 */
+	triggerBeforeRes (result, context) {
+		return execArrByStep(this._beforeResEvt, result, context);
+	}
+	/**
+	 * 触发请求后事件
+	 *  result 格式看evt中的格式
+	 *  context为上下文
+	 */
+	triggerAfterRes (result, context) {
+		if (this._afterResEvt.length) {
+			this._afterResEvt.forEach(current => {
+				try{ 
+					current.call(context, result);
+				} catch (e) {
+					log.error(e);
+				}
+			});
+		}
+	}
+	/**
+	 * 触发穿过请求
+	 *  result 格式看evt中的格式
+	 *  context为上下文
+	 */
+	triggerPipeReq (result, context) {
+		console.log(triggerPipeReq);
+		if (this._pipeRequestEvt.length) {
+			this._pipeRequestEvt.forEach(current => {
+				try{ 
+					current.call(context, result);
+				} catch (e) {
+					log.error(e);
+				}
+			});
+		}
 	}
 }
 
