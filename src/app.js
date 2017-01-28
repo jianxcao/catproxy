@@ -406,7 +406,6 @@ class CatProxy{
 	 *  context为上下文
 	 */
 	triggerPipeReq (result, context) {
-		console.log(triggerPipeReq);
 		if (this._pipeRequestEvt.length) {
 			this._pipeRequestEvt.forEach(current => {
 				try{ 

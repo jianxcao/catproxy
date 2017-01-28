@@ -142,22 +142,22 @@ if (program.cert) {
 	// 初始化代理服务器
 	catProxy.init();
 
-	catProxy.onAfterRes(function(result) {
-		return new Promise(function(resolve, reject) {
-			setTimeout(function() {
-				console.log(1, result.host);
-				resolve(result);
-			}, 300);
-		});
-	}, function(result) {
-		// window.test = 3;
-		console.log(result.protocol);
-	}, function(result) {
-		return new Promise(function(resolve, reject) {
-			setTimeout(function() {
-				console.log(2, result.host);
-				resolve(result);
-			}, 300);
-		});
-	});
+	// catProxy.onPipeRequest(function(result) {
+	// 	return new Promise(function(resolve, reject) {
+	// 		setTimeout(function() {
+	// 			console.log(1, result.host);
+	// 			resolve(result);
+	// 		}, 300);
+	// 	});
+	// }, function(result) {
+	// 	// window.test = 3;
+	// 	console.log(result.protocol);
+	// }, function(result) {
+	// 	return new Promise(function(resolve, reject) {
+	// 		setTimeout(function() {
+	// 			console.log(2, result.host);
+	// 			resolve(result);
+	// 		}, 300);
+	// 	});
+	// });
 }
