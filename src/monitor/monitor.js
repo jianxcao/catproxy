@@ -85,13 +85,16 @@ export default function(catproxy) {
 	if (!catproxy || !catproxy.onBeforeReq) {
 		throw new Error("catproxy是必须得");
 	}
+	var monitorBeforeReq,
+			monitorBeforeRes,
+			monitorAfterRes;
 	// 检测是不是本地的一个服务器
-	// 只要ip是localhost 或者是weinre的请求就忽略
+	// 只要ip是localhost ui服务器 或者是weinre的请求就忽略
 	let checkIsInnerServer = (originalUrl) => {
 		return catproxy.localUiReg.test(originalUrl) || originalUrl.toLowerCase().indexOf(WEINRE_PATH + "/" + weinreId) >= 0;
 	};
 	// 请求发送前
-	catproxy.onBeforeReq((result) => {
+	catproxy.onBeforeReq(monitorBeforeReq = (result) => {
 		if (result && result.id && config.get('monitor:monitorStatus') && !checkIsInnerServer(result.originalUrl)) {
 			/**
 			 * 
@@ -143,7 +146,7 @@ export default function(catproxy) {
 		}				
 	});
 	// 准备发送请求
-	catproxy.onBeforeRes(result => {
+	catproxy.onBeforeRes(monitorBeforeRes = result => {
 		if (result && result.id && config.get('monitor:monitorStatus') && !checkIsInnerServer(result.originalUrl)) {
 			let addMontiorData = merge(monitorList[result.id], {
 				ext: result.ext,
@@ -164,7 +167,7 @@ export default function(catproxy) {
 		}
 	});
 	// 请求发送后
-	catproxy.onAfterRes(result => {
+	catproxy.onAfterRes(monitorAfterRes = result => {
 		if (result && +result.id && config.get('monitor:monitorStatus') && !checkIsInnerServer(result.originalUrl)) {
 			if (monitorList[result.id]) {
 				let startTime = monitorList[result.id].startTime;
@@ -213,6 +216,9 @@ export default function(catproxy) {
 		}
 	});
 
+	catproxy.__monitorBeforeReq = monitorBeforeReq;
+	catproxy.__monitorBeforeRes = monitorBeforeRes;
+	catproxy.__monitorAfterRes = monitorAfterRes;
 	// 管道调用
 	catproxy.onPipeRequest(result => {
 		// 后面判断带得协议不准确，但是仅仅是为了通过正则，测试，正则中并不关系，请求的类型是ws还是wss
