@@ -131,6 +131,8 @@ class MyNav extends Component{
 						<MenuItem eventKey="qrcode">证书二维码</MenuItem>
 					</NavDropdown>
 					<NavItem eventKey="clear" href="javascript:;" className="split"></NavItem>
+					<NavItem eventKey="monitor" href="/c/index" className="navBtn monitor" target="_blank">规则配置</NavItem>
+					<NavItem eventKey="clear" href="javascript:;" className="split"></NavItem>
 					<NavDropdown eventKey="help" title="帮助" id="helpMenu">
 						<MenuItem eventKey="github" href="https://github.com/jianxcao/catproxy" target="_blank">github</MenuItem>
 						<MenuItem eventKey="help" href="https://github.com/jianxcao/catproxy" target="_blank">帮助</MenuItem>

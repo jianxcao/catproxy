@@ -164,7 +164,9 @@ class SubHeader extends React.Component {
 		}, 
 		message => com.context.toast(message.result));
 	}
-
+	jumpMonitor () {
+		window.location.href = '/c/m';
+	}
 	shouldComponentUpdate(nextProps, nextState) {
 		return this.state.openDialog !== nextState.openDialog || this.props.disCache !== nextProps.disCache;      
 	}
@@ -237,6 +239,7 @@ class SubHeader extends React.Component {
 						<ToolbarTitle text="操作" style={toolbarTitleStyle}/>
 						<RaisedButton label="新建" primary={true} onClick={this.handleOpenDialog}/>
 						<RaisedButton label="禁用全部" primary={true} onClick={this.handleDisAll}/>
+						<RaisedButton label="监控" primary={true} onClick={this.jumpMonitor}></RaisedButton>
 						<Checkbox label="禁用缓存" checked={this.props.disCache} onCheck={this.handleDisCache} style={checkBoxWraperStyle}/>
 					</ToolbarGroup>
 					<ToolbarGroup>
