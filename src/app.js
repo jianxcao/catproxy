@@ -264,7 +264,8 @@ class CatProxy{
 			let uiApp = ui(!!port);
 			let app = express();
 			let uiServer = app.listen(p, function() {
-				log.info('catproxy ui界面地址：' + host +"/c/index");
+				log.info('catproxy 规则配置地址：' + host +"/c/index");
+				log.info('catproxy 监控界面地址：' + host +"/c/index");
 				if(port && isAutoOpen) {
 					openCmd(host + "/c/index");
 				}
