@@ -411,9 +411,5 @@ process.on('uncaughtException', errFun);
 process.on('exit', () => {
 	log.info('服务器退出');
 });
-process.on('SIGINT', (...arg) => {
-	console.log(arg);
-	console.log('Received SIGINT.  Press Control-D to exit.');
-});
 export default CatProxy;
 export {CatProxy};
