@@ -223,6 +223,9 @@ var beforeRes = async function(resInfo) {
 			try {
 				// 传递域名过去
 				resInfo.bodyData = await insertWeinreScript(resInfo.bodyData, resInfo.charset,  WEINRE_PATH);
+				if (resInfo.headers['content-length']) {
+					resInfo.headers['content-length'] = resInfo.bodyData.length;
+				}
 			} catch (error) {
 				log.error(error);	
 			}

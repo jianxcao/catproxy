@@ -22,8 +22,6 @@ import express from 'express';
 import webCfg from './config/webCfg';
 import path from 'path';
 import ws from './ws/ws';
-// 只有这些字段可以被保存到配置文件，如果设置了这个 只有这些字段会保存到配置文件，其他字段只能在内存中，不能保存到文件中
-const defSaveProps =  ['hosts', "log", 'breakHttps', 'excludeHttps', 'sni'];
 //	process.env.NODE_ENV
 const getLocalUiReg = (port) => {
 	let ips = localIps.slice(0);
@@ -101,13 +99,12 @@ class CatProxy{
 				fileCfg[current] = val;
 			}
 		});
-		if (saveProps === false) {
-			saveProps = defSaveProps;
-		}
 		// 混合三种配置
 		let cfg = merge.recursive({}, defCfg, fileCfg, opt);
 		if (saveProps && saveProps.length) {
 			this.option.saveProps = saveProps;
+			// 配置了保存字段，则只保存这些字段
+			config.setSaveProp(...saveProps);
 		}
 		// 将用户当前设置保存到缓存配置文件
 		configProps
@@ -121,11 +118,7 @@ class CatProxy{
 				}
 			}
 		});
-		if (saveProps && saveProps.length) {
-			config.save(saveProps); 
-		} else {
-			config.save();
-		}
+		config.save();
 		this._beforeReqEvt = [];
 		this._beforeResEvt = [];
 		this._afterResEvt = [];
@@ -144,14 +137,9 @@ class CatProxy{
 				switch(message.type) {
 				case "config":
 					let data = {};
-					defSaveProps.forEach(function(current) {
-						if (message.result[current] !== undefined && message.result[current] !== null) {
-							data[current] = message.result[current];
-						}
-					});
-					config.set(data);
-					// 每次服务变动都重新设置下log
-					config.save(defSaveProps);
+					config.set(message.result);
+					// 所有配置均不保存
+					config.save([]);
 					com.setLogLevel();
 					break;
 				default:
@@ -265,7 +253,7 @@ class CatProxy{
 			let app = express();
 			let uiServer = app.listen(p, function() {
 				log.info('catproxy 规则配置地址：' + host +"/c/index");
-				log.info('catproxy 监控界面地址：' + host +"/c/index");
+				log.info('catproxy 监控界面地址：' + host +"/c/m");
 				if(port && isAutoOpen) {
 					openCmd(host + "/c/index");
 				}
@@ -333,7 +321,7 @@ class CatProxy{
 			});
 			server.on('clientError', function(err, con) {
 				log.error('ser-clientError' + err);
-			});			
+			});
 			let serverType = server instanceof  http.Server ? 'http' : 'https';
 			let port = serverType === 'http' ? opt.port : opt.httpsPort;
 			// 如果server没有被监听，则调用默认端口监听
@@ -420,6 +408,12 @@ class CatProxy{
 }
 
 process.on('uncaughtException', errFun);
-process.on('exit', ()=> log.info('服务器退出'));
+process.on('exit', () => {
+	log.info('服务器退出');
+});
+process.on('SIGINT', (...arg) => {
+	console.log(arg);
+	console.log('Received SIGINT.  Press Control-D to exit.');
+});
 export default CatProxy;
 export {CatProxy};

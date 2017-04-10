@@ -43,6 +43,7 @@ export let error = err => {
 		log.error(`端口${port}被占用，请检查端口占用情况`);
 		process.exit(1);
 	} else {
+		process.exit(1);
 		log.error("出现错误：" + (err && err.stack ? err.stack : err));
 	}
 };
@@ -86,10 +87,9 @@ export let sendErr = (res, err, uri) => {
 		delete res.headers['content-encoding'];
 	}
 	let statusCode = '500';
-	err.message = err.message || "";
-	if (err.message.indexOf('ETIMEDOUT') > -1) {
+	if (message.indexOf('ETIMEDOUT') > -1) {
 		statusCode = '408';
-	} else if (err.message.indexOf('ENOTFOUND') > -1){
+	} else if (message.indexOf('ENOTFOUND') > -1){
 		statusCode = '504';
 	}
 	if (statusCode === '500') {

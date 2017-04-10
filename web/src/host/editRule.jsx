@@ -172,7 +172,7 @@ export default class EditRule extends React.Component{
 		if (type === 'weinre' || type === 'regReplace') {
 			title += '--' + '并集规则,后续可继续匹配';
 		} else {
-			title += '--' + '先匹配先执行规则,后续规则不回在匹配';
+			title += '--' + '先匹配先执行规则,后续规则不会在匹配';
 		}
 		return (
 			<Paper zDepth={1} style={paperStyle} {...newProps}>
