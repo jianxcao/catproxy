@@ -406,10 +406,5 @@ class CatProxy{
 		}
 	}
 }
-
-process.on('uncaughtException', errFun);
-process.on('exit', () => {
-	log.info('服务器退出');
-});
 export default CatProxy;
 export {CatProxy};

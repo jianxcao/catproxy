@@ -71,3 +71,7 @@
 2. 修改weinre添加后content-length不对的问题
 3. 修改tools中得sendErr方法
 4. 修改忽略目录
+## V1.2.4版本 (2017年04月11日)
+1. 修改tools中得error方法
+2. 修改npm发布忽略文件
+3. 更新fs-extra版本

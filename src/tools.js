@@ -38,8 +38,7 @@ export let error = err => {
 		log.error("请用sudo管理员权限打开");
 		process.exit(1);
 	} else if (err.code === "EADDRINUSE" || err.message.indexOf("EADDRINUSE") > -1) {
-		let port = err.port || err.message.match(portReg);
-		port  = port && port.length > 1 ? port[1] : "";
+		let port = err.port || (err.message.match(portReg) || ['', ''])[1];
 		log.error(`端口${port}被占用，请检查端口占用情况`);
 		process.exit(1);
 	} else {
@@ -93,7 +92,8 @@ export let sendErr = (res, err, uri) => {
 		statusCode = '504';
 	}
 	if (statusCode === '500') {
-		log.error(`url:${uri||""},errInfo: ${err}${err.stack && err.stack}`);
+		log.error(`url:${uri || ``}`);
+		log.error(`${message}`);
 	}
 	res.writeHead(statusCode, res.headers);
 	res.end(message);

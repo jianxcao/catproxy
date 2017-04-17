@@ -6,6 +6,8 @@ import CatProxy from './app';
 import log from './log';
 import * as cert from './cert/cert.js';
 import configProps from './config/configProps';
+import {error as errFun} from './tools';
+process.on('uncaughtException', errFun);
 // 将字段变成list
 let numReg = /^([0-9]){2,}$/;
 let list = (val) => {

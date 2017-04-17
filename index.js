@@ -1,4 +1,4 @@
-//对外接口提供js
+// 对外接口提供js
 var app = require('./build/app');
 var cert = require('./build/cert/cert');
 exports = module.exports = {
