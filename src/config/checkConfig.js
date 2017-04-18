@@ -158,7 +158,7 @@ export default function(cfg) {
 					status = !isNaN(cfg[cur]);
 				} else if (cur === 'type' || cur === 'log' || cur === 'sni') {
 					status = !!valCheck[cur][cfg[cur]];
-				} else if (cur === 'disCache' || cur === 'autoOpen') {
+				} else if (cur === 'disCache' || cur === 'autoOpen' || cur === 'cacheFlush') {
 					status = typeof cfg[cur] === 'boolean';
 				} else if (cur === 'breakHttps') {
 					let list = cfg[cur];

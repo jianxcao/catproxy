@@ -1,6 +1,6 @@
 import ReactDom, {render} from 'react-dom';
 import React, {PropTypes, Component} from 'react';
-import {Navbar, Nav, NavItem, NavDropdown, MenuItem} from 'react-bootstrap';
+import {Navbar, Nav, NavItem, NavDropdown, MenuItem, Tooltip, OverlayTrigger} from 'react-bootstrap';
 import {Provider,connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 import navAction from './action/navAction';
@@ -32,6 +32,7 @@ class MyNav extends Component{
 		this.clearMonitorList = this.clearMonitorList.bind(this);
 		this.changeMonitorFilterStatus = this.changeMonitorFilterStatus.bind(this);
 		this.changeDisCache = this.changeDisCache.bind(this);
+		this.changeCacheFlush = this.changeCacheFlush.bind(this);
 	}
 	static contextTypes = {
 	}
@@ -89,6 +90,13 @@ class MyNav extends Component{
 		sendMsg.disCache(!disCache)
 		.then(null, (err) => console.log(err));
 	}
+	changeCacheFlush (e) {
+		let {sendCacheFlush, cacheFlush} = this.props;
+		sendCacheFlush(!cacheFlush);
+		// 后台保存
+		sendMsg.cacheFlush(!cacheFlush)
+		.then(null, (err) => console.log(err));
+	}
 	changeCert(key) {
 		if (key === 'qrcode') {
 			qrcode({
@@ -98,11 +106,14 @@ class MyNav extends Component{
 	}
 	render() {
 		let pageUrl = window.config.host + "/m";
-		let {disCache, monitorStatus, monitorFilterStatus} = this.props;
+		let {disCache, monitorStatus, monitorFilterStatus, cacheFlush} = this.props;
 		const recordCls = cs('navBtn', 'record', {disable: !monitorStatus});
 		const recordTip = monitorStatus ? "点击停止监听" : "点击开始监听";
 		const toolbarTip = monitorFilterStatus ? "点击隐藏过滤" : "点击现实过滤";
 		const toobarCls = cs('navBtn', 'filter', {disable: !monitorFilterStatus});
+		const tooltip = (
+			<Tooltip id="tooltip">在html页面中的head中插入meta标签禁止缓存，通常在调试微信时很有用, 但是只支持utf-8编码的页面</Tooltip>
+		);
 		return (
 			<Navbar>
 				<Navbar.Header>
@@ -122,6 +133,13 @@ class MyNav extends Component{
 						<input type="checkbox"
 							checked={disCache} 
 							onChange={this.changeDisCache} id="disCache"/><label htmlFor="disCache">禁止缓存</label></span>
+					<div className="split"></div>
+					<OverlayTrigger overlay={tooltip}>
+						<span className="cacheFlush">
+							<input type="checkbox"
+								checked={cacheFlush} 
+								onChange={this.changeCacheFlush} id="cacheFlush"/><label htmlFor="cacheFlush">刷新缓存</label></span>							
+					</OverlayTrigger>
 					<div className="split"></div>
 				</div>
 				<Nav>

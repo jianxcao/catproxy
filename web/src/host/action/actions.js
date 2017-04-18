@@ -25,6 +25,7 @@ let  {
 	SWITCH_RULE,
 	UPDATE_CURRENT_RULE,
 	DIS_CACHE,
+	CACHE_FLUSH,
 	REMOTE_UPDATE_RULE_URL
 } = actionType;
 
@@ -233,6 +234,14 @@ export let updateSelectRule = (groupId, branchId) => {
 export let disCache = (status) => {
 	return {
 		type: DIS_CACHE,
+		status
+	};
+};
+
+// 禁止缓存
+export let cacheFlush = (status) => {
+	return {
+		type: CACHE_FLUSH,
 		status
 	};
 };

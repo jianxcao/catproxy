@@ -21,6 +21,7 @@ let  {
 	SWITCH_GROUP,
 	UPDATE_CURRENT_RULE,
 	DIS_CACHE,
+	CACHE_FLUSH,
 	REMOTE_UPDATE_RULE_URL
 } = actionType;
 
@@ -193,6 +194,16 @@ export let selectRule = (state = new Map(), action = {}) => {
 export let disCache = (state, action = {}) => {
 	switch (action.type) {
 	case DIS_CACHE:
+		return !!action.status;
+	default:
+		return state;
+	}
+};
+
+// 禁止缓存
+export let cacheFlush = (state, action = {}) => {
+	switch (action.type) {
+	case CACHE_FLUSH:
 		return !!action.status;
 	default:
 		return state;

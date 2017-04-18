@@ -25,6 +25,10 @@ export const {
 	 *是否打开过滤器
 	 *@param boolean 是否打开过滤器
 	*/	
-	monitorFilterStatus
+	monitorFilterStatus,
+	/**
+	 * 刷新缓存，插入 meta标签只有 contentType是text/html时候管用
+	 */
+	cacheFlush
 } = result = createActions(...Object.keys(navType));
 export default result; 

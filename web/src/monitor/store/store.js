@@ -15,6 +15,7 @@ import { createStore, applyMiddleware, compose } from 'redux';
 // 所有需要的状态暂时都放在这里
 const initialState = new Immutable.fromJS({
 	disCache: false,
+	cacheFlush: false,
 	monitorStatus: false,
 	monitorFilterStatus: true,
 	monitorFilterType: "all",

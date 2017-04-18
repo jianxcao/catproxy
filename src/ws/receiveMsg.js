@@ -59,6 +59,12 @@ export let fetchConfig = ()=> {
 	};
 	try {
 		data.result = config.get();
+		if (data.result.cacheFlush === 'undefined') {
+			data.result.cacheFlush = false;
+		}
+		if (data.result.disCache === 'undefined') {
+			data.result.disCache = true;
+		}		
 		if (!data.result.hosts) {
 			data.result.hosts = [];
 		}
@@ -81,6 +87,16 @@ let disCache = (status, ws) => {
 	try {
 		config.set('disCache', status);
 		config.save('disCache');
+		return success('更新配置成功');
+	} catch(e) {
+		log.error(e);
+		return error('更新配置失败');
+	}
+};
+let cacheFlush = (status, ws) => {
+	try {
+		config.set('cacheFlush', status);
+		config.save('cacheFlush');
 		return success('更新配置成功');
 	} catch(e) {
 		log.error(e);
@@ -149,6 +165,8 @@ export let saveConfig = (msg = {}, ws = {}) => {
 			}
 		case('disCache'):
 			return disCache(!!param.status, ws);
+		case('cacheFlush'):
+			return cacheFlush(!!param.status, ws);
 		case('monitor'):
 			return monitor(param, ws);
 		default:

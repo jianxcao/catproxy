@@ -21,7 +21,8 @@ import {
 	addBranch,
 	addGroup,
 	disableAll,
-	disCache
+	disCache,
+	cacheFlush
 } from './action/actions';
 var previousHosts = null;
 const toobarStyle ={
@@ -50,6 +51,7 @@ class SubHeader extends React.Component {
 		this.handleDisAll = this.handleDisAll.bind(this);
 		this.handleDisCache = this.handleDisCache.bind(this);
 		this.handleSaveHosts = this.handleSaveHosts.bind(this);
+		this.handleCacheFlush = this.handleCacheFlush.bind(this);
 		this.state = {
 			openDialog: false
 		};
@@ -164,11 +166,21 @@ class SubHeader extends React.Component {
 		}, 
 		message => com.context.toast(message.result));
 	}
+	handleCacheFlush (proxy, status) {
+		var com = this;
+		let {cacheFlushMethod} = this.props;
+		cacheFlushMethod(status);
+		sendMsg.cacheFlush(status)
+		.then(message => {
+			com.context.toast(message.result);
+		}, 
+		message => com.context.toast(message.result));
+	}
 	jumpMonitor () {
 		window.location.href = '/c/m';
 	}
 	shouldComponentUpdate(nextProps, nextState) {
-		return this.state.openDialog !== nextState.openDialog || this.props.disCache !== nextProps.disCache;      
+		return this.state.openDialog !== nextState.openDialog || this.props.disCache !== nextProps.disCache || this.props.cacheFlush !== nextProps.cacheFlush;      
 	}
 
 	renderDialog() {
@@ -230,6 +242,7 @@ class SubHeader extends React.Component {
 	}
 
 	render() {
+		let {cacheFlush, disCache} = this.props;
 		return (
 			<Paper zDepth={0} style={paperStyle}>
 				<Toolbar style={toobarStyle}>
@@ -240,7 +253,8 @@ class SubHeader extends React.Component {
 						<RaisedButton label="新建" primary={true} onClick={this.handleOpenDialog}/>
 						<RaisedButton label="禁用全部" primary={true} onClick={this.handleDisAll}/>
 						<RaisedButton label="监控" primary={true} onClick={this.jumpMonitor}></RaisedButton>
-						<Checkbox label="禁用缓存" checked={this.props.disCache} onCheck={this.handleDisCache} style={checkBoxWraperStyle}/>
+						<Checkbox label="禁用缓存" checked={disCache} onCheck={this.handleDisCache} style={checkBoxWraperStyle}/>
+						<Checkbox label="刷新缓存" checked={cacheFlush} onCheck={this.handleCacheFlush} style={checkBoxWraperStyle}/>
 					</ToolbarGroup>
 					<ToolbarGroup>
 						<RaisedButton label="保存规则" primary={true} onClick={this.handleSaveHosts}/>
@@ -254,7 +268,8 @@ class SubHeader extends React.Component {
 function mapStateToProps(state) {
 	return {
 		hosts: state.get('hosts'),
-		disCache: state.get('disCache')
+		disCache: state.get('disCache'),
+		cacheFlush: state.get('cacheFlush')
 	};
 }
 function mapDispatchToProps(dispatch) {
@@ -262,7 +277,8 @@ function mapDispatchToProps(dispatch) {
 		addBranch: bindActionCreators(addBranch, dispatch),
 		addGroup: bindActionCreators(addGroup, dispatch),
 		disableAll: bindActionCreators(disableAll, dispatch),
-		disCacheMethod: bindActionCreators(disCache, dispatch)
+		disCacheMethod: bindActionCreators(disCache, dispatch),
+		cacheFlushMethod: bindActionCreators(cacheFlush, dispatch),
 	};
 }
 export default connect(mapStateToProps, mapDispatchToProps)(SubHeader);

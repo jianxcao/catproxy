@@ -123,6 +123,7 @@ const initialState = new Immutable.fromJS({
 	// 当前选中的规则
 	selectRule: {},
 	disCache: false,
+	cacheFlush: false,
 	// 更新远程数据的url
 	remoteUpdateRuleUrl: ""
 });

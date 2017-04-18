@@ -56,6 +56,18 @@ export let disCache =(status) => {
 	return send('saveConfig')(result);
 };
 
+export let cacheFlush =(status) => {
+	status = !!status;
+	let result = {
+		param: {
+			status: status
+		},
+		path: "cacheFlush"
+	};
+	return send('saveConfig')(result);
+};
+
+
 // 更新监控状态
 export let monitorStatus = (status) => {
 	status = !!status;
@@ -120,5 +132,6 @@ export default {
 	monitorStatus,
 	monitorFilterStatus,
 	monitorFilterType,
-	hiddenDataUrl
+	hiddenDataUrl,
+	cacheFlush
 };

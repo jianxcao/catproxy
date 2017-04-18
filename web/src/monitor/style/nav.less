@@ -106,6 +106,9 @@
 		.disCache{
 			.checkbox();
 		}
+		.cacheFlush {
+			.checkbox();
+		}
 		.split{
 			transform: translate(0px, 0px);
 		}
@@ -140,15 +143,30 @@
 					margin-right: 0px;
 				}
 				label::before{
-					border: 1px solid @disCacheBorderColor;
-					box-shadow: @disCacheBoxShadow;
-					background-color: @disCacheBgColor;
+					border: 1px solid @cacheBorderColor;
+					box-shadow: @cacheBoxShadow;
+					background-color: @cacheBgColor;
 					top:2px;
 				}
 				input:checked + label:after{
 					color: @disCacheCheckColor;
 					top:2px;
 				}
+			}
+			.cacheFlush {
+				label{
+					margin-right: 0px;
+				}
+				label::before{
+					border: 1px solid @cacheBorderColor;
+					box-shadow: @cacheBoxShadow;
+					background-color: @cacheBgColor;
+					top:2px;
+				}
+				input:checked + label:after{
+					color: @disCacheCheckColor;
+					top:2px;
+				}				
 			}
 		}
 	}
@@ -224,9 +242,9 @@
 	@filterHoverColor:darken(@filterColor, 10%);
 
 	// 禁止缓存按钮 复写
-	@disCacheBorderColor: #a5a5a5;
-	@disCacheBoxShadow: 0px 0px 2px 0px #a5a5a5;
-	@disCacheBgColor: #e7e7e7;
+	@cacheBorderColor: #a5a5a5;
+	@cacheBoxShadow: 0px 0px 2px 0px #a5a5a5;
+	@cacheBgColor: #e7e7e7;
 	@disCacheCheckColor: #444444;
 	.navbarTheme();
 }

@@ -30,6 +30,7 @@ class App extends React.Component {
 			if (action.type === 'FETCH_SUCC') {
 				store.dispatch(actions.resetHosts(action.result.result.hosts));
 				store.dispatch(actions.disCache(action.result.result.disCache));
+				store.dispatch(actions.cacheFlush(action.result.result.cacheFlush));
 				store.dispatch(actions.remoteUpdateRuleUrl(action.result.result.remoteRuleUrl));
 			}
 		});

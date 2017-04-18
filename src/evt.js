@@ -230,6 +230,16 @@ var beforeRes = async function(resInfo) {
 				log.error(error);	
 			}
 		}
+			// 是个文件
+		if (contentType.indexOf('text/html') > -1 && config.get('cacheFlush') && resInfo.bodyData && resInfo.bodyData.length) {
+			let meta  = `
+			<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+			<meta http-equiv="Pragma" content="no-cache" />
+			<meta http-equiv="Expires" content="0" />
+			`;
+			resInfo.bodyData = resInfo.bodyData.toString().replace('<head>', '<head>' + meta);
+			resInfo.bodyData = iconv.encode(resInfo.bodyData, 'UTF-8');
+		}	
 	}
 	// 触发事件
 	let result = await catProxy.triggerBeforeRes(resInfo, this);

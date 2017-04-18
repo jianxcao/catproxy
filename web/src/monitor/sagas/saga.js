@@ -2,7 +2,7 @@ import { takeEvery, delay } from 'redux-saga';
 import { call, put, fork } from 'redux-saga/effects';
 import {fetchConfig, getConDetail} from "../../ws/sendMsg";
 import {FETCH_CONFIG, FETCH_CON_DATA} from '../action/fetchType';
-import {disCache as disCacheAction, monitorStatus, monitorFilterStatus} from '../action/navAction';
+import {disCache as disCacheAction,cacheFlush as cacheFlushAction, monitorStatus, monitorFilterStatus} from '../action/navAction';
 import {loadingPage, loadingConData} from '../action/loadingAction';
 import {hiddenDataUrl, monitorFilterType} from '../action/filterBarAction';
 import Immutable from 'immutable';
@@ -20,10 +20,11 @@ function* fetchCfg(action) {
 	// console.log(data);
 	yield put(loadingPage(false));
 	// 测试真实数据disCache对不对
-	let {result: {monitor, disCache}} = data;
+	let {result: {monitor, disCache, cacheFlush}} = data;
 	monitor = monitor || {};
 	// console.log("monitor", monitor);
-	yield put(disCacheAction(disCache));
+	yield put(disCacheAction(!!disCache));
+	yield put(cacheFlushAction(!!cacheFlush));
 	yield put(monitorStatus(monitor.monitorStatus));
 	yield put(monitorFilterStatus(monitor.monitorFilterStatus));
 	yield put(hiddenDataUrl(monitor.hiddenDataUrl));
