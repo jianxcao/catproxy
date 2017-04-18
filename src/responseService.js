@@ -55,7 +55,8 @@ let local = function(reqInfo, resInfo, fileAbsPath) {
 		delete headers['content-length'];
 		delete headers['content-encoding'];
 		if (!headers['content-type']) {	
-			let mimeType = mime.lookup((path.extname(fileAbsPath) || "").slice(1));
+			let extName = path.extname(fileAbsPath) || "";
+			let mimeType = extName ? mime.lookup((extName).slice(1)) : 'text/html';
 			headers['content-type'] = mimeType;
 		}
 		res.writeHead(statusCode, headers || {});
@@ -247,7 +248,7 @@ let remote = function(reqInfo, resInfo) {
 			port: reqInfo.port || (reqInfo.protocol === 'http' ? 80 : 443),
 			path: t.test(reqInfo.path) ? reqInfo.path : "/" + reqInfo.path,
 			method: reqInfo.method,
-			headers: reqInfo.headers // 大小写问题，是否需要转换
+			headers: reqInfo.headers
 		};
 		if (reqInfo.protocol === 'https') {
 			options.rejectUnauthorized = false;

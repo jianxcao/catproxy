@@ -8,7 +8,6 @@ import crypto from 'crypto';
 import os from 'os';
 //  放到临时目录中
 export const fileCache = path.join(os.tmpdir(), './catproxy.cache.fileCache');
-console.log(fileCache);
 // 数据库缓存大小
 // 确定db目录存在
 fse.ensureDirSync(fileCache);
