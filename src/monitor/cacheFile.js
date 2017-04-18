@@ -5,7 +5,10 @@ import path from 'path';
 import Promise from 'promise';
 import merge from 'merge';
 import crypto from 'crypto';
-export const fileCache = path.resolve('./fileCache');
+import os from 'os';
+//  放到临时目录中
+export const fileCache = path.join(os.tmpdir(), './catproxy.cache.fileCache');
+console.log(fileCache);
 // 数据库缓存大小
 // 确定db目录存在
 fse.ensureDirSync(fileCache);
@@ -71,3 +74,7 @@ export let getCacheFile = (id) => {
 		});		
 	});
 };
+
+process.on('beforeExit', () => {
+	fse.removeSync(fileCache);
+});
