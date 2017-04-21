@@ -231,7 +231,7 @@ var beforeRes = async function(resInfo) {
 			}
 		}
 			// 是个文件
-		if (contentType.indexOf('text/html') > -1 && config.get('cacheFlush') && resInfo.bodyData && resInfo.bodyData.length) {
+		if (contentType && contentType.indexOf('text/html') > -1 && config.get('cacheFlush') && resInfo.bodyData && resInfo.bodyData.length) {
 			let meta  = `
 			<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 			<meta http-equiv="Pragma" content="no-cache" />

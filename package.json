@@ -1,6 +1,6 @@
 {
   "name": "catproxy",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "description": "a node proxy or host change tools",
   "main": "index.js",
   "scripts": {
@@ -39,7 +39,7 @@
     "node-forge": "^0.6.40",
     "node-uuid": "^1.4.7",
     "promise": "^7.1.1",
-    "prompt": "^1.0.0",
+    "read": "^1.0.7",
     "request-ip": "^1.2.3",
     "socket.io": "^1.4.8",
     "weinre": "^2.0.0-pre-I0Z7U9OV",
@@ -101,8 +101,9 @@
     "webpack-stream": "^3.2.0"
   },
   "engines": {
-    "node": ">=4"
+    "node": ">=4.0.0"
   },
+  "engineStrict": true,
   "repository": {
     "type": "git",
     "url": "https://github.com/jianxcao/catproxy"

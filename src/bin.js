@@ -1,6 +1,6 @@
 import program from 'commander';
 import pkg from '../package.json';
-import prompt from 'prompt';
+import read from 'read';
 import colors from 'colors';
 import CatProxy from './app';
 import log from './log';
@@ -21,6 +21,27 @@ let convertToInt = (num) => {
 	let val = parseInt(num);
 	return isNaN(val) ? undefined : val;
 };
+
+function promptCert (prompt, callback) {
+	if (!callback) {
+		return;
+	}
+	read({ prompt: prompt}, function (error, answer) {
+		if (error) {
+			log.error(error);
+			return process.exit(1);
+		}
+		if (answer === '是' || answer === 'yes' || answer === 'y') {
+			callback();
+			process.exit(0);
+		} else if (answer === '否' || answer === 'n' || answer === 'n') {
+			process.exit(0);
+		} else {
+			promptCert(colors.green('请输入y或者n?'), callback);
+		}
+	});	
+};
+
 // 说明，注意不要改空格，否则输出到 控制台会变样
 let out = `
   *****说明******：
@@ -62,29 +83,9 @@ program
 // 生成证书
 if (program.cert) {
 	if (cert.isRootCertExits()) {
-		prompt.start({noHandleSIGINT: true});
-		prompt.get({
-			properties: {
-				isOverride: {
-					type: 'string',
-					required: true,
-					message: '请输入 y 或者 n',
-					description: colors.green("已经存在跟证书，是否覆盖?"),
-					conform: (val)=> {
-						return val === 'yes' || val === 'no' || val === 'n' || val === 'y';
-					}
-				}
-			}
-		}, function (err, result) {
-			if (err) {
-				process.exit(1);
-			} else {
-				if (result.isOverride === 'yes' || result.isOverride === 'y') {
-					cert.setRootCert();
-				}
-				process.exit(0);
-			}
-		});
+		promptCert(colors.green('已经存在根证书，是否覆盖?'), function () {
+			cert.setRootCert();
+		});		
 	} else {
 		cert.setRootCert();
 		process.exit(0);
