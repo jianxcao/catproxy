@@ -75,10 +75,50 @@ let createSelfCert = (domains, rootOpt) => {
 // 			return {type: 2, value: host};
 // 		})
 // 	}
+	cert.setExtensions([{
+		name: 'basicConstraints',
+		cA: true
+	}, {
+		name: 'keyUsage',
+		keyCertSign: true,
+		digitalSignature: true,
+		nonRepudiation: true,
+		keyEncipherment: true,
+		dataEncipherment: true
+	}, {
+		name: 'extKeyUsage',
+		serverAuth: true,
+		clientAuth: true,
+		codeSigning: true,
+		emailProtection: true,
+		timeStamping: true
+	}, {
+		name: 'nsCertType',
+		client: true,
+		server: true,
+		email: true,
+		objsign: true,
+		sslCA: true,
+		emailCA: true,
+		objCA: true
+	},{
+		name: 'subjectAltName',
+		altNames: domains.map(function(host) {
+			if (host.match(/^[\d\.]+$/)) {
+				return {type: 7, ip: host};
+			}
+			return {type: 2, value: host};
+		})
+	}, {
+		name: 'subjectKeyIdentifier'
+	}]);
+
 	cert.setSubject(attrs.concat([{
 		name: 'commonName',
 		value: domains[0]
 	}]));
+	// console.log(111111);
+	// console.log(cert.getExtensions());
 	cert.sign(rootKey, md.sha256.create());
 	return {
 		cert: pki.certificateToPem(cert),
