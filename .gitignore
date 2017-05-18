@@ -24,3 +24,6 @@ npm-debug.log
 
 #缓存目录
 fileCache
+
+# 文档目录忽略
+_book
