@@ -2,7 +2,8 @@
 
 * [Read Me](README.md)
 * [安装](docs/install.md)
-* [基础用法](docs/base.md)
-* [高级用法](docs/advance.md)
-* [重要提示](docs/advance/tip.md)
+* [命令说明](docs/cmd.md)
+* [ui配置界面说明](docs/manager.md)
+* [ui监控界面说明](docs/moniter.md)
+* [https说明](docs/https.md)
 * [更新日志](docs/updateInfo.md)

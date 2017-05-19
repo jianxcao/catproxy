@@ -1,6 +1,6 @@
 {
   "gitbook": "3.2.2",
-  "title": "ftl-node",
+  "title": "catproxy",
   "author": "jianxcao",
   "language" : "zh-hans",
   "plugins": ["edit-link", "prism", "-highlight", "github", "-search", "search-pro",  "splitter"],
@@ -11,11 +11,11 @@
         "defineWord" : ["Gitbook Use"]
     },     
     "edit-link": {
-      "base": "https://github.com/jianxcao/ftl-node/tree/master",
+      "base": "https://github.com/jianxcao/catproxy/tree/master",
       "label": "Edit This Page"
     },
     "github": {
-      "url": "https://github.com/jianxcao/ftl-node"
+      "url": "https://github.com/jianxcao/catproxy"
     }
   }
 }
