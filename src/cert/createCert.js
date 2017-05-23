@@ -75,10 +75,13 @@ let createSelfCert = (domains, rootOpt) => {
 // 			return {type: 2, value: host};
 // 		})
 // 	}
-	cert.setExtensions([{
-		name: 'basicConstraints',
-		cA: true
-	},{
+	cert.setExtensions([
+		// 某些电脑加这个 会爆出 证书乱码问题
+	// {
+	// 	name: 'basicConstraints',
+	// 	cA: true
+	// },
+	{
 		name: 'subjectAltName',
 		altNames: domains.map(function(host) {
 			if (host.match(/^[\d\.]+$/)) {
