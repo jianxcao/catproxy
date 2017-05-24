@@ -213,6 +213,12 @@ var beforeRes = async function(resInfo) {
 	} catch(e) {
 		log.error(e);
 	}
+	// 触发事件
+	let result = await catProxy.triggerBeforeRes(resInfo, this);
+	// 修改了引用
+	if (resInfo !== result) {
+		resInfo = merge(resInfo, result);
+	}	
 	resInfo.isBinary = isBinary(resInfo.bodyData);	
 	// 文本文件 -- 需要检测编码是不是不是 utf-8
 	// 二进制文件是没有charset的
@@ -238,19 +244,12 @@ var beforeRes = async function(resInfo) {
 			<meta http-equiv="Expires" content="0" />
 			`;
 			resInfo.bodyData = resInfo.bodyData.toString().replace('<head>', '<head>' + meta);
-			console.log(resInfo.charset);
 			resInfo.bodyData = iconv.encode(resInfo.bodyData, resInfo.charset || 'UTF-8');
 			// 重新设置body的长度
 			if (resInfo.headers['content-length']) {
 				resInfo.headers['content-length'] = resInfo.bodyData.length;
 			}
 		}	
-	}
-	// 触发事件
-	let result = await catProxy.triggerBeforeRes(resInfo, this);
-	// 修改了引用
-	if (resInfo !== result) {
-		resInfo = merge(resInfo, result);
 	}
 	return resInfo;
 };

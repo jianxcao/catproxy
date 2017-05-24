@@ -123,6 +123,7 @@ parseOneBranch = (rule, messageInfo, groupName, branchName) => {
 	// 设置了 weinre
 	if (type === 'weinre') {
 		messageInfo.weinre = true;
+		return;
 	}
 	// 正则替换，即用正则替换url
 	// 替换后还可以执行下一个规则
