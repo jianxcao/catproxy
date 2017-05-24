@@ -238,7 +238,12 @@ var beforeRes = async function(resInfo) {
 			<meta http-equiv="Expires" content="0" />
 			`;
 			resInfo.bodyData = resInfo.bodyData.toString().replace('<head>', '<head>' + meta);
-			resInfo.bodyData = iconv.encode(resInfo.bodyData, 'UTF-8');
+			console.log(resInfo.charset);
+			resInfo.bodyData = iconv.encode(resInfo.bodyData, resInfo.charset || 'UTF-8');
+			// 重新设置body的长度
+			if (resInfo.headers['content-length']) {
+				resInfo.headers['content-length'] = resInfo.bodyData.length;
+			}
 		}	
 	}
 	// 触发事件
