@@ -85,7 +85,12 @@ let detailHost = function(result, reqInfo, resInfo) {
 	.then(address => {
 		// 如果还是死循环，则跳出
 		if (isServerPort && localIps.some(current => ip.isEqual(current, address))) {
-			return Promise.reject('Dead circulation');
+			if (reqInfo.headers && reqInfo.headers['self-server']) {
+				return Promise.reject('Dead circulation');
+			} else {
+				reqInfo.headers = reqInfo.headers || {};
+				reqInfo.headers['self-server'] = 1;
+			}
 		}
 		return merge(result, {
 			hostname: address
@@ -250,6 +255,7 @@ let remote = function(reqInfo, resInfo) {
 			method: reqInfo.method,
 			headers: reqInfo.headers
 		};
+		if (hostname === 1)
 		if (reqInfo.protocol === 'https') {
 			options.rejectUnauthorized = false;
 			// 旧的协议是http-即http跳转向https--从新生成证书
