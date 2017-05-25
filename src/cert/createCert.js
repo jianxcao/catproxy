@@ -1,4 +1,4 @@
-import {pki, md} from 'node-forge';
+import forge, {pki, md, pkcs12} from 'node-forge';
 let attrs  = [{
 	name: 'countryName',
 	value: 'CN'
@@ -46,9 +46,12 @@ let createRootCert = () => {
 		cA: true
 	}]);
 	cert.sign(keys.privateKey, md.sha256.create());
-	// console.log(cert.subject.attributes);
+	// base64-encode p12
+	let p12Asn1 = pkcs12.toPkcs12Asn1(keys.privateKey, cert, '123456', {algorithm: '3des'});
+	let p12Der = new Buffer(forge.asn1.toDer(p12Asn1).toHex(), 'hex')
 	return {
 		cert: pki.certificateToPem(cert),
+		pfx: p12Der,
 		privateKey: pki.privateKeyToPem(keys.privateKey),
 		publicKey: pki.publicKeyToPem(keys.publicKey),
 	};

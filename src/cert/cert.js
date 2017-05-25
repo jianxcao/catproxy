@@ -13,6 +13,7 @@ certDir = path.join(certDir, './.cert_center');
 
 var rootKeyPath = path.resolve(certDir, './cert.key');
 var rootCrtPath = path.resolve(certDir, './cert.crt');
+var rootPfxPath = path.resolve(certDir, './cert.pfx');
 var certCachePath = path.resolve(certDir, 'certCache');
 var certCache = {};
 // console.log(log);
@@ -31,6 +32,7 @@ var setRootCert = () => {
 	let cert = result.cert;
 	fs.writeFileSync(rootKeyPath, privateKey);
 	fs.writeFileSync(rootCrtPath, cert);
+	fs.writeFileSync(rootPfxPath, result.pfx);
 	return {
 		privateKey,
 		cert
