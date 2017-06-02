@@ -45,3 +45,12 @@
 
 ### 图文说明
 ![firefox证书步骤2](img/https_4.jpg)
+
+
+## ios 安装证书
+1. 直接扫描证书二维码
+![ios证书步骤1](img/ios1.png)
+2. 点击install安装证书
+![ios证书步骤2](img/ios2.png)
+3. ios10.3以上的浏览器需要在 设置->通用->关于下打开安装得证书
+![ios证书步骤3](img/ios3.png)
