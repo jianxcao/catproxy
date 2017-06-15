@@ -86,15 +86,15 @@ export default function(catproxy) {
 		throw new Error("catproxy是必须得");
 	}
 	var monitorBeforeReq,
-			monitorBeforeRes,
-			monitorAfterRes;
+		monitorBeforeRes,
+		monitorAfterRes;
 	// 检测是不是本地的一个服务器
 	// 只要ip是localhost ui服务器 或者是weinre的请求就忽略
 	let checkIsInnerServer = (originalUrl) => {
 		return catproxy.localUiReg.test(originalUrl) || originalUrl.toLowerCase().indexOf(WEINRE_PATH + "/" + weinreId) >= 0;
 	};
 	// 请求发送前
-	catproxy.onBeforeReq(monitorBeforeReq = (result) => {
+	monitorBeforeReq = (result) => {
 		if (result && result.id && config.get('monitor:monitorStatus') && !checkIsInnerServer(result.originalUrl)) {
 			/**
 			 * 
@@ -144,9 +144,9 @@ export default function(catproxy) {
 				monitorList[result.id] = addMontiorData;
 			}
 		}				
-	});
+	};
 	// 准备发送请求
-	catproxy.onBeforeRes(monitorBeforeRes = result => {
+	monitorBeforeRes = result => {
 		if (result && result.id && config.get('monitor:monitorStatus') && !checkIsInnerServer(result.originalUrl)) {
 			let addMontiorData = merge(monitorList[result.id], {
 				ext: result.ext,
@@ -155,7 +155,9 @@ export default function(catproxy) {
 			});
 			let type = getReqType(addMontiorData, result.ext) || "other";
 			addMontiorData.type = type;
-			addMontiorData.isResinary = result.isBinary;
+			// 当所有用户调用结束在看是否是二进制数据
+			result.isBinary = isBinary(result.bodyData);
+			addMontiorData.isResbinary = result.isBinary;
 			// 修改缓存数据
 			monitorList[result.id] = {
 				startTime: addMontiorData.startTime
@@ -165,9 +167,9 @@ export default function(catproxy) {
 			// 调用数据增加
 			addMonitor(addMontiorData);				
 		}
-	});
+	};
 	// 请求发送后
-	catproxy.onAfterRes(monitorAfterRes = result => {
+	monitorAfterRes = result => {
 		if (result && +result.id && config.get('monitor:monitorStatus') && !checkIsInnerServer(result.originalUrl)) {
 			if (monitorList[result.id]) {
 				let startTime = monitorList[result.id].startTime;
@@ -214,8 +216,8 @@ export default function(catproxy) {
 				updateMonitor(updateData);
 			}
 		}
-	});
-
+	};
+	// 动态添加到数组中，因为这些方法在用户调用 on事件后才能被调用
 	catproxy.__monitorBeforeReq = monitorBeforeReq;
 	catproxy.__monitorBeforeRes = monitorBeforeRes;
 	catproxy.__monitorAfterRes = monitorAfterRes;

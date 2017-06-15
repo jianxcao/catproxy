@@ -143,7 +143,7 @@ class ViewResData extends Component {
 	}
 	render() {
 		let {data, resBodyData} = this.props;
-		let isResinary = data.get('isResinary');
+		let isResbinary = data.get('isResbinary');
 		let id = data.get('resBodyDataId');
 		let ext = data.get('ext');
 		let resHeaders = data.get('resHeaders');
@@ -155,7 +155,7 @@ class ViewResData extends Component {
 			let t = typeof resBodyData.data;
 			// 二进制数据 - 看看是不是 图片如果是图片就 处理图片，否则就返回不认识
 			// 不存在id表示数据没有在后天存在
-			if (isResinary) {
+			if (isResbinary) {
 				if (resHeaders) {
 					let contentType = resHeaders.get("content-type");
 					if (isImage.test(contentType)) {

@@ -56,12 +56,14 @@ const execArrByStep = async function (arr, result, context) {
 		return result;
 	}
 	for(let cur of arr) {
-		// 这里调用如果出错，最后直接抛出 -- 也可以考虑哪一步出错，哪一步单独抛出
-		// 检测cur是够是一个函数？？
-		let newRes = await cur.call(context, result);
-		// 修改了引用
-		if (newRes !== result) {
-			result = merge(result, newRes);
+		if (cur) {
+			// 这里调用如果出错，最后直接抛出 -- 也可以考虑哪一步出错，哪一步单独抛出
+			// 检测cur是够是一个函数？？
+			let newRes = await cur.call(context, result);
+			// 修改了引用
+			if (newRes !== result) {
+				result = merge(result, newRes);
+			}
 		}
 	}
 	return result;
@@ -363,7 +365,7 @@ class CatProxy{
 	 * result 格式看evt中的格式
 	 */
 	triggerBeforeReq (result, context) {
-		return execArrByStep(this._beforeReqEvt, result, context);
+		return execArrByStep(this._beforeReqEvt.concat([this.__monitorBeforeReq]), result, context);
 	}
 	/**
 	 * 触发 请求前事件
@@ -371,7 +373,7 @@ class CatProxy{
 	 *  context为上下文
 	 */
 	triggerBeforeRes (result, context) {
-		return execArrByStep(this._beforeResEvt, result, context);
+		return execArrByStep(this._beforeResEvt.concat([this.__monitorBeforeRes]), result, context);
 	}
 	/**
 	 * 触发请求后事件
@@ -379,15 +381,13 @@ class CatProxy{
 	 *  context为上下文
 	 */
 	triggerAfterRes (result, context) {
-		if (this._afterResEvt.length) {
-			this._afterResEvt.forEach(current => {
-				try{ 
-					current.call(context, result);
-				} catch (e) {
-					log.error(e);
-				}
-			});
-		}
+		(this._afterResEvt || []).concat([this.__monitorAfterRes]).forEach(current => {
+			try{ 
+				current && current.call(context, result);
+			} catch (e) {
+				log.error(e);
+			}
+		});
 	}
 	/**
 	 * 触发穿过请求
