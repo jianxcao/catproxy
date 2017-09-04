@@ -255,7 +255,6 @@ let remote = function(reqInfo, resInfo) {
 			method: reqInfo.method,
 			headers: reqInfo.headers
 		};
-		if (hostname === 1)
 		if (reqInfo.protocol === 'https') {
 			options.rejectUnauthorized = false;
 			// 旧的协议是http-即http跳转向https--从新生成证书

@@ -1,6 +1,6 @@
 {
   "name": "catproxy",
-  "version": "1.2.11",
+  "version": "1.2.12",
   "description": "a node proxy or host change tools",
   "main": "index.js",
   "scripts": {

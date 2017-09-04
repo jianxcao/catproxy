@@ -5,3 +5,7 @@ mime.define({
 mime.define({
 	'text/javascript': ['js']
 });
+
+mime.define({
+	'text/html': ['ftl']
+});
