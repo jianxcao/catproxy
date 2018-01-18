@@ -179,6 +179,9 @@ class SubHeader extends React.Component {
 	jumpMonitor () {
 		window.location.href = '/c/m';
 	}
+	jumpHelpRule () {
+		window.location.href = 'https://github.com/jianxcao/catproxy/blob/master/docs/rule.md';	
+	}
 	shouldComponentUpdate(nextProps, nextState) {
 		return this.state.openDialog !== nextState.openDialog || this.props.disCache !== nextProps.disCache || this.props.cacheFlush !== nextProps.cacheFlush;      
 	}
@@ -257,6 +260,7 @@ class SubHeader extends React.Component {
 						<Checkbox label="刷新缓存" checked={cacheFlush} onCheck={this.handleCacheFlush} style={checkBoxWraperStyle}/>
 					</ToolbarGroup>
 					<ToolbarGroup>
+					<RaisedButton label="规则说明" primary={true} onClick={this.jumpHelpRule}/>
 						<RaisedButton label="保存规则" primary={true} onClick={this.handleSaveHosts}/>
 					</ToolbarGroup>
 				</Toolbar>

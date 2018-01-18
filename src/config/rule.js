@@ -12,7 +12,7 @@ let parseOneRule, parseBranch, parseOneBranch, execParse, standardUrl;
 let isStringReg = /^\/.+\/$/;
 let isStartHttp = /^http(s)?:\/\//;
 let isStartSlash = /^\//;
-
+let escapeReg = /(\*|\.|\?|\+|\$|\^|\[|\]|\(|\)|\{|\}|\||\\|\/)/g;
 
 /**
  * 保存规则
@@ -110,6 +110,7 @@ parseOneBranch = (rule, messageInfo, groupName, branchName) => {
 		test = test.slice(1, test.length -1);
 	} else {
 		test = isStartHttp.test(test) ? test : (messageInfo.protocol === 'https' ? "https://" + test : "http://" + test);
+		test = test.replace(escapeReg, '\\$1');
 		test = '^' + test;
 	}
 	// 将test转换成正则
