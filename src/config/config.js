@@ -27,7 +27,7 @@ export let getPath = () => {
 	var exits = fs.existsSync(dirPath);
 	// 目录不存在
 	if (!exits) {
-		fs.mkdir(dirPath);
+		fs.mkdirSync(dirPath);
 	}
 	// 临时文件存放位置
 	filePath = path.resolve(dirPath, 'rule.json');

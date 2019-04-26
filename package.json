@@ -1,6 +1,6 @@
 {
   "name": "catproxy",
-  "version": "1.2.13",
+  "version": "1.2.14",
   "description": "a node proxy or host change tools",
   "main": "index.js",
   "scripts": {
@@ -34,7 +34,7 @@
     "is-equal": "^1.5.3",
     "isbinaryfile": "^3.0.1",
     "js-beautify": "^1.6.7",
-    "merge": "^1.2.0",
+    "merge": "^1.2.1",
     "mime": "^1.3.4",
     "node-forge": "^0.6.40",
     "node-uuid": "^1.4.7",
@@ -46,12 +46,12 @@
     "winston": "^2.2.0"
   },
   "devDependencies": {
-    "babel-core": "^6.3.26",
+    "babel-core": "^6.26.3",
     "babel-eslint": "^6.1.2",
     "babel-loader": "^6.2.4",
     "babel-plugin-transform-async-to-generator": "^6.16.0",
     "babel-plugin-transform-es2015-modules-amd": "^6.8.0",
-    "babel-plugin-transform-es2015-modules-commonjs": "^6.10.3",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
     "babel-plugin-transform-runtime": "^6.15.0",
     "babel-preset-es2015": "^6.9.0",
     "babel-preset-react": "^6.11.1",
@@ -74,7 +74,7 @@
     "keymirror": "^0.1.1",
     "less": "^2.7.1",
     "less-loader": "^2.2.3",
-    "lodash": "^4.17.2",
+    "lodash": "^4.17.11",
     "material-ui": "^0.16.4",
     "monaco-editor": "^0.7.0",
     "npm": "^4.0.3",
