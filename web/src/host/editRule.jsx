@@ -178,7 +178,15 @@ export default class EditRule extends React.Component {
 				<SelectField value={rule.get('type')} style={fieldStyle} onChange={this.handleTypeChange}>
 					{menuRulesTypeList}
 				</SelectField>
-				<TextField name='test' onChange={this.handleChange} style={fieldStyle} underlineShow={true} fullWidth={true} value={rule.get('test')} hintText='请输入源地址,或者增则字符串，会自动以^开头' />
+				<TextField
+					name='test'
+					onChange={this.handleChange}
+					style={fieldStyle}
+					underlineShow={true}
+					fullWidth={true}
+					value={rule.get('test')}
+					hintText='地址如http://test.com,地址会编译成正则,正则如/.*/'
+				/>
 				{exec}
 				{virtualPath}
 				<div style={divStyle}>{this.renderIcon()}</div>
