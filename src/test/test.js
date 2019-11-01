@@ -62,14 +62,14 @@ var time = function() {
 			console.log(index);
 			resolve(index);
 			index++; }
-		, 300)
+		, 300);
 	});
-}
+};
 
 var a = async function() {
-		for(let i = 0; i < 5; i++) {
-			let result = await time();
-			console.log(result);
-		}
+	for(let i = 0; i < 5; i++) {
+		let result = await time();
+		console.log(result);
+	}
 };
 a();

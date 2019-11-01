@@ -27,3 +27,5 @@ fileCache
 
 # 文档目录忽略
 _book
+
+.eslintcache

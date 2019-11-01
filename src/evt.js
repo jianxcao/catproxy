@@ -36,7 +36,7 @@ let detailBeforeReq = async function(reqInfo) {
 		let result = await parseRule(reqInfo);
 		reqInfo = result || reqInfo;
 	}
-	//添加 clientIp，目前还有bug-- 这段 clientIp总是获取不对
+	// 添加 clientIp，目前还有bug-- 这段 clientIp总是获取不对
 	let {req, headers} = reqInfo;
 	let clientIp = requestIp.getClientIp(req); 
 	// clientIp获取不对，就设置成 机器ip？？？
@@ -54,7 +54,7 @@ let detailBeforeReq = async function(reqInfo) {
 		reqInfo = merge(reqInfo, result);
 	}
 	return reqInfo;
-}
+};
 
 /**
  * 代理请求发出前
@@ -122,13 +122,13 @@ let detailBeforeReq = async function(reqInfo) {
  *   }
  */
 var beforeReq = function(reqInfo) {
-		return detailBeforeReq.call(this, reqInfo)
+	return detailBeforeReq.call(this, reqInfo)
 		.then(null, function(err) {
 			// 如果出错忽略所有数据
 			// 如果改了reqInfo引用上的数据就没救了
 			log.error(err);
 			return reqInfo;
-		})
+		});
 };
 
 /** 
@@ -155,7 +155,7 @@ var disCache = function (resInfo) {
 		 * 服务器根据该头部判断是否是缓存，如果是返回304，不是则返回新文件
 		 * 缺点，如果服务器文件并没有什么改变，只是改变了时间，也会跟新文件
 		 */
-			// 删除 last-modified,让浏览器下次请求不能带 If-Modified-Since 头部,这样服务器无法返回304
+		// 删除 last-modified,让浏览器下次请求不能带 If-Modified-Since 头部,这样服务器无法返回304
 		delete resInfo.headers['last-modified'];
 	}
 	return resInfo;
@@ -236,7 +236,7 @@ var beforeRes = async function(resInfo) {
 				log.error(error);	
 			}
 		}
-			// 是个文件
+		// 是个文件
 		if (contentType && contentType.indexOf('text/html') > -1 && config.get('cacheFlush') && resInfo.bodyData && resInfo.bodyData.length) {
 			let meta  = `
 			<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />

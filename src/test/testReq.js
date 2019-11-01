@@ -55,11 +55,11 @@ function checkServerIdentity(host, cert) {
 		// escape all characters that have special meaning in regexps
 		// (i.e. '.', '[', '{', '*', and others)
 		var re = host.replace(
-				/\*([a-z0-9\\-_\.])|[\.,\-\\\^\$+?*\[\]\(\):!\|{}]/g,
-				function(all, sub) {
-					if (sub) return '[a-z0-9\\-_]*' + (sub === '-' ? '\\-' : sub);
-					return '\\' + all;
-				});
+			/\*([a-z0-9\\-_\.])|[\.,\-\\\^\$+?*\[\]\(\):!\|{}]/g,
+			function(all, sub) {
+				if (sub) return '[a-z0-9\\-_]*' + (sub === '-' ? '\\-' : sub);
+				return '\\' + all;
+			});
 
 		return new RegExp('^' + re + '$', 'i');
 	}
@@ -157,7 +157,7 @@ function checkServerIdentity(host, cert) {
 	}
 	if (!valid) {
 		var err = new Error(
-				`Hostname/IP doesn't match certificate's altnames: "${reason}"`);
+			`Hostname/IP doesn't match certificate's altnames: "${reason}"`);
 		err.reason = reason;
 		err.host = host;
 		err.cert = cert;

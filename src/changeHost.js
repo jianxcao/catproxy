@@ -21,25 +21,25 @@ export default (hostname, isServerPort) => {
 			}
 		});
 	})
-	.then(visitIp => {
-		return new Promise((resolve, reject) => {
+		.then(visitIp => {
+			return new Promise((resolve, reject) => {
 			// 是一个本地的ip
-			if (ip.isPrivate(visitIp)) {
+				if (ip.isPrivate(visitIp)) {
 				// 如果解析的ip和当前服务器开的ip一样
-				if (localIps.some(current => ip.isEqual(current, visitIp)) && isServerPort) {
-					dns.resolve(hostname, function(err, addresses) {
-						if (err || !addresses || !addresses.length) {
-							reject(err.code || " 为找到合适的ip");
-						} else {
-							resolve(addresses[0]);
-						}
-					});
+					if (localIps.some(current => ip.isEqual(current, visitIp)) && isServerPort) {
+						dns.resolve(hostname, function(err, addresses) {
+							if (err || !addresses || !addresses.length) {
+								reject(err.code || " 为找到合适的ip");
+							} else {
+								resolve(addresses[0]);
+							}
+						});
+					} else {
+						resolve(visitIp);
+					}
 				} else {
-					resolve(visitIp);
-				}
-			} else {
 				 resolve(visitIp);
-			}
+				}
+			});
 		});
-	});
 };

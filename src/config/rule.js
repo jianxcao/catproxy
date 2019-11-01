@@ -61,17 +61,17 @@ export let parseRule = messageInfo => {
 			param: [current, messageInfo]
 		};
 	}))
-	.then(result => {
-		if (result) {
-			delete result.__match;
-			messageInfo.ruleInfo = 	messageInfo.ruleInfo.join('||');
-			if (!messageInfo.ruleInfo) {
-				delete messageInfo.ruleInfo;
+		.then(result => {
+			if (result) {
+				delete result.__match;
+				messageInfo.ruleInfo = 	messageInfo.ruleInfo.join('||');
+				if (!messageInfo.ruleInfo) {
+					delete messageInfo.ruleInfo;
+				}
+				return result;
 			}
-			return result;
-		}
-		return messageInfo;
-	});
+			return messageInfo;
+		});
 };
 
 parseOneRule = (group, messageInfo) => {
@@ -148,12 +148,12 @@ parseOneBranch = (rule, messageInfo, groupName, branchName) => {
 	messageInfo.__match = true;
 	log.debug(`解析规则,当前url:${currentUrl}, 规则类型:${type},规则正则${test},规则执行${exec}`);
 	switch(type){
-		// host模式下只能修改 host protocol port
+	// host模式下只能修改 host protocol port
 	case('host'):
 		// 远程文件替换整个url路径包括参数
 	case('remoteFile'):
 		if (exec) {
-				// 转换成一个url的对象
+			// 转换成一个url的对象
 			let execObj = standardUrl(exec, messageInfo.protocol);
 			messageInfo.host = execObj.host;
 			messageInfo.protocol = execObj.protocol.split(':')[0];
@@ -162,7 +162,7 @@ parseOneBranch = (rule, messageInfo, groupName, branchName) => {
 			// log.debug('', messageInfo.protocol, messageInfo.port, exec);
 			messageInfo.ruleInfo.push(`分组:${groupName}-分支:${branchName}-规则类型:${type}-规则正则:${test}-规则执行:${exec}`);
 		} else  {
-				// 没有配置exec如果是 host就访问线上，如果是 remoteFile就跳过
+			// 没有配置exec如果是 host就访问线上，如果是 remoteFile就跳过
 			if (type === 'host') {
 				return new Promise((resolve, reject) => {
 					dns.resolve(messageInfo.host.split(':')[0], function(err, addresses) {
@@ -192,7 +192,7 @@ parseOneBranch = (rule, messageInfo, groupName, branchName) => {
 		break;
 	case('localDir'):
 		if (exec) {
-				// 去掉hash和param
+			// 去掉hash和param
 			let p = messageInfo.path.split('?')[0];
 			p = messageInfo.path.split('#')[0];
 			if (!isStartSlash.test(virtualPath)) {

@@ -13,7 +13,7 @@ var isInit = false;
 // 获取配置路径
 export let getPath = () => {
 	let dirPath, filePath;
-		// The expected result is:
+	// The expected result is:
 	// OS X - '/Users/user/Library/Preferences'
 	// Windows 8 - 'C:\Users\User\AppData\Roaming'
 	// Windows XP - 'C:\Documents and Settings\User\Application Data'

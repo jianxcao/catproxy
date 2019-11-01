@@ -14,13 +14,13 @@ export default (serverName) => {
 		return Promise.resolve(servers[serverName]);
 	} else {
 		serversPromise[serverName] = serversPromise[serverName] || getHttpsSer(serverName)
-		.then((info) => {
-			servers[serverName] = info;
-			servers['length'] += 1;
-			log.debug("当前代理服务器数据：" + servers.length);
-			delete serversPromise[serverName];
-			return info;
-		});
+			.then((info) => {
+				servers[serverName] = info;
+				servers['length'] += 1;
+				log.debug("当前代理服务器数据：" + servers.length);
+				delete serversPromise[serverName];
+				return info;
+			});
 		return serversPromise[serverName];
 	}
 

@@ -53,11 +53,11 @@ let upgradeToWebSocket = function(req, cltSocket, head) {
 	changeHost(hostname, isServerPort).then(ip => {
 		options.hostname = ip;
 		var proxyReq = (isSecure ? https : http)
-		.request(options, (proxyRes) => {
-			if (!proxyRes.upgrade) {
-				proxyRes.end && proxyRes.end();
-			}
-		});
+			.request(options, (proxyRes) => {
+				if (!proxyRes.upgrade) {
+					proxyRes.end && proxyRes.end();
+				}
+			});
 		proxyReq.on('upgrade', (proxyRes, proxySocket, proxyHead) => {
 			let result = {};
 			Object.defineProperties(result, {
@@ -91,18 +91,18 @@ let upgradeToWebSocket = function(req, cltSocket, head) {
 				proxySocket.unshift(proxyHead);
 			}
 			let headers = Object.keys(proxyRes.headers)
-			.reduce(function (head, key) {
-				var value = proxyRes.headers[key];
-				if (!Array.isArray(value)) {
-					head.push(key + ': ' + value);
+				.reduce(function (head, key) {
+					var value = proxyRes.headers[key];
+					if (!Array.isArray(value)) {
+						head.push(key + ': ' + value);
+						return head;
+					}
+					for (var i = 0; i < value.length; i++) {
+						head.push(key + ': ' + value[i]);
+					}
 					return head;
-				}
-				for (var i = 0; i < value.length; i++) {
-					head.push(key + ': ' + value[i]);
-				}
-				return head;
-			}, ['HTTP/1.1 101 Switching Protocols'])
-			.join('\r\n') + '\r\n\r\n';
+				}, ['HTTP/1.1 101 Switching Protocols'])
+				.join('\r\n') + '\r\n\r\n';
 			// 写入头文件
 			cltSocket.write(headers);
 			proxySocket.pipe(cltSocket).pipe(proxySocket);
@@ -205,11 +205,11 @@ export let requestHandler = function(req, res) {
 		}
 	};
 	req
-	.on('data', data)
-	.on('end', end)
-	.on('error', err => {
-		log.error('error req', err);
-	});
+		.on('data', data)
+		.on('end', end)
+		.on('error', err => {
+			log.error('error req', err);
+		});
 };
 
 /**
@@ -237,86 +237,86 @@ export let requestConnectHandler = function(req, cltSocket, head) {
 		// }
 		cltSocket.write('\r\n');
 	})
-	.then(first => {
-		cltSocket.pause();
-		// log.debug("first data", first[0]);
-		let opt = config.get();
-		let reqUrl = `http://${req.url}`;
-		let srvUrl = url.parse(reqUrl);
-		let crackHttps;
-		if (typeof opt.breakHttps === 'boolean') {
-			crackHttps = opt.breakHttps;
-		} else if (typeof opt.breakHttps === 'object' && opt.breakHttps.length) {
-			crackHttps = opt.breakHttps.some((current) => new RegExp(current.replace(rep, "")).test(srvUrl.hostname));
-		}
-		// 如果当前状态是 破解状态  并且有排除列表
-		if (crackHttps && typeof opt.excludeHttps === 'object' && opt.excludeHttps) {
-			crackHttps = !opt.excludeHttps.some((current) => new RegExp(current.replace(rep, "")).test(srvUrl.hostname));
-		}
-		// * - an incoming connection using SSLv3/TLSv1 records should start with 0x16
-		// * - an incoming connection using SSLv2 records should start with the record size
-		// *   and as the first record should not be very big we can expect 0x80 or 0x00 (the MSB is a flag)
-		// 如果需要捕获https的请求
-		// 访问地址直接是ip，跳过不代理  
-		if (crackHttps && (first[0] == 0x16 || first[0] == 0x80 || first[0] == 0x00)) {
-			log.verbose(`crack https ${reqUrl}`);
-			getServer(opt.sni === 1 ?  "" : srvUrl.hostname)
-				.then(({
-					port,
-					server
-				}) => {
+		.then(first => {
+			cltSocket.pause();
+			// log.debug("first data", first[0]);
+			let opt = config.get();
+			let reqUrl = `http://${req.url}`;
+			let srvUrl = url.parse(reqUrl);
+			let crackHttps;
+			if (typeof opt.breakHttps === 'boolean') {
+				crackHttps = opt.breakHttps;
+			} else if (typeof opt.breakHttps === 'object' && opt.breakHttps.length) {
+				crackHttps = opt.breakHttps.some((current) => new RegExp(current.replace(rep, "")).test(srvUrl.hostname));
+			}
+			// 如果当前状态是 破解状态  并且有排除列表
+			if (crackHttps && typeof opt.excludeHttps === 'object' && opt.excludeHttps) {
+				crackHttps = !opt.excludeHttps.some((current) => new RegExp(current.replace(rep, "")).test(srvUrl.hostname));
+			}
+			// * - an incoming connection using SSLv3/TLSv1 records should start with 0x16
+			// * - an incoming connection using SSLv2 records should start with the record size
+			// *   and as the first record should not be very big we can expect 0x80 or 0x00 (the MSB is a flag)
+			// 如果需要捕获https的请求
+			// 访问地址直接是ip，跳过不代理  
+			if (crackHttps && (first[0] == 0x16 || first[0] == 0x80 || first[0] == 0x00)) {
+				log.verbose(`crack https ${reqUrl}`);
+				getServer(opt.sni === 1 ?  "" : srvUrl.hostname)
+					.then(({
+						port,
+						server
+					}) => {
 					// 与服务器绑定
-					server.catProxy = com.catProxy;
-					let srvSocket = net.connect(port, "localhost", () => {
-						srvSocket.pipe(cltSocket).pipe(srvSocket);
-						cltSocket.emit('data', first);
-						cltSocket.resume();
+						server.catProxy = com.catProxy;
+						let srvSocket = net.connect(port, "localhost", () => {
+							srvSocket.pipe(cltSocket).pipe(srvSocket);
+							cltSocket.emit('data', first);
+							cltSocket.resume();
+						});
+						srvSocket.on('error', (err) => {
+							cltSocket.end();
+							log.error(`crack https-srv:${reqUrl}请求出现错误: ${err}${err.stack}`);
+						});
+						cltSocket.on('error', err => {
+							log.error(`crack https-clt:${reqUrl}请求出现错误: ${err}${err.stack}`);
+							srvSocket.end();
+						});
 					});
-					srvSocket.on('error', (err) => {
-						cltSocket.end();
-						log.error(`crack https-srv:${reqUrl}请求出现错误: ${err}${err.stack}`);
-					});
-					cltSocket.on('error', err => {
-						log.error(`crack https-clt:${reqUrl}请求出现错误: ${err}${err.stack}`);
-						srvSocket.end();
-					});
-				});
-		} else {
+			} else {
 			// 不认识的协议或者 不破解的https直接连接对应的服务器
-			log.verbose(`pipe request ${reqUrl}`);
-			let result = {};
-			Object.defineProperties(result, {
-				host: {
-					value: srvUrl.host,
-					enumerable: true
-				},
-				headers: req.headers,
-				port : {
-					value: srvUrl.port,
-					enumerable: true
-				},
-				protocol: {
-					value: headerWsTest.test(first.toString()) ? "ws" : "http",
-					enumerable: true
-				}
-			});
-			pipeRequest.call(com, result);
-			let srvSocket = net.connect(srvUrl.port, srvUrl.hostname, () => {
-				srvSocket.pipe(cltSocket).pipe(srvSocket);
-				cltSocket.emit('data', first);
-				cltSocket.resume();
-			});
-			cltSocket.on('error', err => {
-				log.error(`转发请求出现错误: ${err}`);
-				srvSocket.end();
-			});
-			srvSocket.on('error',  (err) => {
-				cltSocket.end();
-				log.error(`转发请求出现错误: ${err}`);
-			});
-		}
-	})
-	.then(null, err => log.error(err));
+				log.verbose(`pipe request ${reqUrl}`);
+				let result = {};
+				Object.defineProperties(result, {
+					host: {
+						value: srvUrl.host,
+						enumerable: true
+					},
+					headers: req.headers,
+					port : {
+						value: srvUrl.port,
+						enumerable: true
+					},
+					protocol: {
+						value: headerWsTest.test(first.toString()) ? "ws" : "http",
+						enumerable: true
+					}
+				});
+				pipeRequest.call(com, result);
+				let srvSocket = net.connect(srvUrl.port, srvUrl.hostname, () => {
+					srvSocket.pipe(cltSocket).pipe(srvSocket);
+					cltSocket.emit('data', first);
+					cltSocket.resume();
+				});
+				cltSocket.on('error', err => {
+					log.error(`转发请求出现错误: ${err}`);
+					srvSocket.end();
+				});
+				srvSocket.on('error',  (err) => {
+					cltSocket.end();
+					log.error(`转发请求出现错误: ${err}`);
+				});
+			}
+		})
+		.then(null, err => log.error(err));
 };
 /**
  * upgrade ws转发请求处理

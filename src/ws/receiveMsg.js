@@ -118,38 +118,38 @@ export let getConDetail = (msg = {param: {}}, ws = {}) => {
 	let {param: {id, ext, contentType, charset, formatCode}} = msg;
 	if (id) {
 		getCacheFile(id)
-		.then(data => {
+			.then(data => {
 			// 不是2进制数据就解码数据
-			return isBinary(data) ? data : decodeData(data, charset);
-		})
-		.then(function(data) {
-			if (typeof data === 'string' && data) {
-				ext = updateExt(ext, contentType, data);
-			}
-			return data;
-		})
-		.then(function(data) {
-			if (typeof data === 'string' && formatCode) {
-				return betuifyCode(data, ext);
-			}
-			data = data || "";
-			return data;
-		})
-		.then(function(data) {
-			data = data || "";
-			sendConnDetail({
-				id,
-				data,
-				ext
+				return isBinary(data) ? data : decodeData(data, charset);
+			})
+			.then(function(data) {
+				if (typeof data === 'string' && data) {
+					ext = updateExt(ext, contentType, data);
+				}
+				return data;
+			})
+			.then(function(data) {
+				if (typeof data === 'string' && formatCode) {
+					return betuifyCode(data, ext);
+				}
+				data = data || "";
+				return data;
+			})
+			.then(function(data) {
+				data = data || "";
+				sendConnDetail({
+					id,
+					data,
+					ext
+				});
+			}, function(data) {
+				data = data || "";
+				sendConnDetail({
+					id,
+					data,
+					ext
+				});
 			});
-		}, function(data) {
-			data = data || "";
-			sendConnDetail({
-				id,
-				data,
-				ext
-			});
-		});
 	}
 };
 
@@ -184,39 +184,39 @@ export let remoteUpdateRule = (msg = {}, ws = {}) => {
 		config.set('remoteRuleUrl', visUrl);
 		visUrl = url.parse(visUrl);
 		let req = (visUrl.protocol === 'http:' ? http : https)
-		.request({
-			hostname: visUrl.hostname,
-			port: visUrl.port ? visUrl.port : (visUrl.protocol === 'http:' ? 80 : 443),
-			path: visUrl.path,
-			method: 'GET',
-			headers: {}
-		}, (res) => {
-			if (+res.statusCode !== 200) {
-				return reject(error('服务器获取数据错误'));
-			}
-			res.setEncoding('utf8');
-			let data = [];
-			
-			res.on('data', (chunk) => {
-				data.push(chunk);
-			});
-			res.on('end', () => {
-				let isBuffer = Buffer.isBuffer(data[0]);
-				let result = isBuffer ? Buffer.concat(data) : data.join('');
-				try {
-					result = JSON.parse(result);
-					config.set("hosts", result);
-					config.save(["hosts", "remoteRuleUrl"]);
-					return resolve(success({
-						data: result,
-						msg: "更新数据成功"
-					}));
-				} catch(e) {
-					log.error(e.message);
-					return reject(error('数据格式错误'));
+			.request({
+				hostname: visUrl.hostname,
+				port: visUrl.port ? visUrl.port : (visUrl.protocol === 'http:' ? 80 : 443),
+				path: visUrl.path,
+				method: 'GET',
+				headers: {}
+			}, (res) => {
+				if (+res.statusCode !== 200) {
+					return reject(error('服务器获取数据错误'));
 				}
+				res.setEncoding('utf8');
+				let data = [];
+			
+				res.on('data', (chunk) => {
+					data.push(chunk);
+				});
+				res.on('end', () => {
+					let isBuffer = Buffer.isBuffer(data[0]);
+					let result = isBuffer ? Buffer.concat(data) : data.join('');
+					try {
+						result = JSON.parse(result);
+						config.set("hosts", result);
+						config.save(["hosts", "remoteRuleUrl"]);
+						return resolve(success({
+							data: result,
+							msg: "更新数据成功"
+						}));
+					} catch(e) {
+						log.error(e.message);
+						return reject(error('数据格式错误'));
+					}
+				});
 			});
-		});
 		req.on('error', (e) => {
 			log.error(e.message);
 			reject(error(e.message));

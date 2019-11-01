@@ -95,12 +95,12 @@ class CatProxy{
 		// 读取缓存配置文件
 		let fileCfg = {};
 		configProps
-		.forEach(current => {
-			let val = config.get(current);
-			if ( val !== undefined && val !== null) {
-				fileCfg[current] = val;
-			}
-		});
+			.forEach(current => {
+				let val = config.get(current);
+				if ( val !== undefined && val !== null) {
+					fileCfg[current] = val;
+				}
+			});
 		// 混合三种配置
 		let cfg = merge.recursive({}, defCfg, fileCfg, opt);
 		if (saveProps && saveProps.length) {
@@ -110,16 +110,16 @@ class CatProxy{
 		}
 		// 将用户当前设置保存到缓存配置文件
 		configProps
-		.forEach(current => {
-			if (cfg[current] !== null && cfg[current] !== undefined) {
+			.forEach(current => {
+				if (cfg[current] !== null && cfg[current] !== undefined) {
 				// 为‘’表示要删除这个字段
-				if (cfg[current] === '' && config.get(current)) {
-					config.del(current);
-				} else {
-					config.set(current, cfg[current]);
+					if (cfg[current] === '' && config.get(current)) {
+						config.del(current);
+					} else {
+						config.set(current, cfg[current]);
+					}
 				}
-			}
-		});
+			});
 		config.save();
 		this._beforeReqEvt = [];
 		this._beforeResEvt = [];
@@ -153,15 +153,15 @@ class CatProxy{
 		// dangerous options
 		process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
 		return Promise.resolve()
-		.then(this.createCache.bind(this))
-		.then(this.checkParam.bind(this))
-		.then(this.checkEnv.bind(this))
-		.then(this.createServer.bind(this))
-		.then(this.uiInit.bind(this))
-		.then(null, (err) => {
-			this.errorHandle(err);
-			process.exit(1);
-		});
+			.then(this.createCache.bind(this))
+			.then(this.checkParam.bind(this))
+			.then(this.checkEnv.bind(this))
+			.then(this.createServer.bind(this))
+			.then(this.uiInit.bind(this))
+			.then(null, (err) => {
+				this.errorHandle(err);
+				process.exit(1);
+			});
 	}
 	// 创建缓存，创建请求保存
 	createCache() {
@@ -238,50 +238,50 @@ class CatProxy{
 		let p = port;
 		// 如果port是0 则只提供下载链接的server
 		return Promise.resolve(p || getPort())
-		.then((p) => {
+			.then((p) => {
 			// 内置服务器初始化
-			let host = `http://${localIps[0]}:${p}`;
-			let uiOption = {
-				port : p,
-				hostname: localIps[0],
-				host: host,
-				wsServerUrl: host + webCfg.wsPath,
-				cdnBasePath: path.join('/c', webCfg.cdnBasePath),
-				env: webCfg.env
-			};
-			// 写成正则，判断是否是ui的一个访问地址
-			this.localUiReg = getLocalUiReg(p);
-			let uiApp = ui(!!port);
-			let app = express();
-			let uiServer = app.listen(p, function() {
-				log.info('catproxy 规则配置地址：' + host +"/c/index");
-				log.info('catproxy 监控界面地址：' + host +"/c/m");
-				if(port && isAutoOpen) {
-					openCmd(host + "/c/index");
+				let host = `http://${localIps[0]}:${p}`;
+				let uiOption = {
+					port : p,
+					hostname: localIps[0],
+					host: host,
+					wsServerUrl: host + webCfg.wsPath,
+					cdnBasePath: path.join('/c', webCfg.cdnBasePath),
+					env: webCfg.env
+				};
+				// 写成正则，判断是否是ui的一个访问地址
+				this.localUiReg = getLocalUiReg(p);
+				let uiApp = ui(!!port);
+				let app = express();
+				let uiServer = app.listen(p, function() {
+					log.info('catproxy 规则配置地址：' + host +"/c/index");
+					log.info('catproxy 监控界面地址：' + host +"/c/m");
+					if(port && isAutoOpen) {
+						openCmd(host + "/c/index");
+					}
+				});
+				uiApp.locals.uiOption = uiOption;
+				uiServer.on('error', (err) => {
+					errFun(err);
+					process.exit(1);
+				});
+				// 字app
+				app.use("/c", uiApp);
+				this.ui = {
+					app,
+					uiServer
+				};
+			})
+			.then(() => {
+				if (port) {
+					return ws(this.ui.uiServer, this);
+				}
+			})
+			.then(wsServer => {
+				if (wsServer) {
+					this.ui.wsServer = wsServer;
 				}
 			});
-			uiApp.locals.uiOption = uiOption;
-			uiServer.on('error', (err) => {
-				errFun(err);
-				process.exit(1);
-			});
-			// 字app
-			app.use("/c", uiApp);
-			this.ui = {
-				app,
-				uiServer
-			};
-		})
-		.then(() => {
-			if (port) {
-				return ws(this.ui.uiServer, this);
-			}
-		})
-		.then(wsServer => {
-			if (wsServer) {
-				this.ui.wsServer = wsServer;
-			}
-		});
 	}
 	// 出错处理
 	errorHandle(err) {
