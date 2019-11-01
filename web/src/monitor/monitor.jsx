@@ -94,20 +94,20 @@ class Monitor extends Component{
 			let style = {
 				'minWidth': 800,
 				'minHeight': 500
-			}
+			};
 			out = (<RightMenuProvider>
-					<ToolTipProvider>
-						<div style={style}>
-							<MyNav/>
-							<FilterBar/>
-							<DataList 
-								monitorStatus={monitorStatus} 
-								monitorList={monitorList} 
-								filterListFeild={filterListFeild}
-								/>
-						</div>
-						</ToolTipProvider>
-				</RightMenuProvider>);
+				<ToolTipProvider>
+					<div style={style}>
+						<MyNav/>
+						<FilterBar/>
+						<DataList 
+							monitorStatus={monitorStatus} 
+							monitorList={monitorList} 
+							filterListFeild={filterListFeild}
+						/>
+					</div>
+				</ToolTipProvider>
+			</RightMenuProvider>);
 		}
 		return out;
 	}
@@ -130,7 +130,7 @@ function mapDispatchToProps(dispatch) {
 const ConnectMonitor = connect(mapStateToProps, mapDispatchToProps)(Monitor);
 ReactDom.render(
 	<Scrollbars autoHide={true} hideTracksWhenNotNeeded={true}>
-	<Provider store={store}>
-		<ConnectMonitor/>
-	</Provider></Scrollbars>, 
+		<Provider store={store}>
+			<ConnectMonitor/>
+		</Provider></Scrollbars>, 
 	document.getElementById('g-wrap'));

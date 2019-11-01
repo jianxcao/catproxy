@@ -2,7 +2,7 @@ import * as reducers from '../reducers/index';
 import Immutable from 'immutable';
 import sendMsg from '../../ws/sendMsg';
 import {
-    combineReducers
+	combineReducers
 } from 'redux-immutable';
 import actionType from "../action/action-type";
 let  {

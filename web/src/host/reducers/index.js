@@ -56,14 +56,14 @@ let group = (state = new List(), action = {}) => {
 let branch = (state = new List(), action = {}) => {
 	switch (action.type) {
 	case ADD_BRANCH:
-			// 能找到分组
+		// 能找到分组
 		if (action.groupId >= 0 && action.groupId !== null) {
 			state = state.updateIn([action.groupId, 'branch'], 
-					value=> value.push(new OrderedMap({
-						disable: false,
-						name: action.name,
-						rules: new List()
-					})));
+				value=> value.push(new OrderedMap({
+					disable: false,
+					name: action.name,
+					rules: new List()
+				})));
 			return syncDis(state, action.groupId);
 		} else {// 找不到分组新增一个分组
 			state = state.push(new OrderedMap({
@@ -79,19 +79,19 @@ let branch = (state = new List(), action = {}) => {
 		}
 	case DEL_BRANCH:
 		state =  state.updateIn([action.groupId, 'branch'], 
-				value=> value.delete(action.id));
+			value=> value.delete(action.id));
 		return syncDis(state, action.groupId);
 	case CHANGE_BRANCH_NAME:
 		return state.updateIn(
-				[action.groupId, "branch", action.id, "name"], 
-				()=> action.name);
+			[action.groupId, "branch", action.id, "name"], 
+			()=> action.name);
 	case TOGGLE_BRANCH_DIS:
 		state = state.updateIn([action.groupId, "branch", action.id], 
-				branch => {
-					let status = action.status === undefined ? !branch.get('disable') : action.status;
-					return branch.set('disable', status)
+			branch => {
+				let status = action.status === undefined ? !branch.get('disable') : action.status;
+				return branch.set('disable', status)
 					.update('rules', rules => rules.map(rule => rule.set('disable', status)));
-				});
+			});
 		 		return syncDis(state, action.groupId);
 	case SWITCH_BRANCH:
 		return state.updateIn([action.groupId, "branch"], branchs => {
@@ -120,7 +120,7 @@ let disableAll = (state = new List(), action = {}) => {
 			return groups.set('disable', true)
 				.update("branch", branch => branch.map(branch => {
 					return branch.set('disable', true)
-					.update('rules', rules=>rules.map(rule => rule.set('disable', true)));
+						.update('rules', rules=>rules.map(rule => rule.set('disable', true)));
 				}));
 		});
 	default:

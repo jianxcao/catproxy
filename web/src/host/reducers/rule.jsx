@@ -28,15 +28,15 @@ const methodMap = {
 
 	DEL_RULE: (state, action) => {
 		state = state.updateIn(
-				[action.groupId, "branch", action.branchId, "rules"], 
-				rules => rules.delete(action.ruleId));
+			[action.groupId, "branch", action.branchId, "rules"], 
+			rules => rules.delete(action.ruleId));
 		return syncDis(state, action.groupId);
 	},
 
 	TOGGLE_RULE_DIS: (state, action) => {
 		state = state.updateIn(
-		[action.groupId, "branch", action.branchId, "rules", action.ruleId, "disable"], 
-		val => !val);
+			[action.groupId, "branch", action.branchId, "rules", action.ruleId, "disable"], 
+			val => !val);
 		return syncDis(state, action.groupId);
 	},
 
@@ -44,8 +44,8 @@ const methodMap = {
 		let rule = action.rule;
 		if (rule) {
 			return state.updateIn(
-			[action.groupId, "branch", action.branchId, "rules", action.ruleId], 
-			(rule) => rule.merge(Immutable.fromJS(action.rule))
+				[action.groupId, "branch", action.branchId, "rules", action.ruleId], 
+				(rule) => rule.merge(Immutable.fromJS(action.rule))
 			); 
 		} else {
 			return state;

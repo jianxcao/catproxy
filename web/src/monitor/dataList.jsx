@@ -56,8 +56,8 @@ export default class DataList extends Component {
 	componentWillMount() {
 		this.init();
 		this.ConInfo = <ConInfo 
-					style={conInfostyle} 
-					data={{}} destory= {this.closeCon}></ConInfo>;
+			style={conInfostyle} 
+			data={{}} destory= {this.closeCon}></ConInfo>;
 	}
 	
 	componentDidMount() {
@@ -419,10 +419,10 @@ export default class DataList extends Component {
 				all.push({
 					text: [
 						<input type="checkbox" 
-						name={current.shortName} 
-						defaultChecked={checked} key={1} 
-						onChange={this._changeFilterList} 
-						id={"MenuItem" + current.shortName} 
+							name={current.shortName} 
+							defaultChecked={checked} key={1} 
+							onChange={this._changeFilterList} 
+							id={"MenuItem" + current.shortName} 
 						/>, 
 						<label key={2} htmlFor={"MenuItem" + current.shortName} >{current.name}</label>],
 					eventKey: current.shortName

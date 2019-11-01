@@ -90,18 +90,18 @@ class EditRules extends React.Component{
 			let rules = this.props.rules;
 			let editRules = rules.map((current, index) => {
 				return <EditRule rule={current} key={index} ruleId={index} 
-				delRule={this.delRule}
-				disRule={this.disRule}
-				updateRule={this.updateRule} switchProps = {this.switchProps}/>;
+					delRule={this.delRule}
+					disRule={this.disRule}
+					updateRule={this.updateRule} switchProps = {this.switchProps}/>;
 			});
 			return (
-					<Paper zDepth={0}>
-						<Paper zDepth={0} style={paperStyle}>
-							<RaisedButton label="新建规则" primary={true} onClick={this.newRule}/>
-						</Paper>
-						{editRules}
+				<Paper zDepth={0}>
+					<Paper zDepth={0} style={paperStyle}>
+						<RaisedButton label="新建规则" primary={true} onClick={this.newRule}/>
 					</Paper>
-				);
+					{editRules}
+				</Paper>
+			);
 		} else {
 			return (
 				<Paper zDepth={0}>

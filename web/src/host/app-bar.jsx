@@ -86,10 +86,10 @@ class Header extends React.Component {
 								if (btnId) {
 									store.dispatch(resetHosts(reader.rules));
 									sendMsg.updateRule(reader.rules)
-									.then(message => {
-										toast(message.result);
-									}, 
-									message => toast(message.result));
+										.then(message => {
+											toast(message.result);
+										}, 
+										message => toast(message.result));
 								}
 							}
 						});
@@ -128,12 +128,12 @@ class Header extends React.Component {
 						onBtnClick: (id) => {
 							if (+id) {
 								sendMsg.remoteUpdateRule(val)
-								.then(msg => {
-									toast(msg.result.msg);
-									// 只更新本地数据
-									store.dispatch(remoteUpdateRuleUrl(val));
-									store.dispatch(resetHosts(msg.result.data));
-								}, msg => toast(msg.result));
+									.then(msg => {
+										toast(msg.result.msg);
+										// 只更新本地数据
+										store.dispatch(remoteUpdateRuleUrl(val));
+										store.dispatch(resetHosts(msg.result.data));
+									}, msg => toast(msg.result));
 							}
 						}
 					});
@@ -157,22 +157,22 @@ class Header extends React.Component {
 		let downloadrule = "/c/downloadrule.html";
 		let downloadcert = "/c/downloadcert.html";
 		return (<AppBar
-		title="catproxy"
-		onLeftIconButtonTouchTap = {this.handleToggle}
-		iconElementRight={
-			<IconMenu
-				iconButtonElement={<IconButton><MoreVertIcon /></IconButton>}
-				targetOrigin={{horizontal: 'right', vertical: 'top'}}
-				anchorOrigin={{horizontal: 'right', vertical: 'top'}}>
-				<LinkItem primaryText="下载host文件" leftIcon={getIcon({}, "icon-download")} href={downloadrule}/>
-				<MenuItem primaryText="上传本地host文件" leftIcon={getIcon({}, "icon-upload")} onClick={this.handleImportRule}/>
-				<MenuItem primaryText="上传远程host文件" leftIcon={getIcon({}, "icon-upload")} onClick={this.handleImpRemoteRule}/>
-				<MenuItem primaryText="证书二维码" leftIcon={getIcon({}, "icon-qrcode")} onClick={this.handleShowCertQrcode}/>
-				<LinkItem primaryText="下载证书文件" leftIcon={getIcon({}, "icon-download")} href={downloadcert}/>
-				<LinkItem primaryText="github" leftIcon={getIcon({}, "icon-github")} href="https://github.com/jianxcao/catproxy"/>
-				<LinkItem primaryText="帮助" leftIcon={getIcon({}, "icon-help")} href="https://github.com/jianxcao/catproxy"/>
-			</IconMenu>
-		}/>);
+			title="catproxy"
+			onLeftIconButtonTouchTap = {this.handleToggle}
+			iconElementRight={
+				<IconMenu
+					iconButtonElement={<IconButton><MoreVertIcon /></IconButton>}
+					targetOrigin={{horizontal: 'right', vertical: 'top'}}
+					anchorOrigin={{horizontal: 'right', vertical: 'top'}}>
+					<LinkItem primaryText="下载host文件" leftIcon={getIcon({}, "icon-download")} href={downloadrule}/>
+					<MenuItem primaryText="上传本地host文件" leftIcon={getIcon({}, "icon-upload")} onClick={this.handleImportRule}/>
+					<MenuItem primaryText="上传远程host文件" leftIcon={getIcon({}, "icon-upload")} onClick={this.handleImpRemoteRule}/>
+					<MenuItem primaryText="证书二维码" leftIcon={getIcon({}, "icon-qrcode")} onClick={this.handleShowCertQrcode}/>
+					<LinkItem primaryText="下载证书文件" leftIcon={getIcon({}, "icon-download")} href={downloadcert}/>
+					<LinkItem primaryText="github" leftIcon={getIcon({}, "icon-github")} href="https://github.com/jianxcao/catproxy"/>
+					<LinkItem primaryText="帮助" leftIcon={getIcon({}, "icon-help")} href="https://github.com/jianxcao/catproxy"/>
+				</IconMenu>
+			}/>);
 	}
 }
 function mapStateToProps(state) {

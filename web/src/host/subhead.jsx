@@ -149,11 +149,11 @@ class SubHeader extends React.Component {
 			return;
 		}
 		sendMsg.updateRule(this.props.hosts.toJS())
-		.then(message => {
-			com.context.toast(message.result);
-			previousHosts = hosts;
-		}, 
-		message => com.context.toast(message.result));
+			.then(message => {
+				com.context.toast(message.result);
+				previousHosts = hosts;
+			}, 
+			message => com.context.toast(message.result));
 	}
 	// 禁止使用缓存
 	handleDisCache(proxy, status) {
@@ -161,20 +161,20 @@ class SubHeader extends React.Component {
 		let {disCacheMethod} = this.props;
 		disCacheMethod(status);
 		sendMsg.disCache(status)
-		.then(message => {
-			com.context.toast(message.result);
-		}, 
-		message => com.context.toast(message.result));
+			.then(message => {
+				com.context.toast(message.result);
+			}, 
+			message => com.context.toast(message.result));
 	}
 	handleCacheFlush (proxy, status) {
 		var com = this;
 		let {cacheFlushMethod} = this.props;
 		cacheFlushMethod(status);
 		sendMsg.cacheFlush(status)
-		.then(message => {
-			com.context.toast(message.result);
-		}, 
-		message => com.context.toast(message.result));
+			.then(message => {
+				com.context.toast(message.result);
+			}, 
+			message => com.context.toast(message.result));
 	}
 	jumpMonitor () {
 		window.location.href = '/c/m';
@@ -223,24 +223,24 @@ class SubHeader extends React.Component {
 			contentStyle={contentStyle}
 			autoScrollBodyContent={true}
 			bodyStyle={bodyStyle}
-			>
-				<AutoComplete
-					floatingLabelText="分组名称"
-					ref="grounEle"
-					filter={AutoComplete.caseInsensitiveFilter}
-					dataSource={source}
-					maxSearchResults={5}
-					openOnFocus={true}
-					onUpdateInput = {this.handleGroupInput}
-					onNewRequest={this.handleGroupSelect}
-				/><br/>
-				<TextField
-					ref="branchEel"
-					floatingLabelText="规则名称"
-					type="text"
-					onKeyUp = {this.handleEnterKeyAddBranch}
-					onChange={this.handleChangeBranch}
-				/>
+		>
+			<AutoComplete
+				floatingLabelText="分组名称"
+				ref="grounEle"
+				filter={AutoComplete.caseInsensitiveFilter}
+				dataSource={source}
+				maxSearchResults={5}
+				openOnFocus={true}
+				onUpdateInput = {this.handleGroupInput}
+				onNewRequest={this.handleGroupSelect}
+			/><br/>
+			<TextField
+				ref="branchEel"
+				floatingLabelText="规则名称"
+				type="text"
+				onKeyUp = {this.handleEnterKeyAddBranch}
+				onChange={this.handleChangeBranch}
+			/>
 		</Dialog>);
 	}
 
@@ -260,7 +260,7 @@ class SubHeader extends React.Component {
 						<Checkbox label="刷新缓存" checked={cacheFlush} onCheck={this.handleCacheFlush} style={checkBoxWraperStyle}/>
 					</ToolbarGroup>
 					<ToolbarGroup>
-					<RaisedButton label="规则说明" primary={true} onClick={this.jumpHelpRule}/>
+						<RaisedButton label="规则说明" primary={true} onClick={this.jumpHelpRule}/>
 						<RaisedButton label="保存规则" primary={true} onClick={this.handleSaveHosts}/>
 					</ToolbarGroup>
 				</Toolbar>

@@ -39,14 +39,14 @@ const getMonaco = () => {
 };
 const getBaseEditor = () => {
 	return getMonaco()
-	.then(function(monaco) {
+		.then(function(monaco) {
 		// 内存中创建编辑器，
 		// 前提是编辑器已经加载成功了
-		var editor = monaco.editor.create(container, merge({
-			model: null,
-		}, options));
-		return editor;
-	});
+			var editor = monaco.editor.create(container, merge({
+				model: null,
+			}, options));
+			return editor;
+		});
 };
 
 export default class Eidtor extends Component {
@@ -102,10 +102,10 @@ export default class Eidtor extends Component {
 		}
 		if (!editor) {
 			getBaseEditor()
-			.then((ed) => {
-				editor = ed;
-				this._editorDidMount();
-			});
+				.then((ed) => {
+					editor = ed;
+					this._editorDidMount();
+				});
 		} else {
 			this._editorDidMount();
 		}

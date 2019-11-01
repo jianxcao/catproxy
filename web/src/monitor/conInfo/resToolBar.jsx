@@ -73,15 +73,15 @@ export default class ResToolBar extends Component {
 		result["bar1"] =(<div className="split"></div>);
 		result["bar2"] = (
 			<Nav><NavDropdown eventKey={"language"} title={language} className="language" id="language" onSelect={this._changeLanguage}>
-					{lan}
-				</NavDropdown></Nav>
+				{lan}
+			</NavDropdown></Nav>
 		);
 		// 美化按钮一定有，但是可能点击了没有效果
 		result["bar3"] =(<div className="split"></div>);
 		result["bar4"] = (<div className="formatCode">
-					<span><input type="checkbox" name="type" id="resToolBarFormatCode" value="format" defaultChecked={!!formatCode} onChange={this._changeFormat}/>
-					<label htmlFor="resToolBarFormatCode">美化</label></span>
-			</div>);
+			<span><input type="checkbox" name="type" id="resToolBarFormatCode" value="format" defaultChecked={!!formatCode} onChange={this._changeFormat}/>
+				<label htmlFor="resToolBarFormatCode">美化</label></span>
+		</div>);
 	
 		result = createFragment(result);
 		return (<div className="resToolBar">{result}</div>);

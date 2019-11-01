@@ -7,7 +7,7 @@ import createSagaMiddleware from 'redux-saga';
 import rootSaga from '../sagas/saga';
 import {clearMonitorList} from '../action/monitorListAction';
 import {
-    combineReducers
+	combineReducers
 } from 'redux-immutable';
 
 import { createStore, applyMiddleware, compose } from 'redux';

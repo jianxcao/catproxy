@@ -5,7 +5,7 @@ import {handleActions, handleAction} from 'redux-actions';
 import monitorListType, {CUR_CON_DETAIL_DATA} from "../action/monitorListType";
 export default {
 	monitorList: handleActions({
-			// 增加数据
+		// 增加数据
 		ADD_MONITOR_LIST: (state , {payload: arrData}) => {
 			// 数据量限定在5000
 			if (state.size > 100000) {

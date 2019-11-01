@@ -107,11 +107,11 @@ export default class RightMenu extends Component{
 		}
 		menu = (
 			<div><Clearfix>
-					<AdjustPos left = {left} top ={top}>
-						<ul className={className} style={menuStyle} {...otherProps}>
-							{copyItem}{items}
-						</ul>
-					</AdjustPos>
+				<AdjustPos left = {left} top ={top}>
+					<ul className={className} style={menuStyle} {...otherProps}>
+						{copyItem}{items}
+					</ul>
+				</AdjustPos>
 			</Clearfix></div>);
 		return menu;
 	}

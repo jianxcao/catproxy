@@ -16,10 +16,10 @@ export default class CustomScrollbars extends Component {
 	renderThumbVertical(props) {
 		let {style = {}, ...myProp} = props;
 		style.width = 7;
-		return <div {...myProp} style={style} className="thumbVertical"/>
+		return <div {...myProp} style={style} className="thumbVertical"/>;
 	}
 	renderView(props) {
-		return <div {...props} className="scrollBarBiew"/>
+		return <div {...props} className="scrollBarBiew"/>;
 	}
 	render() {
 		let props = this.props;

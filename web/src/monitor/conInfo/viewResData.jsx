@@ -200,18 +200,18 @@ class ViewResData extends Component {
 		// 显示编辑器
 		result = <Editor data={resBodyData.data} language={language} editorDidMount={this.editorDidMount} opt={opt}></Editor>;
 		return (
-		<div className="codePreview">
-			<ResToolBar
-				formatCode={formatCode}
-				charset={charset}
-				language={language}
-				changeFormatCode = {this.changeFormatCode}
-				changeCharset= {this.changeCharset}
-				changeLanguage={this.changeLanguage}
+			<div className="codePreview">
+				<ResToolBar
+					formatCode={formatCode}
+					charset={charset}
+					language={language}
+					changeFormatCode = {this.changeFormatCode}
+					changeCharset= {this.changeCharset}
+					changeLanguage={this.changeLanguage}
 				>
-			</ResToolBar>
-			<div className="code">{result}</div>
-		</div>);
+				</ResToolBar>
+				<div className="code">{result}</div>
+			</div>);
 	}
 }
 

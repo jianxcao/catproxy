@@ -76,23 +76,23 @@ class FilterBar extends Component{
 			let showUserName = current === "ws" ? "WS" : upperFirstLetter(current);
 			let	isChecked = monitorFilterType === current;
 			return (
-					<span className="type" key={index}>
-						<input type="radio" name="type" id={current} value={current} 
-							checked={isChecked}
-							onChange={this.changeMonitorFilterType}/>
-						<label htmlFor={current}>{showUserName}</label>
-					</span>
-				);
+				<span className="type" key={index}>
+					<input type="radio" name="type" id={current} value={current} 
+						checked={isChecked}
+						onChange={this.changeMonitorFilterType}/>
+					<label htmlFor={current}>{showUserName}</label>
+				</span>
+			);
 		});
 		filterTypes.splice(1, 0, (<div className="split" key="split"></div>));
 		return (
 			<div className="filterBar" style = {style}>
-					<div className="filter">
-						<input type="text" name="filter" placeholder="过滤" defaultValue={monitorFilterCondition} onChange={this.changeMonitorFilterCondition}/>
-					</div>
-					<div className="filterTypes">
-						{filterTypes}
-					</div>
+				<div className="filter">
+					<input type="text" name="filter" placeholder="过滤" defaultValue={monitorFilterCondition} onChange={this.changeMonitorFilterCondition}/>
+				</div>
+				<div className="filterTypes">
+					{filterTypes}
+				</div>
 			</div>
 		);
 	}

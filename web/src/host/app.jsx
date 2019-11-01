@@ -26,14 +26,14 @@ class App extends React.Component {
 	}
 	componentDidMount() {
 		store.dispatch(actions.fetchRule())
-		.then((action) => {
-			if (action.type === 'FETCH_SUCC') {
-				store.dispatch(actions.resetHosts(action.result.result.hosts));
-				store.dispatch(actions.disCache(action.result.result.disCache));
-				store.dispatch(actions.cacheFlush(action.result.result.cacheFlush));
-				store.dispatch(actions.remoteUpdateRuleUrl(action.result.result.remoteRuleUrl));
-			}
-		});
+			.then((action) => {
+				if (action.type === 'FETCH_SUCC') {
+					store.dispatch(actions.resetHosts(action.result.result.hosts));
+					store.dispatch(actions.disCache(action.result.result.disCache));
+					store.dispatch(actions.cacheFlush(action.result.result.cacheFlush));
+					store.dispatch(actions.remoteUpdateRuleUrl(action.result.result.remoteRuleUrl));
+				}
+			});
 	}
 	getChildContext() {
 		return {
@@ -57,4 +57,4 @@ ReactDom.render(
 			</DialogProvider>
 		</Provider>
 	</MuiThemeProvider>, 
-document.getElementById('g-wrap'));
+	document.getElementById('g-wrap'));

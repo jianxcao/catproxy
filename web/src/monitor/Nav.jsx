@@ -67,7 +67,7 @@ class MyNav extends Component{
 		sendMonitorStatus(!monitorStatus);
 		// 直接保存后台
 		sendMsg.monitorStatus(!monitorStatus)
-		.then(null, (err) => console.log(err));
+			.then(null, (err) => console.log(err));
 	}
 	// 清除掉所有得监控数据
 	clearMonitorList(e) {
@@ -80,7 +80,7 @@ class MyNav extends Component{
 		sendMonitorFilterStatus(!monitorFilterStatus);
 		// 后台保存
 		sendMsg.monitorFilterStatus(!monitorFilterStatus)
-		.then(null, (err) => console.log(err));
+			.then(null, (err) => console.log(err));
 	}
 	// 切换 缓存
 	changeDisCache(e) {
@@ -88,14 +88,14 @@ class MyNav extends Component{
 		sendDisCache(!disCache);
 		// 后台保存
 		sendMsg.disCache(!disCache)
-		.then(null, (err) => console.log(err));
+			.then(null, (err) => console.log(err));
 	}
 	changeCacheFlush (e) {
 		let {sendCacheFlush, cacheFlush} = this.props;
 		sendCacheFlush(!cacheFlush);
 		// 后台保存
 		sendMsg.cacheFlush(!cacheFlush)
-		.then(null, (err) => console.log(err));
+			.then(null, (err) => console.log(err));
 	}
 	changeCert(key) {
 		if (key === 'qrcode') {
@@ -156,7 +156,7 @@ class MyNav extends Component{
 						<MenuItem eventKey="help" href="https://github.com/jianxcao/catproxy" target="_blank">帮助</MenuItem>
 					</NavDropdown>
 				</Nav>
-		</Navbar>);
+			</Navbar>);
 	}
 }
 function mapStateToProps(state) {

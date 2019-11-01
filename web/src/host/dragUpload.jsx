@@ -44,17 +44,17 @@ class DragUpload extends React.Component {
 			document.addEventListener("dragover", prevDef);
 		}
 		return {
-				// onDragEnter: (e)=> {
-				// 	console.log('hhhhhhh', e);
-				// 	e.preventDefault();
-				// 	e.stopPropagation();
-				// 	return false;
-				// },
-				// onDragOver: (e)=> {
-				// 	e.preventDefault();
-				// 	e.stopPropagation();
-				// 	return false;
-				// },
+			// onDragEnter: (e)=> {
+			// 	console.log('hhhhhhh', e);
+			// 	e.preventDefault();
+			// 	e.stopPropagation();
+			// 	return false;
+			// },
+			// onDragOver: (e)=> {
+			// 	e.preventDefault();
+			// 	e.stopPropagation();
+			// 	return false;
+			// },
 			onDrop: (e) => {
 				e.preventDefault();
 				var files = e.dataTransfer.files;
@@ -66,7 +66,7 @@ class DragUpload extends React.Component {
 						return toast('文件大小超过限制');
 					}
 					let file = files[0];
-						// 如果已经上传完成
+					// 如果已经上传完成
 					if (com.reader && com.reader.rules) {
 						dialog({
 							msg: "已经有上传的文件，确定覆盖吗",

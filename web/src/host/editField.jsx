@@ -49,14 +49,14 @@ export default class EditField extends React.Component {
 	render(){
 		if (this.props.isEditor) {
 			return (<TextField
-					name="myTextInput"
-					ref="myTextInput"
-					style={style}
-					inputStyle={inputStyle}
-					defaultValue={this.props.val}
-					onClick={this.handleInputClick}
-					onMouseDown={this.handleInputClick}
-					onBlur={this.handleChaneToText}
+				name="myTextInput"
+				ref="myTextInput"
+				style={style}
+				inputStyle={inputStyle}
+				defaultValue={this.props.val}
+				onClick={this.handleInputClick}
+				onMouseDown={this.handleInputClick}
+				onBlur={this.handleChaneToText}
 			/>);
 		} else {
 			return (<div style={style}>{this.props.val}</div>);

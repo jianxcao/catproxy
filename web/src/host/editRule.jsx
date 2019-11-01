@@ -154,11 +154,11 @@ export default class EditRule extends React.Component{
 		let type = rule.get('type');
 		if ( type === 'localDir') {
 			virtualPath = <TextField name="virtualPath" 
-			onChange={this.handleChange}
-			style={fieldStyle} underlineShow={true}
-			fullWidth={true}
-			value={rule.get('virtualPath')}
-			hintText="请输入虚拟部分路径" />;
+				onChange={this.handleChange}
+				style={fieldStyle} underlineShow={true}
+				fullWidth={true}
+				value={rule.get('virtualPath')}
+				hintText="请输入虚拟部分路径" />;
 		}
 		let exec = null;
 		if (type !== 'weinre') {
@@ -166,7 +166,7 @@ export default class EditRule extends React.Component{
 				onChange={this.handleChange}
 				style={fieldStyle} underlineShow={true}
 				fullWidth={true}  value={rule.get('exec')}
-				hintText={targetTips[rule.get('type')]} />
+				hintText={targetTips[rule.get('type')]} />;
 		}
 		let title = '规则' + (this.props.ruleId + 1);
 		if (type === 'weinre' || type === 'regReplace') {
