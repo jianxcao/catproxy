@@ -2,34 +2,34 @@
 import * as status from './status';
 import hostStore from '../host/store/store';
 import monitorStore from '../monitor/store/store';
-import {resetHosts} from '../host/action/actions';
-import {addMonitorList, updateMonitorList, curConDetailData} from '../monitor/action/monitorListAction';
+import { resetHosts } from '../host/action/actions';
+import { addMonitorList, updateMonitorList, curConDetailData } from '../monitor/action/monitorListAction';
 // 增加监控数据
-export let addMonitorData = (message)=> {
+export let addMonitorData = message => {
 	if (message && message.status === status.SUCC) {
 		monitorStore.dispatch(addMonitorList(message.result));
 	}
 };
 
 // 更新数据
-export let updateMonitorData = (message)=> {
+export let updateMonitorData = message => {
 	if (message && message.status === status.SUCC) {
 		monitorStore.dispatch(updateMonitorList(message.result));
 	}
 };
 
-export let updateRule = (message)=> {
+export let updateRule = message => {
 	if (message && message.status === status.SUCC) {
 		hostStore.dispatch(resetHosts(message.result.hosts));
 	}
 };
 
-export let getConDetail = (message)=> {
+export let getConDetail = message => {
 	monitorStore.dispatch(curConDetailData(message.result, message.status));
 };
 
 export default {
 	addMonitorData,
 	updateMonitorData,
-	updateRule
+	updateRule,
 };

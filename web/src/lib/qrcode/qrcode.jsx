@@ -1,18 +1,18 @@
-import React,{PropTypes} from 'react';
+import React, { PropTypes } from 'react';
 import qrcode from './code';
-export default class QrCode extends React.Component{
+export default class QrCode extends React.Component {
 	componentDidMount() {
 		let opt = Object.assign({}, this.props.opt);
 		qrcode(this.refs.qrcode, opt);
 	}
 	static propTypes = {
-		opt: PropTypes.object.isRequired
-	}
+		opt: PropTypes.object.isRequired,
+	};
 	static defaultProps = {
-		opt: {}
-	}
+		opt: {},
+	};
 	render() {
-		let {opt, ...props} = this.props;
-		return (<div ref="qrcode" {...props}></div>);
+		let { opt, ...props } = this.props;
+		return <div ref='qrcode' {...props}></div>;
 	}
 }

@@ -1,22 +1,22 @@
 /**
  * websocket通讯入口
- * 
+ *
  *  所有接受到得消息是一个Object
- * 
+ *
  * {
  * 	path: "数据访问路径，相同type下的不同逻辑处理可以用不同的path"
  * 	param: "请求参"
  * }
- * 
+ *
  *
  * 所有发出的消息是一个Object
- * 
+ *
  * data:{
  * 	//当前请求的状态，如果不是100表示出现错误了
  * 	status: 100,
  * 	result: {'当前返回的数据'}
  * }
- * 
+ *
  */
 import Promise from 'promise';
 import skt from 'socket.io';
@@ -59,8 +59,8 @@ let recive = (ws, evtType) => {
 let distributeReciveMethod = () => {
 	// 有新的客户端建立链接
 	// 所有请求都在catproxy下
-	wss.of(webCfg.wsPath).on('connection', (ws) => {
-		for(let type in receiveType) {
+	wss.of(webCfg.wsPath).on('connection', ws => {
+		for (let type in receiveType) {
 			recive(ws, type);
 		}
 	});
@@ -75,7 +75,7 @@ export default (server, catproxy) => {
 	}
 	return new Promise(resolve => {
 		wss = skt(server);
-		wss.on('error', (err)=> {
+		wss.on('error', err => {
 			log.info('err io', err);
 		});
 		// 初始化监控

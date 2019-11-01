@@ -1,17 +1,17 @@
-import ReactDom, {render} from 'react-dom';
-import React, {PropTypes, Component} from 'react';
-import {Provider,connect} from 'react-redux';
-import {bindActionCreators} from 'redux';
-import {monitorFilterStatus} from './action/navAction';
+import ReactDom, { render } from 'react-dom';
+import React, { PropTypes, Component } from 'react';
+import { Provider, connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { monitorFilterStatus } from './action/navAction';
 import filterBarAction from './action/filterBarAction';
 import filterBarReducer from './reducers/filterBar';
 import reduce from 'lodash/reduce';
-import {upperFirstLetter} from './util';
-import {MONITOR_FILTER_TYPES} from './constant';
-import * as sendMsg from "../ws/sendMsg";
+import { upperFirstLetter } from './util';
+import { MONITOR_FILTER_TYPES } from './constant';
+import * as sendMsg from '../ws/sendMsg';
 import shallowCompare from 'react-addons-shallow-compare'; // ES6
 import cs from 'classnames';
-class FilterBar extends Component{
+class FilterBar extends Component {
 	constructor(...arg) {
 		super(...arg);
 		this.changeMonitorFilterType = this.changeMonitorFilterType.bind(this);
@@ -26,18 +26,18 @@ class FilterBar extends Component{
 
 		sendMonitorFilterType: PropTypes.func.isRequired,
 		sendMonitorFilterCondition: PropTypes.func.isRequired,
-		sendHiddenDataUrl: PropTypes.func.isRequired
-	}
+		sendHiddenDataUrl: PropTypes.func.isRequired,
+	};
 	static defaultProps = {
-		monitorFilterCondition: ""
-	}
+		monitorFilterCondition: '',
+	};
 	shouldComponentUpdate(nextProps, nextState) {
 		return shallowCompare(this, nextProps, nextState);
 	}
-	
+
 	// 改变监控的 类型
 	changeMonitorFilterType(e) {
-		let {sendMonitorFilterType, monitorFilterType} = this.props;
+		let { sendMonitorFilterType, monitorFilterType } = this.props;
 		let val = e.target.value;
 		if (monitorFilterType !== val) {
 			sendMonitorFilterType(val);
@@ -47,7 +47,7 @@ class FilterBar extends Component{
 	// 改变监控的条件
 	changeMonitorFilterCondition(e) {
 		let val = e.target.value;
-		let {sendMonitorFilterCondition} = this.props;
+		let { sendMonitorFilterCondition } = this.props;
 		if (this._fitlerConitionTimer) {
 			window.clearTimeout(this._fitlerConitionTimer);
 		}
@@ -57,61 +57,63 @@ class FilterBar extends Component{
 	}
 	// 改变是否现实 dataURL
 	changeHiddenDataUrl() {
-		let {sendHiddenDataUrl, hiddenDataUrl} = this.props;
+		let { sendHiddenDataUrl, hiddenDataUrl } = this.props;
 		sendHiddenDataUrl(!hiddenDataUrl);
 		sendMsg.hiddenDataUrl(!hiddenDataUrl);
 	}
 	render() {
-		let {	
-			monitorFilterStatus,
-			monitorFilterType,
-			monitorFilterCondition,
-			hiddenDataUrl
-		} = this.props;
+		let { monitorFilterStatus, monitorFilterType, monitorFilterCondition, hiddenDataUrl } = this.props;
 		const style = {};
 		if (!monitorFilterStatus) {
-			style.display = "none";
+			style.display = 'none';
 		}
 		let filterTypes = MONITOR_FILTER_TYPES.map((current, index) => {
-			let showUserName = current === "ws" ? "WS" : upperFirstLetter(current);
-			let	isChecked = monitorFilterType === current;
+			let showUserName = current === 'ws' ? 'WS' : upperFirstLetter(current);
+			let isChecked = monitorFilterType === current;
 			return (
-				<span className="type" key={index}>
-					<input type="radio" name="type" id={current} value={current} 
-						checked={isChecked}
-						onChange={this.changeMonitorFilterType}/>
+				<span className='type' key={index}>
+					<input type='radio' name='type' id={current} value={current} checked={isChecked} onChange={this.changeMonitorFilterType} />
 					<label htmlFor={current}>{showUserName}</label>
 				</span>
 			);
 		});
-		filterTypes.splice(1, 0, (<div className="split" key="split"></div>));
+		filterTypes.splice(1, 0, <div className='split' key='split'></div>);
 		return (
-			<div className="filterBar" style = {style}>
-				<div className="filter">
-					<input type="text" name="filter" placeholder="过滤" defaultValue={monitorFilterCondition} onChange={this.changeMonitorFilterCondition}/>
+			<div className='filterBar' style={style}>
+				<div className='filter'>
+					<input type='text' name='filter' placeholder='过滤' defaultValue={monitorFilterCondition} onChange={this.changeMonitorFilterCondition} />
 				</div>
-				<div className="filterTypes">
-					{filterTypes}
-				</div>
+				<div className='filterTypes'>{filterTypes}</div>
 			</div>
 		);
 	}
 }
 function mapStateToProps(state) {
-	return reduce(filterBarReducer, (result, current, key) => {
-		result[key] = state.get(key);
-		return result;
-	}, {
-		monitorFilterStatus: state.get('monitorFilterStatus')
-	});
+	return reduce(
+		filterBarReducer,
+		(result, current, key) => {
+			result[key] = state.get(key);
+			return result;
+		},
+		{
+			monitorFilterStatus: state.get('monitorFilterStatus'),
+		}
+	);
 }
 function mapDispatchToProps(dispatch) {
-	return reduce(filterBarAction, (result, current, key) => {
-		result["send" + upperFirstLetter(key)] = bindActionCreators(current, dispatch);
-		return result;
-	}, {});
-};
-export default connect(mapStateToProps, mapDispatchToProps)(FilterBar);
+	return reduce(
+		filterBarAction,
+		(result, current, key) => {
+			result['send' + upperFirstLetter(key)] = bindActionCreators(current, dispatch);
+			return result;
+		},
+		{}
+	);
+}
+export default connect(
+	mapStateToProps,
+	mapDispatchToProps
+)(FilterBar);
 
 /**
 <div className="hideDataUrl">

@@ -1,13 +1,13 @@
 import weinre from 'weinre';
-import {localIps} from './getLocalIps';
-import {Buffer} from 'buffer';
+import { localIps } from './getLocalIps';
+import { Buffer } from 'buffer';
 import path from 'path';
 import * as config from './config/config';
 import iconv from 'iconv-lite';
-import {weinreId} from './tools';
+import { weinreId } from './tools';
 
 // weinre下这个方法有问题，重写成系统默认的
-Error.prepareStackTrace  =  undefined;
+Error.prepareStackTrace = undefined;
 
 var server;
 const headReg = /<head>|<head\s[^<]*>/gi;
@@ -20,7 +20,7 @@ const createServer = function(port) {
 			verbose: false,
 			debug: false,
 			readTimeout: 5,
-			deathTimeout: 15
+			deathTimeout: 15,
 		});
 		weinreServer.___port = port;
 		server = weinreServer;
@@ -41,18 +41,21 @@ export const weinreServer = async function() {
 /**
  * 管道调用
  */
-let getScriptStr = (baseUrl) => (match) => {
-	let port = (server || {}).___port || "";
+let getScriptStr = baseUrl => match => {
+	let port = (server || {}).___port || '';
 	let ip = localIps[0];
-	return match + `
+	return (
+		match +
+		`
 		<script>window.WeinreServerURL="${baseUrl}/${weinreId}/"</script>
 		<script src="${baseUrl}/${weinreId}/target/target-script-min.js#anonymous"></script>
-		`;
+		`
+	);
 };
 /**
  * 插入weinre代码
  */
-export let insertWeinreScript = async function(data = "", charset = "UTF-8", baseUrl = "") {
+export let insertWeinreScript = async function(data = '', charset = 'UTF-8', baseUrl = '') {
 	let strData = iconv.decode(data, charset);
 	if (headReg.test(strData)) {
 		if (!server) {

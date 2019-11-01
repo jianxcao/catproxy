@@ -1,24 +1,23 @@
 // 事件触发中心
 import log from './log';
-import {parseRule} from './config/rule';
+import { parseRule } from './config/rule';
 import * as config from './config/config';
 import iconv from 'iconv-lite';
-import {Buffer} from 'buffer';
+import { Buffer } from 'buffer';
 import Promise from 'promise';
 import path from 'path';
-import {getMonitorId, weinreId, hostReg} from './tools'; 
-import {decodeCompress, isBinary, getCharset} from './dataHelper';
+import { getMonitorId, weinreId, hostReg } from './tools';
+import { decodeCompress, isBinary, getCharset } from './dataHelper';
 import mime from 'mime';
 import requestIp from 'request-ip';
-import {localIps} from './getLocalIps';
+import { localIps } from './getLocalIps';
 import ip from 'ip';
 import URL from 'url';
 import merge from 'merge';
-import {WEINRE_PATH} from './config/defCfg';
-import {insertWeinreScript} from './weinreServer';
+import { WEINRE_PATH } from './config/defCfg';
+import { insertWeinreScript } from './weinreServer';
 // 自动解析类型，其他类型一律保存的是 Buffer
 var autoDecodeRegs = /text\/.+|(?:application\/(?:json.*|.*javascript))/i;
-
 
 let detailBeforeReq = async function(reqInfo) {
 	let catProxy = this.catProxy;
@@ -26,19 +25,19 @@ let detailBeforeReq = async function(reqInfo) {
 	// 等待解析url
 	// weinre解析直接转走
 	// 6d902c89-aee6-4428-9357-b71c7242359f/ws/target|/b97a96cd-cd88-48dd-9d4f-7d41401aa4d8/target/target-script-min.js
-	if (reqInfo.originalUrl.toLowerCase().indexOf(WEINRE_PATH + "/" + weinreId) >= 0) {
+	if (reqInfo.originalUrl.toLowerCase().indexOf(WEINRE_PATH + '/' + weinreId) >= 0) {
 		let port = config.get('weinrePort');
-		reqInfo.host = "127.0.0.1";
+		reqInfo.host = '127.0.0.1';
 		reqInfo.port = port;
-		reqInfo.protocol = "http";
-		reqInfo.path = (reqInfo.path || "").replace(WEINRE_PATH + "/" + weinreId, "");
+		reqInfo.protocol = 'http';
+		reqInfo.path = (reqInfo.path || '').replace(WEINRE_PATH + '/' + weinreId, '');
 	} else {
 		let result = await parseRule(reqInfo);
 		reqInfo = result || reqInfo;
 	}
 	// 添加 clientIp，目前还有bug-- 这段 clientIp总是获取不对
-	let {req, headers} = reqInfo;
-	let clientIp = requestIp.getClientIp(req); 
+	let { req, headers } = reqInfo;
+	let clientIp = requestIp.getClientIp(req);
 	// clientIp获取不对，就设置成 机器ip？？？
 	// let xForwardedFor = headers['x-forwarded-for'];
 	// if (!xForwardedFor) {
@@ -104,7 +103,7 @@ let detailBeforeReq = async function(reqInfo) {
  *    reqInfo.redirect
  */
 /**
- *   test code 
+ *   test code
  * 	 reqInfo.headers['test-cjx'] = 111;
  *   reqInfo.path = '/hyg/mobile/common/base/base.34b37a3c0b.js';
  *   reqInfo.port = 9090;
@@ -122,31 +121,30 @@ let detailBeforeReq = async function(reqInfo) {
  *   }
  */
 var beforeReq = function(reqInfo) {
-	return detailBeforeReq.call(this, reqInfo)
-		.then(null, function(err) {
-			// 如果出错忽略所有数据
-			// 如果改了reqInfo引用上的数据就没救了
-			log.error(err);
-			return reqInfo;
-		});
+	return detailBeforeReq.call(this, reqInfo).then(null, function(err) {
+		// 如果出错忽略所有数据
+		// 如果改了reqInfo引用上的数据就没救了
+		log.error(err);
+		return reqInfo;
+	});
 };
 
-/** 
+/**
  *禁止缓存
  * */
-var disCache = function (resInfo) {
+var disCache = function(resInfo) {
 	// 禁用缓存则删掉缓存相关的header
 	var disCache = config.get('disCache');
 	if (disCache) {
 		// http 1.1引入
-		resInfo.headers['cache-control'] = "no-store";
+		resInfo.headers['cache-control'] = 'no-store';
 		// 时间点表示什么时候文件过期，缺点，服务器和客户端必须有严格的时间同步
 		// 旧浏览器兼容  expires -1 表示不缓存
-		resInfo.headers.expires = "-1";
-	 
+		resInfo.headers.expires = '-1';
+
 		// 删除 etag ,让浏览器下次请求不能带 If-None-Match 头部,这样服务器无法返回304
 		/**
-		 * etag是服务器首次相应带etag，给文件打标机，下次在请求的时候浏览器 
+		 * etag是服务器首次相应带etag，给文件打标机，下次在请求的时候浏览器
 		 *  请求头会带 If-None-Match , 服务器根据该字段判断文件是否改变，如果没改变就返回304，否则返回新文件
 		 */
 		delete resInfo.headers.etag;
@@ -196,21 +194,21 @@ var beforeRes = async function(resInfo) {
 	let com = this;
 	let contentEncoding = resInfo.headers['content-encoding'];
 	let contentType = resInfo.headers['content-type'];
-	resInfo.ext = mime.extension(contentType || "") || (path.extname(URL.parse(resInfo.originalUrl|| "").pathname || "") || "").slice(1);
+	resInfo.ext = mime.extension(contentType || '') || (path.extname(URL.parse(resInfo.originalUrl || '').pathname || '') || '').slice(1);
 	// 禁止缓存
 	resInfo = await disCache(resInfo);
 	try {
 		// 解压成功就删除解压头部
 		if (contentEncoding && resInfo.bodyData.length) {
 			let bodyData = await decodeCompress(resInfo.bodyData, contentEncoding);
-			resInfo.bodyData = bodyData;			
+			resInfo.bodyData = bodyData;
 			delete resInfo.headers['content-encoding'];
 			// 更新content-length
 			if (resInfo.headers['content-length']) {
 				resInfo.headers['content-length'] = bodyData.length;
 			}
-		}		
-	} catch(e) {
+		}
+	} catch (e) {
 		log.error(e);
 	}
 	// 触发事件
@@ -218,8 +216,8 @@ var beforeRes = async function(resInfo) {
 	// 修改了引用
 	if (resInfo !== result) {
 		resInfo = merge(resInfo, result);
-	}	
-	resInfo.isBinary = isBinary(resInfo.bodyData);	
+	}
+	resInfo.isBinary = isBinary(resInfo.bodyData);
 	// 文本文件 -- 需要检测编码是不是不是 utf-8
 	// 二进制文件是没有charset的
 	if (!resInfo.isBinary) {
@@ -228,17 +226,17 @@ var beforeRes = async function(resInfo) {
 		if (resInfo.weinre) {
 			try {
 				// 传递域名过去
-				resInfo.bodyData = await insertWeinreScript(resInfo.bodyData, resInfo.charset,  WEINRE_PATH);
+				resInfo.bodyData = await insertWeinreScript(resInfo.bodyData, resInfo.charset, WEINRE_PATH);
 				if (resInfo.headers['content-length']) {
 					resInfo.headers['content-length'] = resInfo.bodyData.length;
 				}
 			} catch (error) {
-				log.error(error);	
+				log.error(error);
 			}
 		}
 		// 是个文件
 		if (contentType && contentType.indexOf('text/html') > -1 && config.get('cacheFlush') && resInfo.bodyData && resInfo.bodyData.length) {
-			let meta  = `
+			let meta = `
 			<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 			<meta http-equiv="Pragma" content="no-cache" />
 			<meta http-equiv="Expires" content="0" />
@@ -249,7 +247,7 @@ var beforeRes = async function(resInfo) {
 			if (resInfo.headers['content-length']) {
 				resInfo.headers['content-length'] = resInfo.bodyData.length;
 			}
-		}	
+		}
 	}
 	return resInfo;
 };
@@ -291,9 +289,4 @@ var pipeRequest = function(result) {
 	catProxy.triggerPipeReq(result, this);
 	return result;
 };
-export {
-	beforeReq,
-	afterRes,
-	beforeRes,
-	pipeRequest
-};
+export { beforeReq, afterRes, beforeRes, pipeRequest };

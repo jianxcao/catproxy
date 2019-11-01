@@ -1,4 +1,4 @@
-import configProps, {monitorType} from './configProps';
+import configProps, { monitorType } from './configProps';
 import log from '../log';
 const isUrl = /^https?:\/\/.+/;
 const ruleType = {
@@ -8,9 +8,9 @@ const ruleType = {
 	remoteFile: 'remoteFile',
 	redirect: 'redirect',
 	weinre: 'weinre',
-	regReplace: 'regReplace'
+	regReplace: 'regReplace',
 };
-let checkRules = (branch) => {
+let checkRules = branch => {
 	let rules = branch.rules;
 	if (rules && rules.length >= 0 && typeof rules === 'object') {
 		// 空数组是合法的
@@ -31,7 +31,7 @@ let checkRules = (branch) => {
 	}
 };
 
-let checkBranch = (branchs) => {
+let checkBranch = branchs => {
 	if (branchs && branchs.length >= 0 && typeof branchs === 'object') {
 		// 空数组是合法的
 		if (branchs.length === 0) {
@@ -77,7 +77,7 @@ let checkBranch = (branchs) => {
  *}]
  * @return {[type]}       如果是就返回true，其他都不是
  */
-let checkHosts = (hosts) => {
+let checkHosts = hosts => {
 	if (hosts && hosts.length >= 0 && typeof hosts === 'object') {
 		// 空数组是合法的
 		if (hosts.length === 0) {
@@ -104,12 +104,12 @@ let checkHosts = (hosts) => {
 const valCheck = {
 	sni: {
 		1: true,
-		2: true
+		2: true,
 	},
 	type: {
 		all: true,
 		http: true,
-		https: true
+		https: true,
 	},
 	log: {
 		error: true,
@@ -117,18 +117,18 @@ const valCheck = {
 		info: true,
 		verbose: true,
 		debug: true,
-		silly: true
-	}
+		silly: true,
+	},
 };
-let checkMonitor = (monitor) => {
+let checkMonitor = monitor => {
 	let keys = {
 		monitorStatus: true,
 		monitorFilterStatus: true,
 		monitorFilterType: true,
-		hiddenDataUrl: true	
+		hiddenDataUrl: true,
 	};
 	if (typeof monitor === 'object') {
-		for(var m in monitor) {
+		for (var m in monitor) {
 			if (!keys[m]) {
 				delete monitor[m];
 			}
@@ -153,8 +153,8 @@ export default function(cfg) {
 			if (cfg[cur] !== undefined) {
 				if (cur === 'hosts') {
 					status = !!checkHosts(cfg[cur]);
-				} else if (cur === "port" || cur === 'httpsPort' || cur === 'uiPort' || cur === 'weinrePort') {
-					cfg[cur] = + cfg[cur];
+				} else if (cur === 'port' || cur === 'httpsPort' || cur === 'uiPort' || cur === 'weinrePort') {
+					cfg[cur] = +cfg[cur];
 					status = !isNaN(cfg[cur]);
 				} else if (cur === 'type' || cur === 'log' || cur === 'sni') {
 					status = !!valCheck[cur][cfg[cur]];
@@ -164,8 +164,8 @@ export default function(cfg) {
 					let list = cfg[cur];
 					if (Array.isArray(list)) {
 						let result = list.reduce((all, current) => {
-							if (typeof current === 'string' || Object.prototype.toString.call(current) === '[object RegExp]'){
-								all.push(current.toString().replace(/^\/|\/$/g, ""));
+							if (typeof current === 'string' || Object.prototype.toString.call(current) === '[object RegExp]') {
+								all.push(current.toString().replace(/^\/|\/$/g, ''));
 								return all;
 							}
 						}, []);
@@ -173,15 +173,15 @@ export default function(cfg) {
 							cfg[cur] = result;
 							status = true;
 						}
-					}	else if(typeof list === 'boolean') {
+					} else if (typeof list === 'boolean') {
 						status = true;
-					}						
+					}
 				} else if (cur === 'excludeHttps') {
 					let list = cfg[cur];
 					if (Array.isArray(list)) {
 						let result = list.reduce((all, current) => {
-							if (typeof current === 'string' || Object.prototype.toString.call(current) === '[object RegExp]'){
-								all.push(current.toString().replace(/^\/|\/$/g, ""));
+							if (typeof current === 'string' || Object.prototype.toString.call(current) === '[object RegExp]') {
+								all.push(current.toString().replace(/^\/|\/$/g, ''));
 								return all;
 							}
 						}, []);
@@ -196,7 +196,8 @@ export default function(cfg) {
 					if (cfg[cur] && isUrl.test(cfg[cur])) {
 						status = true;
 					}
-				} else if (cur === 'monitor') { // 检测监控数据
+				} else if (cur === 'monitor') {
+					// 检测监控数据
 					status = checkMonitor(cfg[cur]);
 				}
 				if (status) {
@@ -208,4 +209,4 @@ export default function(cfg) {
 		});
 	}
 	return data;
-};
+}

@@ -1,35 +1,35 @@
 import log from '../log';
 import webCfg from '../config/webCfg';
-import {SUCC} from './status';
-import {addMonitorData, updateMonitorData, getConDetail} from './sendType';
+import { SUCC } from './status';
+import { addMonitorData, updateMonitorData, getConDetail } from './sendType';
 let addMonitorArr = [];
 let updateMonitorArr = [];
 let addMonitorTimer;
 let updateMonitorTimer;
 let wss = null;
 
-let sendAddMonitor = (data) => {
+let sendAddMonitor = data => {
 	if (wss) {
 		let result = {
 			result: data,
-			status: SUCC
+			status: SUCC,
 		};
 		wss.emit(addMonitorData, result);
 	}
 };
-let sendUpdateMonitor = (data) => {
+let sendUpdateMonitor = data => {
 	if (wss) {
 		let result = {
 			result: data,
-			status: SUCC
-		};		
+			status: SUCC,
+		};
 		wss.emit(updateMonitorData, result);
 	}
 };
 // 添加监控数据
-export let addMonitor = (data) => {
+export let addMonitor = data => {
 	if (!wss) {
-		log.error("清先初始化monitor");
+		log.error('清先初始化monitor');
 		return;
 	}
 	if (typeof data === 'object' && data.id) {
@@ -43,12 +43,12 @@ export let addMonitor = (data) => {
 		let data = addMonitorArr;
 		addMonitorArr = [];
 		sendAddMonitor(data);
-	}, 100);	
+	}, 100);
 };
 // 更新监控数据
-export let updateMonitor = (data) => {
+export let updateMonitor = data => {
 	if (!wss) {
-		log.error("清先初始化monitor");
+		log.error('清先初始化monitor');
 		return;
 	}
 	if (typeof data === 'object' && data.id) {
@@ -64,12 +64,12 @@ export let updateMonitor = (data) => {
 	}, 150);
 };
 // 发送监控详情数据
-export let sendConnDetail = (data) => {
+export let sendConnDetail = data => {
 	if (wss) {
 		let result = {
 			result: data,
-			status: SUCC
-		};		
+			status: SUCC,
+		};
 		wss.emit(getConDetail, result);
 	}
 };
@@ -78,6 +78,6 @@ export let sendConnDetail = (data) => {
 /**
  * 必须先调init，即default方法才能使用
  */
-export default (webSocket) => {
+export default webSocket => {
 	wss = webSocket;
 };

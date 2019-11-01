@@ -9,27 +9,27 @@ const options = {
 	// key: fs.readFileSync('/Users/jxcao/Downloads/2.key'),
 	// cert: fs.readFileSync('/Users/jxcao/Downloads/2.crt'),
 	// // This is necessary only if the server uses the self-signed certificate
-	ca: [ fs.readFileSync('/Users/jxcao/Downloads/cert.crt') ],
-	host: "www.baidu.com",
+	ca: [fs.readFileSync('/Users/jxcao/Downloads/cert.crt')],
+	host: 'www.baidu.com',
 	port: 443,
-	path: "", // cdn/desktop/index/main.0cf10bc449.js
+	path: '', // cdn/desktop/index/main.0cf10bc449.js
 	rejectUnauthorized: true,
 	headers: {
-		"user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.95 Safari/537.36",
-		"cookie": "_ntes_nnid=5f3062f82d960111e41f1f71737ec0be,1479703849476; cid=315803048; P_INFO=jianxcao@126.com|1480318745|1|lmlc|11&19|bej&1480310183&mail_client#bej&null#10#0#0|185051&0|caipiao&kaola&yiyuangou&mail126&blog|jianxcao@126.com;NTES_PASSPORT=bIi5T6IjZ75EbMr.zSmJ8oJpWqZygTaZxPENt00hvuS.8ptA.y5u3P5wLo2O4BseKmewVeM3dQy7S12fhB9.Dvty.YTyO9ArJVqBn411Lw6V9inPMH03sGaPd; _ntes_nuid=e93426bc5f42b96ffb17c509ce4c350c; JSESSIONID0=af9ee4adf26fa50df03fbc7fe5166e47; sid=315803048_1482217522151; _gat=1; _ga=GA1.2.1764537290.1479703850; JSESSIONID=936ECC04A4AD9A2695619FC0F5BDD33B",
-		"if-modified-since": "Thu, 15 Dec 2016 16:46:57 GMT",
-		"accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-		"host": "www.baidu.com",
-		"cache-control": "max-age=0",
-		"accept-encoding": "gzip, deflate, sdch, br",
-		"accept-language": "zh-CN,zh;q=0.8,en;q=0.6",
-		"connection": "keep-alive"
-	}
+		'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.95 Safari/537.36',
+		cookie:
+			'_ntes_nnid=5f3062f82d960111e41f1f71737ec0be,1479703849476; cid=315803048; P_INFO=jianxcao@126.com|1480318745|1|lmlc|11&19|bej&1480310183&mail_client#bej&null#10#0#0|185051&0|caipiao&kaola&yiyuangou&mail126&blog|jianxcao@126.com;NTES_PASSPORT=bIi5T6IjZ75EbMr.zSmJ8oJpWqZygTaZxPENt00hvuS.8ptA.y5u3P5wLo2O4BseKmewVeM3dQy7S12fhB9.Dvty.YTyO9ArJVqBn411Lw6V9inPMH03sGaPd; _ntes_nuid=e93426bc5f42b96ffb17c509ce4c350c; JSESSIONID0=af9ee4adf26fa50df03fbc7fe5166e47; sid=315803048_1482217522151; _gat=1; _ga=GA1.2.1764537290.1479703850; JSESSIONID=936ECC04A4AD9A2695619FC0F5BDD33B',
+		'if-modified-since': 'Thu, 15 Dec 2016 16:46:57 GMT',
+		accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+		host: 'www.baidu.com',
+		'cache-control': 'max-age=0',
+		'accept-encoding': 'gzip, deflate, sdch, br',
+		'accept-language': 'zh-CN,zh;q=0.8,en;q=0.6',
+		connection: 'keep-alive',
+	},
 };
 options.checkServerIdentity = checkServerIdentity;
 
 function checkServerIdentity(host, cert) {
-	
 	// return new Error("Unknown");
 	// Create regexp to much hostnames
 	function regexpify(host, wildcards) {
@@ -46,20 +46,17 @@ function checkServerIdentity(host, cert) {
 		// which the wildcard character comprises a label other than the
 		// left-most label (e.g., do not match bar.*.example.net)."
 		// RFC6125
-		if (!wildcards && /\*/.test(host) || /[\.\*].*\*/.test(host) ||
-				/\*/.test(host) && !/\*.*\..+\..+/.test(host)) {
+		if ((!wildcards && /\*/.test(host)) || /[\.\*].*\*/.test(host) || (/\*/.test(host) && !/\*.*\..+\..+/.test(host))) {
 			return /$./;
 		}
 
 		// Replace wildcard chars with regexp's wildcard and
 		// escape all characters that have special meaning in regexps
 		// (i.e. '.', '[', '{', '*', and others)
-		var re = host.replace(
-			/\*([a-z0-9\\-_\.])|[\.,\-\\\^\$+?*\[\]\(\):!\|{}]/g,
-			function(all, sub) {
-				if (sub) return '[a-z0-9\\-_]*' + (sub === '-' ? '\\-' : sub);
-				return '\\' + all;
-			});
+		var re = host.replace(/\*([a-z0-9\\-_\.])|[\.,\-\\\^\$+?*\[\]\(\):!\|{}]/g, function(all, sub) {
+			if (sub) return '[a-z0-9\\-_]*' + (sub === '-' ? '\\-' : sub);
+			return '\\' + all;
+		});
 
 		return new RegExp('^' + re + '$', 'i');
 	}
@@ -79,8 +76,7 @@ function checkServerIdentity(host, cert) {
 	if (cert.subjectaltname) {
 		cert.subjectaltname.split(/, /g).forEach(function(altname) {
 			var option = altname.match(/^(DNS|IP Address|URI):(.*)$/);
-			if (!option)
-				return;
+			if (!option) return;
 			if (option[1] === 'DNS') {
 				dnsNames.push(option[2]);
 			} else if (option[1] === 'IP Address') {
@@ -145,9 +141,7 @@ function checkServerIdentity(host, cert) {
 
 		if (!valid) {
 			if (cert.subjectaltname) {
-				reason =
-						`Host: ${host} is not in the cert's altnames: ` +
-						`${cert.subjectaltname}`;
+				reason = `Host: ${host} is not in the cert's altnames: ` + `${cert.subjectaltname}`;
 			} else {
 				reason = `Host: ${host} is not cert's CN: ${cert.subject.CN}`;
 			}
@@ -156,14 +150,13 @@ function checkServerIdentity(host, cert) {
 		reason = 'Cert is empty';
 	}
 	if (!valid) {
-		var err = new Error(
-			`Hostname/IP doesn't match certificate's altnames: "${reason}"`);
+		var err = new Error(`Hostname/IP doesn't match certificate's altnames: "${reason}"`);
 		err.reason = reason;
 		err.host = host;
 		err.cert = cert;
 		return err;
 	}
-};
+}
 
 var req = https.request(options, function(res) {
 	console.log(res.headers);

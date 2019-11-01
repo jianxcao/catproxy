@@ -1,4 +1,4 @@
-import {isRootCertExits, getRootCertPath} from '../cert/cert';
+import { isRootCertExits, getRootCertPath } from '../cert/cert';
 export default () => (req, res, next) => {
 	if (isRootCertExits()) {
 		res.download(getRootCertPath());

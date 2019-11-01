@@ -1,13 +1,13 @@
 import fs from 'fs';
 import path from 'path';
 import fse from 'fs-extra';
-import {md} from 'node-forge';
+import { md } from 'node-forge';
 import log from '../log';
-import {createRootCert, createSelfCert} from './createCert';
+import { createRootCert, createSelfCert } from './createCert';
 var certDir = process.env.APPDATA;
 var heartReg = /\*/g;
 if (!certDir || certDir === 'undefined') {
-	certDir = (process.platform === 'darwin' ? path.join(process.env.HOME, 'Library/Preferences') : '/var/local');
+	certDir = process.platform === 'darwin' ? path.join(process.env.HOME, 'Library/Preferences') : '/var/local';
 }
 certDir = path.join(certDir, './.cert_center');
 
@@ -35,7 +35,7 @@ var setRootCert = () => {
 	fs.writeFileSync(rootPfxPath, result.pfx);
 	return {
 		privateKey,
-		cert
+		cert,
 	};
 };
 
@@ -51,20 +51,19 @@ var getRootCert = () => {
 	if (!isRootCertExits()) {
 		return setRootCert();
 	} else {
-		privateKey = fs.readFileSync(rootKeyPath, {encoding: 'utf8'});
-		cert = fs.readFileSync(rootCrtPath, {encoding: 'utf8'});
-		certCache.root = {privateKey, cert};
+		privateKey = fs.readFileSync(rootKeyPath, { encoding: 'utf8' });
+		cert = fs.readFileSync(rootCrtPath, { encoding: 'utf8' });
+		certCache.root = { privateKey, cert };
 	}
-	return {privateKey, cert};
+	return { privateKey, cert };
 };
-
 
 // 证书是否存在
 var isCertExits = (keyPath, crtPath) => {
 	return fs.existsSync(keyPath) && fs.existsSync(crtPath);
 };
 // 获取证书
-var getCert = (domain) => {
+var getCert = domain => {
 	var result = {};
 	if (!domain) {
 		return result;
@@ -76,21 +75,21 @@ var getCert = (domain) => {
 	// var mc = md.md5.create();
 	// mc.update(domain);
 	// var domainMd5 = mc.digest().toHex();
-	var domainC = domain.replace(heartReg, "_"); 
-	var keyPath = path.join(certCachePath, domainC + ".key");
-	var certPath = path.join(certCachePath, domainC + ".crt");
+	var domainC = domain.replace(heartReg, '_');
+	var keyPath = path.join(certCachePath, domainC + '.key');
+	var certPath = path.join(certCachePath, domainC + '.crt');
 	var cert, privateKey;
 	if (isCertExits(keyPath, certPath)) {
-		privateKey = fs.readFileSync(keyPath, {encoding: 'utf8'});
-		cert = fs.readFileSync(certPath, {encoding: 'utf8'});
+		privateKey = fs.readFileSync(keyPath, { encoding: 'utf8' });
+		cert = fs.readFileSync(certPath, { encoding: 'utf8' });
 	} else {
-		({cert, privateKey} = createSelfCert(domain, getRootCert()));
+		({ cert, privateKey } = createSelfCert(domain, getRootCert()));
 		fse.ensureDirSync(certCachePath);
 		fs.writeFileSync(keyPath, privateKey);
-		fs.writeFileSync(certPath, cert);		
+		fs.writeFileSync(certPath, cert);
 	}
-	certCache[domain] = {cert, privateKey};
-	return {cert, privateKey};
+	certCache[domain] = { cert, privateKey };
+	return { cert, privateKey };
 };
 
 // 删除证书目录
@@ -98,8 +97,10 @@ var emptyCertDir = () => {
 	fse.emptyDirSync(certDir);
 };
 
-var setCertDir = (path) => {
-	if (!path) {return;}
+var setCertDir = path => {
+	if (!path) {
+		return;
+	}
 	fse.ensureDirSync(path);
 	certDir = path;
 	rootKeyPath = path.resolve(certDir, './cert.key');
@@ -110,13 +111,4 @@ var getCertDir = () => certDir;
 var getRootCertPath = () => rootCrtPath;
 // getCert('lmlc.com');
 // emptyCertDir();
-export {
-	isRootCertExits,
-	setRootCert,
-	setCertDir,
-	getCertDir,
-	getRootCertPath,
-	emptyCertDir,
-	getCert,
-	getRootCert
-};
+export { isRootCertExits, setRootCert, setCertDir, getCertDir, getRootCertPath, emptyCertDir, getCert, getRootCert };

@@ -3,10 +3,10 @@ import ip from 'ip';
 import net from 'net';
 import dns from 'dns';
 import Promise from 'promise';
-import {localIps} from './getLocalIps';
-import dnscache  from 'dnscache';
+import { localIps } from './getLocalIps';
+import dnscache from 'dnscache';
 // 增加dns缓存
-dnscache({"enable": true, "ttl": 300, "cachesize": 1000});
+dnscache({ enable: true, ttl: 300, cachesize: 1000 });
 export default (hostname, isServerPort) => {
 	if (net.isIP(hostname)) {
 		return Promise.resolve(hostname);
@@ -20,26 +20,25 @@ export default (hostname, isServerPort) => {
 				resolve(address);
 			}
 		});
-	})
-		.then(visitIp => {
-			return new Promise((resolve, reject) => {
+	}).then(visitIp => {
+		return new Promise((resolve, reject) => {
 			// 是一个本地的ip
-				if (ip.isPrivate(visitIp)) {
+			if (ip.isPrivate(visitIp)) {
 				// 如果解析的ip和当前服务器开的ip一样
-					if (localIps.some(current => ip.isEqual(current, visitIp)) && isServerPort) {
-						dns.resolve(hostname, function(err, addresses) {
-							if (err || !addresses || !addresses.length) {
-								reject(err.code || " 为找到合适的ip");
-							} else {
-								resolve(addresses[0]);
-							}
-						});
-					} else {
-						resolve(visitIp);
-					}
+				if (localIps.some(current => ip.isEqual(current, visitIp)) && isServerPort) {
+					dns.resolve(hostname, function(err, addresses) {
+						if (err || !addresses || !addresses.length) {
+							reject(err.code || ' 为找到合适的ip');
+						} else {
+							resolve(addresses[0]);
+						}
+					});
 				} else {
-				 resolve(visitIp);
+					resolve(visitIp);
 				}
-			});
+			} else {
+				resolve(visitIp);
+			}
 		});
+	});
 };

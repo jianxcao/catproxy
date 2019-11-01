@@ -1,5 +1,5 @@
-import React, {Component, cloneElement, PropTypes} from 'react';
-import ReactDom, {findDOMNode} from 'react-dom';
+import React, { Component, cloneElement, PropTypes } from 'react';
+import ReactDom, { findDOMNode } from 'react-dom';
 
 // 根据传入的值调整组件的位置
 class AdjustPos extends Component {
@@ -8,25 +8,24 @@ class AdjustPos extends Component {
 	}
 	state = {
 		left: -9999,
-		top: -9999
-	}
+		top: -9999,
+	};
 	static propTypes = {
 		left: PropTypes.number.isRequired,
 		top: PropTypes.number.isRequired,
-	}
+	};
 	// 组件挂砸
 	componentDidMount() {
 		this.pos();
 	}
 	// 组件更新
-	componentDidUpdate(prevProps, prevState) {
-	}
-	
+	componentDidUpdate(prevProps, prevState) {}
+
 	pos() {
 		// 找到子元素
 		let tip = findDOMNode(this);
-		let {left, top} = this.props;
-	
+		let { left, top } = this.props;
+
 		let tipPos = tip.getBoundingClientRect();
 		let w = window.innerWidth;
 		let h = window.innerHeight;
@@ -52,19 +51,19 @@ class AdjustPos extends Component {
 			top = top - tipPos.height;
 		}
 		this.setState({
-			left, 
-			top
+			left,
+			top,
 		});
 	}
-	render () {
-		const {children, target, placement, left, top, ...props} = this.props;
+	render() {
+		const { children, target, placement, left, top, ...props } = this.props;
 		return cloneElement(children, {
 			...props,
-			style:{
+			style: {
 				...children.props.style,
 				left: this.state.left,
-				top: this.state.top
-			}
+				top: this.state.top,
+			},
 		});
 	}
 }

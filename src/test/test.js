@@ -13,8 +13,8 @@ import changeHost from '../changeHost';
 // dns.resolve("pimg1.126.net", function(err, addresses){
 // 	console.log(addresses);
 // });
-// 
-// 
+//
+//
 // changeHost("pimg1.126.net", true)
 
 // .then(address => {
@@ -22,7 +22,6 @@ import changeHost from '../changeHost';
 // }, (err) => {
 // 	console.log(err);
 // });
-
 
 // var a = '<meta charset="gb2312">';
 // var b = '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">';
@@ -61,13 +60,13 @@ var time = function() {
 		setTimeout(function() {
 			console.log(index);
 			resolve(index);
-			index++; }
-		, 300);
+			index++;
+		}, 300);
 	});
 };
 
 var a = async function() {
-	for(let i = 0; i < 5; i++) {
+	for (let i = 0; i < 5; i++) {
 		let result = await time();
 		console.log(result);
 	}

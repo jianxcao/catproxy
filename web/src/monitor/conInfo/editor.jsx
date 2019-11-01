@@ -1,8 +1,8 @@
 import ReactDom, { render } from 'react-dom';
 import React, { PropTypes, Component, Children } from 'react';
 import merge from 'lodash/merge';
-import isEmptyObject from "lodash/isEmpty";
-import {shouldEqual} from '../util';
+import isEmptyObject from 'lodash/isEmpty';
+import { shouldEqual } from '../util';
 import Promise from 'promise';
 const win = window;
 const container = document.createElement('div');
@@ -10,18 +10,18 @@ const container = document.createElement('div');
 const options = {
 	readOnly: true,
 	folding: true,
-	theme: "vs",
+	theme: 'vs',
 	// 多少列后就折行, -1表示不折行
 	wrappingColumn: -1,
 	// 折行开始位置
-	wrappingIndent: "same",
-	scrollbar:{
+	wrappingIndent: 'same',
+	scrollbar: {
 		verticalScrollbarSize: 17,
-		horizontalScrollbarSize: 17,				
+		horizontalScrollbarSize: 17,
 		verticalSliderSize: 9,
-		horizontalSliderSize:9,
-		useShadows: true
-	}
+		horizontalSliderSize: 9,
+		useShadows: true,
+	},
 };
 var modelTimer = null;
 // 全局编辑器
@@ -35,18 +35,23 @@ const getMonaco = () => {
 				resolve(win.monaco);
 			});
 		}
-	});	
+	});
 };
 const getBaseEditor = () => {
-	return getMonaco()
-		.then(function(monaco) {
+	return getMonaco().then(function(monaco) {
 		// 内存中创建编辑器，
 		// 前提是编辑器已经加载成功了
-			var editor = monaco.editor.create(container, merge({
-				model: null,
-			}, options));
-			return editor;
-		});
+		var editor = monaco.editor.create(
+			container,
+			merge(
+				{
+					model: null,
+				},
+				options
+			)
+		);
+		return editor;
+	});
 };
 
 export default class Eidtor extends Component {
@@ -63,20 +68,20 @@ export default class Eidtor extends Component {
 		// 当前语言
 		language: PropTypes.string.isRequired,
 		opt: PropTypes.object,
-		editorDidMount: PropTypes.func
-	}
+		editorDidMount: PropTypes.func,
+	};
 	static defaultPorps = {
-		theme: "vs",
-		language: "plaintext"
-	}
-		
-	shouldComponentUpdate (nextProps, nextState) {
+		theme: 'vs',
+		language: 'plaintext',
+	};
+
+	shouldComponentUpdate(nextProps, nextState) {
 		// 永远不更新-- editor 自己控制
 		return nextProps.editorDidMount !== this.props.editorDidMount;
 	}
-	componentWillReceiveProps (nextProps) {
-		let {theme, data, language, opt} = this.props;
-		let {theme: nextTheme, data: nextData, language: nextLanguage, opt: nextOpt} = nextProps;
+	componentWillReceiveProps(nextProps) {
+		let { theme, data, language, opt } = this.props;
+		let { theme: nextTheme, data: nextData, language: nextLanguage, opt: nextOpt } = nextProps;
 		let my = {};
 		// 主题变
 		if (theme !== nextTheme) {
@@ -101,18 +106,17 @@ export default class Eidtor extends Component {
 			win.addEventListener('resize', this.resize, false);
 		}
 		if (!editor) {
-			getBaseEditor()
-				.then((ed) => {
-					editor = ed;
-					this._editorDidMount();
-				});
+			getBaseEditor().then(ed => {
+				editor = ed;
+				this._editorDidMount();
+			});
 		} else {
 			this._editorDidMount();
 		}
 	}
-	_initModel(data = "", language) {
+	_initModel(data = '', language) {
 		// 不延迟切换编辑器的时候有可能会报错, 特别快速的切换编辑器-只保留最后一个
-		modelTimer = 	setTimeout(() => {
+		modelTimer = setTimeout(() => {
 			var oldModel = editor.getModel();
 			if (oldModel) {
 				oldModel.dispose();
@@ -126,10 +130,10 @@ export default class Eidtor extends Component {
 		}, 100);
 	}
 	_editorDidMount() {
-		let {editorDidMount, data = "", language} = this.props;
-		let {editorContainer} = this.refs;
+		let { editorDidMount, data = '', language } = this.props;
+		let { editorContainer } = this.refs;
 		if (!language) {
-			language = "plaintext";
+			language = 'plaintext';
 		}
 		this._initModel(data, language);
 		editorContainer.appendChild(container);
@@ -149,7 +153,6 @@ export default class Eidtor extends Component {
 		let div = document.createElement('div');
 		div.appendChild(container);
 		div = null;
-		
 	}
 
 	resize() {
@@ -157,10 +160,8 @@ export default class Eidtor extends Component {
 			editor.layout();
 		}
 	}
-	
+
 	render() {
-		return (
-			<div ref="editorContainer" className="editorContainer"></div>
-		);
+		return <div ref='editorContainer' className='editorContainer'></div>;
 	}
 }

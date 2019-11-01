@@ -1,20 +1,20 @@
-import {Table, Column, Cell}  from 'fixed-data-table';
-import ReactDom, {render} from 'react-dom';
-import React, {PropTypes, Component, Children, cloneElement} from 'react';
+import { Table, Column, Cell } from 'fixed-data-table';
+import ReactDom, { render } from 'react-dom';
+import React, { PropTypes, Component, Children, cloneElement } from 'react';
 import HeaderCell from './headerCell';
-import {computeColumnWidth, adjustColumnWidth} from './cellWidthHelper';
-import style from "fixed-data-table/dist/fixed-data-table-base.css";
-import {Provider,connect} from 'react-redux';
-import {bindActionCreators} from 'redux';
-import {monitorStatus} from './action/navAction';
-import {upperFirstLetter} from './util';
+import { computeColumnWidth, adjustColumnWidth } from './cellWidthHelper';
+import style from 'fixed-data-table/dist/fixed-data-table-base.css';
+import { Provider, connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { monitorStatus } from './action/navAction';
+import { upperFirstLetter } from './util';
 import cs from 'classnames';
 import ConInfo from './conInfo/conInfo';
-const clsChec = /[^\x20\t\r\n\f]+/g ;
+const clsChec = /[^\x20\t\r\n\f]+/g;
 const getDomainReg = /:\/\/([^:\/]+)/;
 const wrongCodeReg = /(^4)|(^5).+/;
 const conInfostyle = {
-	top: 66
+	top: 66,
 };
 export default class DataList extends Component {
 	constructor(props) {
@@ -33,7 +33,6 @@ export default class DataList extends Component {
 		this.closeCon = this.closeCon.bind(this);
 		// 打开详情的宽度
 		this._conInfoWidth = null;
-	
 	}
 	static propTypes = {
 		filterListFeild: PropTypes.array.isRequired,
@@ -42,34 +41,32 @@ export default class DataList extends Component {
 		minTableHeight: PropTypes.number,
 		monitorStatus: PropTypes.bool.isRequired,
 		// 这里必须是一个list
-		monitorList: PropTypes.object.isRequired
+		monitorList: PropTypes.object.isRequired,
 	};
 	static defaultProps = {
 		minCellWidth: 80,
 		minTableWidth: 800,
-		minTableHeight: 500
-	}
+		minTableHeight: 500,
+	};
 	static contextTypes = {
 		openRightMenu: PropTypes.func.isRequired,
-		closeRightMenu: PropTypes.func.isRequired
-	}
+		closeRightMenu: PropTypes.func.isRequired,
+	};
 	componentWillMount() {
 		this.init();
-		this.ConInfo = <ConInfo 
-			style={conInfostyle} 
-			data={{}} destory= {this.closeCon}></ConInfo>;
+		this.ConInfo = <ConInfo style={conInfostyle} data={{}} destory={this.closeCon}></ConInfo>;
 	}
-	
+
 	componentDidMount() {
 		var win = window;
 		if (win.addEventListener) {
 			win.addEventListener('resize', this._onResize, false);
 		}
 		this._mountNode = document.createElement('div');
-		this._mountNode.className = "conInfoWrap";
+		this._mountNode.className = 'conInfoWrap';
 		document.body.appendChild(this._mountNode);
 	}
-	componentWillUnmount () {
+	componentWillUnmount() {
 		if (this._mountNode) {
 			if (this._conInfoInstance) {
 				this._closeDetailCon();
@@ -81,31 +78,31 @@ export default class DataList extends Component {
 			win.removeEventListener('resize', this._onResize);
 		}
 	}
-	
+
 	componentDidUpdate(prevProps, prevState) {
 		// 组件更新后保存宽度
 		let refs = this.refs;
 		let customColums = this.state.customColums;
 		customColums.forEach(function(current) {
-			let key  = current.shortName + "Header";
+			let key = current.shortName + 'Header';
 			if (refs[key] && refs[key].props && refs[key].props.width) {
 				current.width = refs[key].props.width;
 			}
 		});
-		localStorage.setItem("customColums", JSON.stringify(customColums));
+		localStorage.setItem('customColums', JSON.stringify(customColums));
 	}
 	// 初始化
 	init() {
 		let tableWidth = window.innerWidth;
 		let tableHeight = window.innerHeight;
-		let {filterListFeild, minCellWidth, minTableHeight} = this.props;
+		let { filterListFeild, minCellWidth, minTableHeight } = this.props;
 		let showFeild;
 		// 从本地取到列，要显示的列和列的宽度
-		let customColums = localStorage.getItem("customColums");
+		let customColums = localStorage.getItem('customColums');
 		if (customColums) {
-			try{
+			try {
 				customColums = JSON.parse(customColums);
-			} catch(e) {
+			} catch (e) {
 				customColums = [];
 			}
 		} else {
@@ -122,16 +119,16 @@ export default class DataList extends Component {
 			tableHeight: tableHeight,
 			tableWidth: tableWidth,
 			customColums: showFeild,
-			rowSelect: -1
+			rowSelect: -1,
 		};
 	}
-	componentWillReceiveProps (nextProps) {
-		let {monitorList, monitorStatus} = nextProps;
-		let {rowSelect} = this.state;
+	componentWillReceiveProps(nextProps) {
+		let { monitorList, monitorStatus } = nextProps;
+		let { rowSelect } = this.state;
 		if (!monitorList || monitorList.size === 0 || !monitorStatus) {
 			rowSelect = -1;
 			this.setState({
-				rowSelect
+				rowSelect,
 			});
 			this._closeDetailCon();
 		}
@@ -141,36 +138,35 @@ export default class DataList extends Component {
 			let oldData = this.props.monitorList.get(rowSelect);
 			// 如果当前打开详情页面的数据发生了变化则从新渲染详情
 			if (newData) {
-				if (oldData && !oldData.equals(newData) || !oldData) {
+				if ((oldData && !oldData.equals(newData)) || !oldData) {
 					this._renderConInfo(newData);
 				}
 			} else {
 				this.setState({
-					rowSelect: -1
+					rowSelect: -1,
 				});
-				this._closeDetailCon();				
+				this._closeDetailCon();
 			}
 		}
-		
 	}
-	
-	getTextCell ({rowIndex, columnKey: key, ...props}) {
-		let {monitorList} = this.props;
+
+	getTextCell({ rowIndex, columnKey: key, ...props }) {
+		let { monitorList } = this.props;
 		let data = monitorList.get(rowIndex);
 		let result;
-		let status = data.get("status") || "";
-		let name = data.get("name") || "";
+		let status = data.get('status') || '';
+		let name = data.get('name') || '';
 		let className = cs({
-			 "wrong_color": wrongCodeReg.test(status),
-			 "row_select": this.state.rowSelect === rowIndex
+			wrong_color: wrongCodeReg.test(status),
+			row_select: this.state.rowSelect === rowIndex,
 		});
-				
-		if (key === 'status' || key === 'size' || key === "time") {
+
+		if (key === 'status' || key === 'size' || key === 'time') {
 			result = data.get(key);
 			if (result === undefined || result === null) {
-				result = "Pending";
+				result = 'Pending';
 			}
-		} else if (key === 'domain') { 
+		} else if (key === 'domain') {
 			result = name.match(getDomainReg);
 			if (result && result.length > 0) {
 				result = result[1];
@@ -180,13 +176,15 @@ export default class DataList extends Component {
 		} else {
 			result = data.get(key);
 		}
-		let myProp = {...props};
+		let myProp = { ...props };
 		if (key === 'name') {
 			// 增加url tip提示
 			myProp['data-tip'] = result;
 		}
 		return (
-			<Cell {...myProp} className={className}>{result}</Cell>
+			<Cell {...myProp} className={className}>
+				{result}
+			</Cell>
 		);
 	}
 	// 调整列宽度
@@ -197,12 +195,12 @@ export default class DataList extends Component {
 		let lockColum = this.state.customColums.filter(current => current.shortName === columnKey);
 		// 更新新的 宽度
 		lockColum[0].width = newColumnWidth;
-		let {customColums, tableWidth} = this.state;
-		let {minCellWidth} = this.props;
+		let { customColums, tableWidth } = this.state;
+		let { minCellWidth } = this.props;
 		// 从新更新一次tab的height
 		this.setState({
 			//  调整宽度到合适得大小
-			customColums: adjustColumnWidth(customColums, minCellWidth, tableWidth, columnKey)
+			customColums: adjustColumnWidth(customColums, minCellWidth, tableWidth, columnKey),
 		});
 	}
 	// 页面大小发生变化
@@ -212,8 +210,8 @@ export default class DataList extends Component {
 	// 页面大小发生变化
 	_update(timestamp) {
 		var win = window;
-		let {customColums, tableHeight, tableWidth} = this.state;
-		let {minTableWidth, minCellWidth, minTableHeight} = this.props;
+		let { customColums, tableHeight, tableWidth } = this.state;
+		let { minTableWidth, minCellWidth, minTableHeight } = this.props;
 		let newWidth = win.innerWidth;
 		if (newWidth < minTableWidth) {
 			newWidth = minTableWidth;
@@ -222,7 +220,7 @@ export default class DataList extends Component {
 		newHeight = Math.max(newHeight, minTableHeight);
 		let s = {};
 		if (newHeight !== tableHeight) {
-			 s.tableHeight = newHeight;
+			s.tableHeight = newHeight;
 		}
 		if (newWidth !== tableWidth) {
 			s.tableWidth = newWidth;
@@ -234,72 +232,76 @@ export default class DataList extends Component {
 	// 鼠标悬浮行
 	_onRowMouseEnter(e, index) {
 		let rowEle = e.currentTarget;
-		let cls = "row_hover";
-		let className = " " + (rowEle.className || "") + " ";
-		if (className.indexOf( " " + cls + " " ) < 0) {
+		let cls = 'row_hover';
+		let className = ' ' + (rowEle.className || '') + ' ';
+		if (className.indexOf(' ' + cls + ' ') < 0) {
 			rowEle.className = (className + cls).trim();
 		}
 	}
 	// 鼠标离开行
 	_onRowMouseLeave(e, index) {
 		let rowEle = e.currentTarget;
-		let cls = "row_hover";
-		let className = " " + (rowEle.className || "") + " ";
-		if (className.indexOf( " " + cls + " " ) > -1) {
-			rowEle.className = (className.replace(" " + cls + " ", "")).trim();
-		}		
+		let cls = 'row_hover';
+		let className = ' ' + (rowEle.className || '') + ' ';
+		if (className.indexOf(' ' + cls + ' ') > -1) {
+			rowEle.className = className.replace(' ' + cls + ' ', '').trim();
+		}
 	}
 	// 鼠标按下 某一行，弹出右键菜单
 	_onRowMouseDown(e, index) {
-		let {monitorStatus, monitorList} = this.props;
-		let {rowSelect} = this.state;
+		let { monitorStatus, monitorList } = this.props;
+		let { rowSelect } = this.state;
 		let data = monitorList.get(index);
 		if (e.button == 2) {
-			let domain = (data.get("name") || "").match(getDomainReg);
+			let domain = (data.get('name') || '').match(getDomainReg);
 			if (domain && domain.length > 0) {
 				domain = domain[1];
 			} else {
-				domain = "";
-			}		
-			let menus =  [{
-				text: "打开链接",
-				eventKey: "openUrl",
-				href: data.get("name"),
-				target: "_blank"
-			},{
-				text: "复制链接",
-				eventKey: "copyUrl",
-				copy: data.get("name")
-			},{
-				text: "复制域名",
-				eventKey: "copyDomain",
-				copy: domain
-			}];
+				domain = '';
+			}
+			let menus = [
+				{
+					text: '打开链接',
+					eventKey: 'openUrl',
+					href: data.get('name'),
+					target: '_blank',
+				},
+				{
+					text: '复制链接',
+					eventKey: 'copyUrl',
+					copy: data.get('name'),
+				},
+				{
+					text: '复制域名',
+					eventKey: 'copyDomain',
+					copy: domain,
+				},
+			];
 			let reqHeaders = data.get('reqHeaders');
 			let resHeaders = data.get('resHeaders');
 			if (reqHeaders) {
 				menus.push({
-					text: "复制请求头",
-					eventKey: "copyReqHeader",
-					copy: reqHeaders.toJS()
+					text: '复制请求头',
+					eventKey: 'copyReqHeader',
+					copy: reqHeaders.toJS(),
 				});
 			}
 			if (resHeaders) {
 				menus.push({
-					text: "复制响应头",
-					eventKey: "copyResHeader",
-					copy: data.get('resHeaders').toJS()
+					text: '复制响应头',
+					eventKey: 'copyResHeader',
+					copy: data.get('resHeaders').toJS(),
 				});
 			}
 			if (menus.length >= 3) {
 				menus.splice(2, 0, {
-					divider: true
+					divider: true,
 				});
 			}
 			this.context.openRightMenu({
 				left: e.clientX,
 				top: e.clientY,
-				menuItems: menus
+				menuItems: menus,
 			});
 		} else {
 			let id = data.get('id');
@@ -308,7 +310,7 @@ export default class DataList extends Component {
 			}
 			if (index !== rowSelect) {
 				this.setState({
-					rowSelect: index
+					rowSelect: index,
 				});
 				if (data) {
 					this._renderConInfo(data);
@@ -318,22 +320,19 @@ export default class DataList extends Component {
 	}
 	// 渲染conInfo
 	_renderConInfo(data) {
-		let detail = "";
+		let detail = '';
 		let width = this._conInfoWidth;
 		if (data) {
-			detail = cloneElement(this.ConInfo, {data});
+			detail = cloneElement(this.ConInfo, { data });
 			// 先关闭上一个
 			this._closeDetailCon();
-			let conInfoInstance = ReactDom.unstable_renderSubtreeIntoContainer(
-				this, detail, this._mountNode
-			);
+			let conInfoInstance = ReactDom.unstable_renderSubtreeIntoContainer(this, detail, this._mountNode);
 			this._conInfoInstance = conInfoInstance;
 		}
-		
 	}
 	closeCon() {
 		this.setState({
-			rowSelect: -1
+			rowSelect: -1,
 		});
 		this._closeDetailCon();
 	}
@@ -341,15 +340,15 @@ export default class DataList extends Component {
 	_closeDetailCon() {
 		if (this._mountNode && this._conInfoInstance) {
 			ReactDom.unmountComponentAtNode(this._mountNode);
-			this._conInfoInstance = null;	
+			this._conInfoInstance = null;
 		}
-	}	
+	}
 	// 修改显示字段
 	_changeFilterList(e) {
 		let ele = e.target;
 		let name = ele.name;
-		let {customColums, tableWidth} = this.state;
-		let {filterListFeild, minCellWidth} = this.props;
+		let { customColums, tableWidth } = this.state;
+		let { filterListFeild, minCellWidth } = this.props;
 		// 增加了一列
 		if (ele.checked) {
 			let totalFlex = 0;
@@ -367,7 +366,7 @@ export default class DataList extends Component {
 					all.push({
 						...current,
 						// 新增加的列宽度默认最小宽度
-						width: flex/totalFlex * tableWidth
+						width: (flex / totalFlex) * tableWidth,
 					});
 				}
 				if (have[current.shortName]) {
@@ -376,12 +375,12 @@ export default class DataList extends Component {
 				return all;
 			}, []);
 			this.setState({
-				customColums: adjustColumnWidth(customColums, minCellWidth, tableWidth)
-			});			
+				customColums: adjustColumnWidth(customColums, minCellWidth, tableWidth),
+			});
 		} else {
 			// 只有一列的时候不准删除
 			if (customColums.length === 1) {
-				e.target.checked = "checked";
+				e.target.checked = 'checked';
 				return;
 			}
 			// 删除掉1列
@@ -396,14 +395,14 @@ export default class DataList extends Component {
 				customColums.splice(index, 1);
 			}
 			this.setState({
-				customColums: adjustColumnWidth(customColums, minCellWidth, tableWidth)
-			});			
+				customColums: adjustColumnWidth(customColums, minCellWidth, tableWidth),
+			});
 		}
 	}
 	// 鼠标按下某一表格头部，弹出右键菜单
 	_onHeaderCellMouseDown(e) {
-		let {customColums} = this.state;
-		let {filterListFeild} = this.props;
+		let { customColums } = this.state;
+		let { filterListFeild } = this.props;
 		if (e.button == 2) {
 			let have = customColums.reduce((all, current) => {
 				all[current.shortName] = true;
@@ -413,19 +412,17 @@ export default class DataList extends Component {
 				let checked = !!have[current.shortName];
 				if (index % 3 === 0 && index !== 0) {
 					all.push({
-						divider: true
+						divider: true,
 					});
 				}
 				all.push({
 					text: [
-						<input type="checkbox" 
-							name={current.shortName} 
-							defaultChecked={checked} key={1} 
-							onChange={this._changeFilterList} 
-							id={"MenuItem" + current.shortName} 
-						/>, 
-						<label key={2} htmlFor={"MenuItem" + current.shortName} >{current.name}</label>],
-					eventKey: current.shortName
+						<input type='checkbox' name={current.shortName} defaultChecked={checked} key={1} onChange={this._changeFilterList} id={'MenuItem' + current.shortName} />,
+						<label key={2} htmlFor={'MenuItem' + current.shortName}>
+							{current.name}
+						</label>,
+					],
+					eventKey: current.shortName,
 				});
 				return all;
 			}, []);
@@ -433,39 +430,47 @@ export default class DataList extends Component {
 				left: e.clientX,
 				top: e.clientY,
 				menuItems,
-				className: "filterColumMenu",
-				menuClickEvt: () => false
+				className: 'filterColumMenu',
+				menuClickEvt: () => false,
 			});
 		}
 	}
 	// 开始滚动则关闭右键菜单
 	_onScrollStart(e) {
-		let {closeRightMenu} = this.context;
+		let { closeRightMenu } = this.context;
 		closeRightMenu();
 		return false;
 	}
 
 	render() {
-		let {tableWidth, tableHeight, customColums, rowSelect} = this.state;
-		let {monitorStatus, monitorList} = this.props;
+		let { tableWidth, tableHeight, customColums, rowSelect } = this.state;
+		let { monitorStatus, monitorList } = this.props;
 		// 没有数据的情况
 		if (!monitorStatus || !monitorList || !monitorList.size) {
 			let style = {
 				width: tableWidth,
 				height: tableHeight,
-				lineHeight: tableHeight + "px"
+				lineHeight: tableHeight + 'px',
 			};
-			let content = monitorStatus ? "监控已经准备好" : "点击开始录制按钮录制";
-			return (<div className="dataList noData" style={style}>{content}</div>);
+			let content = monitorStatus ? '监控已经准备好' : '点击开始录制按钮录制';
+			return (
+				<div className='dataList noData' style={style}>
+					{content}
+				</div>
+			);
 		}
 		// 按列初始化数据
 		let col = customColums.reduce((all, current, index) => {
-			let width  = current.width;
+			let width = current.width;
 			let flexGrow = +current.flexGrow || 1;
 			all.push(
-				<Column 
-					align={"center"}
-					header={<HeaderCell ref={current.shortName + "Header"} data-tip={current.tip} onMouseDown={this._onHeaderCellMouseDown}>{current.name}</HeaderCell>}
+				<Column
+					align={'center'}
+					header={
+						<HeaderCell ref={current.shortName + 'Header'} data-tip={current.tip} onMouseDown={this._onHeaderCellMouseDown}>
+							{current.name}
+						</HeaderCell>
+					}
 					key={index}
 					allowCellsRecycling={true}
 					columnKey={current.shortName}
@@ -479,9 +484,9 @@ export default class DataList extends Component {
 			return all;
 		}, []);
 		return (
-			<div className="dataList">
+			<div className='dataList'>
 				<Table
-					onColumnResizeEndCallback = {this._onColumnResizeEndCallback}
+					onColumnResizeEndCallback={this._onColumnResizeEndCallback}
 					rowsCount={monitorList.size}
 					rowHeight={25}
 					headerHeight={30}
@@ -490,8 +495,9 @@ export default class DataList extends Component {
 					onRowMouseEnter={this._onRowMouseEnter}
 					onRowMouseLeave={this._onRowMouseLeave}
 					onRowMouseDown={this._onRowMouseDown}
-					onScrollStart = {this._onScrollStart}
-					height={tableHeight}>
+					onScrollStart={this._onScrollStart}
+					height={tableHeight}
+				>
 					{col}
 				</Table>
 			</div>

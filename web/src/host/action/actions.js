@@ -1,6 +1,6 @@
-import actionType from "./action-type";
+import actionType from './action-type';
 import sendMsg from '../../ws/sendMsg';
-let  {
+let {
 	FETCH_FAILURE,
 	FETCH_SUCC,
 	FETCH,
@@ -26,51 +26,51 @@ let  {
 	UPDATE_CURRENT_RULE,
 	DIS_CACHE,
 	CACHE_FLUSH,
-	REMOTE_UPDATE_RULE_URL
+	REMOTE_UPDATE_RULE_URL,
 } = actionType;
 
 // ------分支控制相关开始-----//
 export let disableAll = () => {
 	return {
-		type: DISABLE_ALL
+		type: DISABLE_ALL,
 	};
 };
 
-export let resetHosts = (hosts) => {
+export let resetHosts = hosts => {
 	return {
 		type: RESET_HOSTS,
-		hosts
+		hosts,
 	};
 };
 
-export let addBranch = (groupId, groupName, name) =>{
+export let addBranch = (groupId, groupName, name) => {
 	return {
 		type: ADD_BRANCH,
 		groupId,
 		groupName,
-		name
+		name,
 	};
 };
 
-export let delBranch = (groupId, id) =>{
+export let delBranch = (groupId, id) => {
 	return {
 		type: DEL_BRANCH,
 		groupId,
-		id
+		id,
 	};
 };
 
-export let addGroup = (name) =>{
+export let addGroup = name => {
 	return {
 		type: ADD_GROUP,
-		name
+		name,
 	};
 };
 
-export let delGroup = (id) =>{
+export let delGroup = id => {
 	return {
 		type: DEL_GROUP,
-		id
+		id,
 	};
 };
 
@@ -78,7 +78,7 @@ export let changeGroupName = (id, name) => {
 	return {
 		type: CHANGE_GROUP_NAME,
 		id,
-		name
+		name,
 	};
 };
 
@@ -87,7 +87,7 @@ export let changeBranchName = (groupId, id, name) => {
 		type: CHANGE_BRANCH_NAME,
 		groupId,
 		id,
-		name
+		name,
 	};
 };
 // status为undefined或者null取反原来的状态
@@ -95,7 +95,7 @@ export let toggleGroupDis = (id, status) => {
 	return {
 		type: TOGGLE_GROUP_DIS,
 		id,
-		status
+		status,
 	};
 };
 // status为undefined或者null取反原来的状态
@@ -104,21 +104,21 @@ export let toggleBranchDis = (groupId, id, status) => {
 		type: TOGGLE_BRANCH_DIS,
 		groupId,
 		id,
-		status
+		status,
 	};
 };
 
-export let fetchSucc = (data) => {
+export let fetchSucc = data => {
 	return {
 		data,
-		type: FETCH_SUCC
+		type: FETCH_SUCC,
 	};
 };
 
-export let fetchFail = (error) => {
+export let fetchFail = error => {
 	return {
 		error,
-		type: FETCH_FAILURE
+		type: FETCH_FAILURE,
 	};
 };
 // ------分支控制相关结束-----//
@@ -127,18 +127,17 @@ export let fetchFail = (error) => {
 export let fetchRule = () => {
 	return {
 		type: FETCH,
-		promise: sendMsg.fetchConfig()
+		promise: sendMsg.fetchConfig(),
 	};
 };
 
 // 切换左侧列表的显示状态
-export let drawerStatus = (status) => {
+export let drawerStatus = status => {
 	return {
 		type: DRAWERSTATUS,
-		status
+		status,
 	};
 };
-
 
 // 规则相关 -----------------------
 // 新增规则
@@ -147,7 +146,7 @@ export let addRule = (groupId, branchId, rule) => {
 		type: ADD_RULE,
 		groupId,
 		branchId,
-		rule
+		rule,
 	};
 };
 
@@ -157,7 +156,7 @@ export let delRule = (groupId, branchId, ruleId) => {
 		type: DEL_RULE,
 		groupId,
 		branchId,
-		ruleId
+		ruleId,
 	};
 };
 
@@ -167,7 +166,7 @@ export let toggleRuleDis = (groupId, branchId, ruleId) => {
 		type: TOGGLE_RULE_DIS,
 		groupId,
 		branchId,
-		ruleId
+		ruleId,
 	};
 };
 
@@ -178,15 +177,15 @@ export let updateRule = (groupId, branchId, ruleId, rule) => {
 		groupId,
 		branchId,
 		ruleId,
-		rule
+		rule,
 	};
 };
 
 // 切换 折叠
-export let toggleFlod = (groupId) => {
+export let toggleFlod = groupId => {
 	return {
 		type: TOGGLE_FLOD,
-		groupId
+		groupId,
 	};
 };
 
@@ -196,7 +195,7 @@ export let switchBranch = (groupId, sourceBranchId, branchId) => {
 		type: SWITCH_BRANCH,
 		groupId,
 		sourceBranchId,
-		branchId
+		branchId,
 	};
 };
 
@@ -205,7 +204,7 @@ export let switchGroup = (sourceGroupId, groupId) => {
 	return {
 		type: SWITCH_GROUP,
 		groupId,
-		sourceGroupId
+		sourceGroupId,
 	};
 };
 
@@ -216,7 +215,7 @@ export let switchRule = (groupId, branchId, sourceId, id) => {
 		groupId,
 		branchId,
 		sourceId,
-		id
+		id,
 	};
 };
 
@@ -225,28 +224,27 @@ export let updateSelectRule = (groupId, branchId) => {
 	return {
 		type: UPDATE_CURRENT_RULE,
 		groupId,
-		branchId
+		branchId,
 	};
 };
 
-
 // 禁止缓存
-export let disCache = (status) => {
+export let disCache = status => {
 	return {
 		type: DIS_CACHE,
-		status
+		status,
 	};
 };
 
 // 禁止缓存
-export let cacheFlush = (status) => {
+export let cacheFlush = status => {
 	return {
 		type: CACHE_FLUSH,
-		status
+		status,
 	};
 };
 
 // 远程url
-export let remoteUpdateRuleUrl = (url) => {
-	return {url, type: REMOTE_UPDATE_RULE_URL};
+export let remoteUpdateRuleUrl = url => {
+	return { url, type: REMOTE_UPDATE_RULE_URL };
 };

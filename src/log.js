@@ -1,13 +1,14 @@
 import winston from 'winston';
-var logger = new (winston.Logger)({
-	transports: [new (winston.transports.Console)({
-		levels: winston.config.npm.levels,
-		level: "debug",
-		stripColors: true,
-		colorize: 'all'
-	}),
+var logger = new winston.Logger({
+	transports: [
+		new winston.transports.Console({
+			levels: winston.config.npm.levels,
+			level: 'debug',
+			stripColors: true,
+			colorize: 'all',
+		}),
 		// new (winston.transports.File)({ filename: 'info.log' })
-	]
+	],
 });
 // logger.error('error');
 // logger.warn('warn');

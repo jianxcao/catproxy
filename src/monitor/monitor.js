@@ -5,15 +5,15 @@ import Promise from 'promise';
 import merge from 'merge';
 import isbinaryfile from 'isbinaryfile';
 import crypto from 'crypto';
-import {cacheFile} from './cacheFile';
-import {isBinary, getReqType, isImage} from '../dataHelper';
-import {addMonitor, updateMonitor} from '../ws/sendMsg';
-import {weinreId} from '../tools';
+import { cacheFile } from './cacheFile';
+import { isBinary, getReqType, isImage } from '../dataHelper';
+import { addMonitor, updateMonitor } from '../ws/sendMsg';
+import { weinreId } from '../tools';
 import * as config from '../config/config';
-import {WEINRE_PATH} from '../config/defCfg';
+import { WEINRE_PATH } from '../config/defCfg';
 // 当前监控数据-- 记录文件的url和 resBodyData的文件生成的md5值
 var monitorList = {};
-const resBodyName = "_res_body_";
+const resBodyName = '_res_body_';
 // 处理mulitpartData
 /** 数据格式
  * multipart/form-data; boundary=----WebKitFormBoundaryAxMpx9qwQiovE99R 659
@@ -43,20 +43,20 @@ const resBodyName = "_res_body_";
 		------WebKitFormBoundaryAxMpx9qwQiovE99R--
  */
 let detailMultipartData = function(contentType, bodyData) {
-	contentType = contentType || "";
-	var key  = contentType.toLowerCase().split("boundary=");
+	contentType = contentType || '';
+	var key = contentType.toLowerCase().split('boundary=');
 	if (key && key.length > 0) {
 		let reg = /Content-Disposition\s*:\s*form-data;.+;\s*filename=.*/gi;
 		let isContentType = /^Content-Type.*/i;
 		key = key[1];
-		let data = bodyData.toString().split("\n");
+		let data = bodyData.toString().split('\n');
 		let newData = [];
 		let l = data.length;
 		let s = null;
 		let j = null;
 		if (l) {
 			for (let i = 0; i < l; i++) {
-				let current = data[i] || "";
+				let current = data[i] || '';
 				if (reg.test(current)) {
 					s = true;
 				}
@@ -71,7 +71,7 @@ let detailMultipartData = function(contentType, bodyData) {
 						j = null;
 						s = null;
 						newData.push(current);
-					} 
+					}
 				} else {
 					newData.push(current);
 				}
@@ -83,18 +83,16 @@ let detailMultipartData = function(contentType, bodyData) {
 
 export default function(catproxy) {
 	if (!catproxy || !catproxy.onBeforeReq) {
-		throw new Error("catproxy是必须得");
+		throw new Error('catproxy是必须得');
 	}
-	var monitorBeforeReq,
-		monitorBeforeRes,
-		monitorAfterRes;
+	var monitorBeforeReq, monitorBeforeRes, monitorAfterRes;
 	// 检测是不是本地的一个服务器
 	// 只要ip是localhost ui服务器 或者是weinre的请求就忽略
-	let checkIsInnerServer = (originalUrl) => {
-		return catproxy.localUiReg.test(originalUrl) || originalUrl.toLowerCase().indexOf(WEINRE_PATH + "/" + weinreId) >= 0;
+	let checkIsInnerServer = originalUrl => {
+		return catproxy.localUiReg.test(originalUrl) || originalUrl.toLowerCase().indexOf(WEINRE_PATH + '/' + weinreId) >= 0;
 	};
 	// 请求发送前
-	monitorBeforeReq = (result) => {
+	monitorBeforeReq = result => {
 		if (result && result.id && config.get('monitor:monitorStatus') && !checkIsInnerServer(result.originalUrl)) {
 			/**
 			 * 
@@ -106,7 +104,8 @@ export default function(catproxy) {
 				上面2种类似
 				multipart/form-data	不对字符编码。在使用包含文件上传控件的表单时，必须使用该值。 去掉二进制数据转换  multipart request payload
 				
-			**/	
+			**/
+
 			let contentType = result.headers['content-type'];
 			let addMontiorData = {
 				id: result.id,
@@ -114,7 +113,7 @@ export default function(catproxy) {
 				protocol: result.protocol,
 				method: result.method,
 				reqHeaders: result.headers,
-				startTime: result.startTime
+				startTime: result.startTime,
 			};
 			if (result.ruleInfo) {
 				addMontiorData.reqRuleInfo = result.ruleInfo;
@@ -130,20 +129,20 @@ export default function(catproxy) {
 							bodyData = detailMultipartData(contentType, bodyData);
 						} else {
 							// 不认识的二进制数据忽略
-							bodyData = "二进制数据!!!";
+							bodyData = '二进制数据!!!';
 						}
 					} else {
-						bodyData = "二进制数据!!!";
+						bodyData = '二进制数据!!!';
 					}
 				}
-				addMontiorData.reqBodyData = (bodyData || "").toString();
+				addMontiorData.reqBodyData = (bodyData || '').toString();
 				// log.debug(contentType, "************\n" ,result.bodyData.length, "**************\n", result.originalFullUrl);
 				// log.debug("isBinary", isb);
 				// log.debug('content--', addMontiorData.bodyData);
 				// 先记录到缓存中
 				monitorList[result.id] = addMontiorData;
 			}
-		}				
+		}
 	};
 	// 准备发送请求
 	monitorBeforeRes = result => {
@@ -151,21 +150,21 @@ export default function(catproxy) {
 			let addMontiorData = merge(monitorList[result.id], {
 				ext: result.ext,
 				resHeaders: result.headers,
-				serverIp: result.serverIp
+				serverIp: result.serverIp,
 			});
-			let type = getReqType(addMontiorData, result.ext) || "other";
+			let type = getReqType(addMontiorData, result.ext) || 'other';
 			addMontiorData.type = type;
 			// 当所有用户调用结束在看是否是二进制数据
 			result.isBinary = isBinary(result.bodyData);
 			addMontiorData.isResbinary = result.isBinary;
 			// 修改缓存数据
 			monitorList[result.id] = {
-				startTime: addMontiorData.startTime
+				startTime: addMontiorData.startTime,
 			};
 			// startTime不需要传递到前端
 			delete addMontiorData.startTime;
 			// 调用数据增加
-			addMonitor(addMontiorData);				
+			addMonitor(addMontiorData);
 		}
 	};
 	// 请求发送后
@@ -173,7 +172,7 @@ export default function(catproxy) {
 		if (result && +result.id && config.get('monitor:monitorStatus') && !checkIsInnerServer(result.originalUrl)) {
 			if (monitorList[result.id]) {
 				let startTime = monitorList[result.id].startTime;
-				let {bodyData} = result;
+				let { bodyData } = result;
 				let fileName;
 				let resBodyData;
 				if (bodyData && bodyData.length) {
@@ -187,14 +186,14 @@ export default function(catproxy) {
 						// 缓存文件
 						cacheFile(fileName, bodyData);
 					} else {
-						resBodyData = "二进制数据!!!";
+						resBodyData = '二进制数据!!!';
 					}
 				} else {
 					if (result.bodyDataErr) {
 						resBodyData = result.bodyDataErr;
 					} else {
 						// 可能是 302，等请求没有响应内容
-						resBodyData = "";
+						resBodyData = '';
 					}
 				}
 				let updateData = {
@@ -227,19 +226,16 @@ export default function(catproxy) {
 		if (result && result.id && config.get('monitor:monitorStatus') && !checkIsInnerServer(`ws://${result.host}`)) {
 			let addMontiorData = {
 				id: result.id,
-				name: (result.host || "").split(":")[0],
+				name: (result.host || '').split(':')[0],
 				protocol: result.protocol,
-				method: "CONNECT",
-				time: "-",
+				method: 'CONNECT',
+				time: '-',
 				status: 200,
 				size: 0,
-				type: result.protocol === 'ws' || result.protocol === 'wss' ? "ws" : "other"
+				type: result.protocol === 'ws' || result.protocol === 'wss' ? 'ws' : 'other',
 			};
 			// 调用数据增加
 			addMonitor(addMontiorData);
 		}
 	});
-};
-
-
-
+}

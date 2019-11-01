@@ -1,5 +1,5 @@
 export default () => {
-	return (req, res, next)=> {
-		res.render("monitor/monitor");
+	return (req, res, next) => {
+		res.render('monitor/monitor');
 	};
 };

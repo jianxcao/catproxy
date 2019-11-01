@@ -7,13 +7,13 @@ import configInit, * as config from './config/config';
 import merge from 'merge';
 import Promise from 'promise';
 import log from './log';
-import {requestHandler, requestConnectHandler, requestUpgradeHandler} from './requestSerives';
+import { requestHandler, requestConnectHandler, requestUpgradeHandler } from './requestSerives';
 import EventEmitter from 'events';
-import {getCert, getCertDir} from './cert/cert.js';
-import {SNICallback} from './httpsProxySer';
+import { getCert, getCertDir } from './cert/cert.js';
+import { SNICallback } from './httpsProxySer';
 import ui from './web/app';
-import {localIps} from './getLocalIps';
-import {error as errFun, getPort, openCmd} from './tools';
+import { localIps } from './getLocalIps';
+import { error as errFun, getPort, openCmd } from './tools';
 import * as requestMiddleware from './requestMiddleware';
 import configProps from './config/configProps';
 import util from 'util';
@@ -23,26 +23,26 @@ import webCfg from './config/webCfg';
 import path from 'path';
 import ws from './ws/ws';
 //	process.env.NODE_ENV
-const getLocalUiReg = (port) => {
+const getLocalUiReg = port => {
 	let ips = localIps.slice(0);
 	ips.push('localhost');
 	let l = ips.length;
 	return ips.reduce((result, cur, index) => {
 		if (index > 0) {
-			result += "|";
-		} 
+			result += '|';
+		}
 		result += `(?:${cur}`;
 		if (port !== 80 || port !== 443) {
 			result += `:${port})`;
 		} else {
-			result += ")";
+			result += ')';
 		}
 		// 最后一次
 		if (index === l - 1) {
-			return new RegExp(result, "i");
+			return new RegExp(result, 'i');
 		}
 		return result;
-	}, "^(?:http|ws)(?:s?)://");
+	}, '^(?:http|ws)(?:s?)://');
 };
 /**
  * 按顺序调用数组，每个步骤返回promise
@@ -50,12 +50,12 @@ const getLocalUiReg = (port) => {
  * @result表示执行的结果，结果会进行合并，结果必须是一个object
  * @context 表示执行的上下文
  */
-const execArrByStep = async function (arr, result, context) {
+const execArrByStep = async function(arr, result, context) {
 	result = result || {};
 	if (!arr || !arr.length) {
 		return result;
 	}
-	for(let cur of arr) {
+	for (let cur of arr) {
 		if (cur) {
 			// 这里调用如果出错，最后直接抛出 -- 也可以考虑哪一步出错，哪一步单独抛出
 			// 检测cur是够是一个函数？？
@@ -68,10 +68,10 @@ const execArrByStep = async function (arr, result, context) {
 	}
 	return result;
 };
-class CatProxy{
+class CatProxy {
 	/**
-	 * 
-	 * @param  {[type]} option 
+	 *
+	 * @param  {[type]} option
 	 *  {
 	 *  	type: "当前服务器类型"
 	 *		port: "当前http端口",
@@ -94,13 +94,12 @@ class CatProxy{
 		log.info(`当前证书目录： ${certDir}`);
 		// 读取缓存配置文件
 		let fileCfg = {};
-		configProps
-			.forEach(current => {
-				let val = config.get(current);
-				if ( val !== undefined && val !== null) {
-					fileCfg[current] = val;
-				}
-			});
+		configProps.forEach(current => {
+			let val = config.get(current);
+			if (val !== undefined && val !== null) {
+				fileCfg[current] = val;
+			}
+		});
 		// 混合三种配置
 		let cfg = merge.recursive({}, defCfg, fileCfg, opt);
 		if (saveProps && saveProps.length) {
@@ -109,17 +108,16 @@ class CatProxy{
 			config.setSaveProp(...saveProps);
 		}
 		// 将用户当前设置保存到缓存配置文件
-		configProps
-			.forEach(current => {
-				if (cfg[current] !== null && cfg[current] !== undefined) {
+		configProps.forEach(current => {
+			if (cfg[current] !== null && cfg[current] !== undefined) {
 				// 为‘’表示要删除这个字段
-					if (cfg[current] === '' && config.get(current)) {
-						config.del(current);
-					} else {
-						config.set(current, cfg[current]);
-					}
+				if (cfg[current] === '' && config.get(current)) {
+					config.del(current);
+				} else {
+					config.set(current, cfg[current]);
 				}
-			});
+			}
+		});
 		config.save();
 		this._beforeReqEvt = [];
 		this._beforeResEvt = [];
@@ -136,16 +134,16 @@ class CatProxy{
 			}
 			log.debug('receive message');
 			if (message.type) {
-				switch(message.type) {
-				case "config":
-					let data = {};
-					config.set(message.result);
-					// 所有配置均不保存
-					config.save([]);
-					com.setLogLevel();
-					break;
-				default:
-					log.error('收到未知的消息', message);
+				switch (message.type) {
+					case 'config':
+						let data = {};
+						config.set(message.result);
+						// 所有配置均不保存
+						config.save([]);
+						com.setLogLevel();
+						break;
+					default:
+						log.error('收到未知的消息', message);
 				}
 			}
 		});
@@ -158,16 +156,14 @@ class CatProxy{
 			.then(this.checkEnv.bind(this))
 			.then(this.createServer.bind(this))
 			.then(this.uiInit.bind(this))
-			.then(null, (err) => {
+			.then(null, err => {
 				this.errorHandle(err);
 				process.exit(1);
 			});
 	}
 	// 创建缓存，创建请求保存
-	createCache() {
-	}
-	checkParam() {
-	}
+	createCache() {}
+	checkParam() {}
 	// 设置 日志级别
 	setLogLevel(logLevel) {
 		if (logLevel) {
@@ -185,24 +181,24 @@ class CatProxy{
 	}
 	// 设置服务器端口
 	setHttpPort(port) {
-		port = + port;
+		port = +port;
 		config.set('port', port);
 		config.save('port');
 	}
 	setHttpsPort(port) {
-		port = + port;
+		port = +port;
 		config.set('httpsPort', port);
 		config.save('httpsPort');
 	}
 	// 设置ui端口
 	setUiPort(port) {
-		port = + port;
+		port = +port;
 		config.set('uiPort', port);
 		config.save('uiPort');
 	}
 	// 设置sni类型
 	setSniType(type) {
-		config.set("sni", type);
+		config.set('sni', type);
 		config.save('sni');
 	}
 	// 设置破解https
@@ -226,50 +222,49 @@ class CatProxy{
 		return config.get();
 	}
 	setConfig(...arg) {
-		config.set(...arg);	
+		config.set(...arg);
 		config.save();
 	}
 	// 环境检测
-	checkEnv() {
-	}
+	checkEnv() {}
 	uiInit() {
 		let port = config.get('uiPort');
 		let isAutoOpen = config.get('autoOpen');
 		let p = port;
 		// 如果port是0 则只提供下载链接的server
 		return Promise.resolve(p || getPort())
-			.then((p) => {
-			// 内置服务器初始化
+			.then(p => {
+				// 内置服务器初始化
 				let host = `http://${localIps[0]}:${p}`;
 				let uiOption = {
-					port : p,
+					port: p,
 					hostname: localIps[0],
 					host: host,
 					wsServerUrl: host + webCfg.wsPath,
 					cdnBasePath: path.join('/c', webCfg.cdnBasePath),
-					env: webCfg.env
+					env: webCfg.env,
 				};
 				// 写成正则，判断是否是ui的一个访问地址
 				this.localUiReg = getLocalUiReg(p);
 				let uiApp = ui(!!port);
 				let app = express();
 				let uiServer = app.listen(p, function() {
-					log.info('catproxy 规则配置地址：' + host +"/c/index");
-					log.info('catproxy 监控界面地址：' + host +"/c/m");
-					if(port && isAutoOpen) {
-						openCmd(host + "/c/index");
+					log.info('catproxy 规则配置地址：' + host + '/c/index');
+					log.info('catproxy 监控界面地址：' + host + '/c/m');
+					if (port && isAutoOpen) {
+						openCmd(host + '/c/index');
 					}
 				});
 				uiApp.locals.uiOption = uiOption;
-				uiServer.on('error', (err) => {
+				uiServer.on('error', err => {
 					errFun(err);
 					process.exit(1);
 				});
 				// 字app
-				app.use("/c", uiApp);
+				app.use('/c', uiApp);
 				this.ui = {
 					app,
-					uiServer
+					uiServer,
 				};
 			})
 			.then(() => {
@@ -298,20 +293,30 @@ class CatProxy{
 		// 可以自定义server或者用系统内置的server
 		if (opt.type === 'http' && !servers[0]) {
 			servers[0] = http.createServer();
-		} else if (opt.type === 'https' && !servers[0]){
+		} else if (opt.type === 'https' && !servers[0]) {
 			// 找到证书，创建https的服务器
-			let {privateKey: key, cert} = getCert(opt.certHost);
-			servers[0] = https.createServer({key,cert, rejectUnauthorized: false, SNICallback});
-		} else if (opt.type === 'all' && !servers[0]  && !servers[1]) {
+			let { privateKey: key, cert } = getCert(opt.certHost);
+			servers[0] = https.createServer({
+				key,
+				cert,
+				rejectUnauthorized: false,
+				SNICallback,
+			});
+		} else if (opt.type === 'all' && !servers[0] && !servers[1]) {
 			servers[0] = http.createServer();
-			let {privateKey: key, cert} = getCert(opt.certHost);
-			servers[1] = https.createServer({key,cert, rejectUnauthorized: false, SNICallback});
+			let { privateKey: key, cert } = getCert(opt.certHost);
+			servers[1] = https.createServer({
+				key,
+				cert,
+				rejectUnauthorized: false,
+				SNICallback,
+			});
 		}
 		let requestFun = requestMiddleware.middleWare(requestHandler);
 		servers.forEach(server => {
 			server.catProxy = com;
 			// 如果在http下代理https，则需要过度下请求
-			if (server instanceof  http.Server) {
+			if (server instanceof http.Server) {
 				server.on('connect', requestConnectHandler);
 			}
 			server.on('upgrade', requestUpgradeHandler);
@@ -324,12 +329,12 @@ class CatProxy{
 			server.on('clientError', function(err, con) {
 				log.error('ser-clientError' + err);
 			});
-			let serverType = server instanceof  http.Server ? 'http' : 'https';
+			let serverType = server instanceof http.Server ? 'http' : 'https';
 			let port = serverType === 'http' ? opt.port : opt.httpsPort;
 			// 如果server没有被监听，则调用默认端口监听
 			if (!server.listening) {
 				// 根据server的类型调用不同的端口
-				server.listen(port, function () {
+				server.listen(port, function() {
 					log.info('代理服务器启动于：' + `${serverType}://${localIps[0]}:${port}`);
 				});
 			}
@@ -341,7 +346,7 @@ class CatProxy{
 		this.servers = servers;
 	}
 	// 想服务器添加request事件
-	use (fun) {
+	use(fun) {
 		requestMiddleware.use(fun);
 		return this;
 	}
@@ -364,7 +369,7 @@ class CatProxy{
 	 * 触发req事件，result表示参数，context表示上下文
 	 * result 格式看evt中的格式
 	 */
-	triggerBeforeReq (result, context) {
+	triggerBeforeReq(result, context) {
 		return execArrByStep(this._beforeReqEvt.concat([this.__monitorBeforeReq]), result, context);
 	}
 	/**
@@ -372,7 +377,7 @@ class CatProxy{
 	 *  result 格式看evt中的格式
 	 *  context为上下文
 	 */
-	triggerBeforeRes (result, context) {
+	triggerBeforeRes(result, context) {
 		return execArrByStep(this._beforeResEvt.concat([this.__monitorBeforeRes]), result, context);
 	}
 	/**
@@ -380,9 +385,9 @@ class CatProxy{
 	 *  result 格式看evt中的格式
 	 *  context为上下文
 	 */
-	triggerAfterRes (result, context) {
+	triggerAfterRes(result, context) {
 		(this._afterResEvt || []).concat([this.__monitorAfterRes]).forEach(current => {
-			try{ 
+			try {
 				current && current.call(context, result);
 			} catch (e) {
 				log.error(e);
@@ -394,10 +399,10 @@ class CatProxy{
 	 *  result 格式看evt中的格式
 	 *  context为上下文
 	 */
-	triggerPipeReq (result, context) {
+	triggerPipeReq(result, context) {
 		if (this._pipeRequestEvt.length) {
 			this._pipeRequestEvt.forEach(current => {
-				try{ 
+				try {
 					current.call(context, result);
 				} catch (e) {
 					log.error(e);
@@ -407,4 +412,4 @@ class CatProxy{
 	}
 }
 export default CatProxy;
-export {CatProxy};
+export { CatProxy };

@@ -1,15 +1,9 @@
 import * as reducers from '../reducers/index';
 import Immutable from 'immutable';
 import sendMsg from '../../ws/sendMsg';
-import {
-	combineReducers
-} from 'redux-immutable';
-import actionType from "../action/action-type";
-let  {
-	FETCH_FAILURE,
-	FETCH_SUCC,
-	FETCH
-} = actionType;
+import { combineReducers } from 'redux-immutable';
+import actionType from '../action/action-type';
+let { FETCH_FAILURE, FETCH_SUCC, FETCH } = actionType;
 import { createStore, applyMiddleware, compose } from 'redux';
 /**
  * 记录所有被发起的 action 以及产生的新的 state。
@@ -26,7 +20,7 @@ const logger = store => next => action => {
 
 /**
  * 向服务器同步用户的部分操作
- * 
+ *
  */
 const syncStateToSer = store => next => action => {
 	let state = store.getState();
@@ -41,7 +35,7 @@ const syncStateToSer = store => next => action => {
 		// TOGGLE_BRANCH_DIS: 1,
 		// TOGGLE_GROUP_DIS: 1,
 		// TOGGLE_RULE_DIS: 1,
-		TOGGLE_FLOD: 1
+		TOGGLE_FLOD: 1,
 	};
 	if (test[action.type]) {
 		if (!state.get('hosts').equals(nextState.get('hosts'))) {
@@ -50,7 +44,6 @@ const syncStateToSer = store => next => action => {
 	}
 	return result;
 };
-
 
 /**
  * 在 state 更新完成和 listener 被通知之后发送崩溃报告。
@@ -95,10 +88,7 @@ const readyStatePromise = store => next => action => {
 		return newAction;
 	}
 	next(makeAction(FETCH));
-	return action.promise.then(
-		result => next(makeAction(FETCH_SUCC, { result })),
-		error => next(makeAction(FETCH_FAILURE, { error }))
-	);
+	return action.promise.then(result => next(makeAction(FETCH_SUCC, { result })), error => next(makeAction(FETCH_FAILURE, { error })));
 };
 
 /**
@@ -109,10 +99,7 @@ const readyStatePromise = store => next => action => {
  *
  * `dispatch` 会返回被发起函数的返回值。
  */
-const thunk = store => next => action =>
-	typeof action === 'function' ?
-		action(store.dispatch, store.getState) :
-		next(action);
+const thunk = store => next => action => (typeof action === 'function' ? action(store.dispatch, store.getState) : next(action));
 const initialState = new Immutable.fromJS({
 	// 所有规则
 	hosts: [],
@@ -125,7 +112,7 @@ const initialState = new Immutable.fromJS({
 	disCache: false,
 	cacheFlush: false,
 	// 更新远程数据的url
-	remoteUpdateRuleUrl: ""
+	remoteUpdateRuleUrl: '',
 });
 // 组合所有reducers
 let toDo = combineReducers(reducers);
@@ -135,7 +122,12 @@ let middleware = [thunk, vanillaPromise, readyStatePromise, syncStateToSer, cras
 if (window.config.env === 'dev') {
 	middleware.push(logger);
 }
-let store = createStore(toDo, initialState, compose(applyMiddleware(...middleware),
-	window.devToolsExtension ? window.devToolsExtension() : f => f
-));
+let store = createStore(
+	toDo,
+	initialState,
+	compose(
+		applyMiddleware(...middleware),
+		window.devToolsExtension ? window.devToolsExtension() : f => f
+	)
+);
 export default store;

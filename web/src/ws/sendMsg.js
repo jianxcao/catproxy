@@ -1,17 +1,15 @@
 // 像服务器发送消息，如果有消息返回则接受
 // 暴露出发送消息的各个方法
 /*
- * 
+ *
  *  所有接受到得消息是一个Object
- * 
+ *
  * {
  * 	path: "数据访问路径，相同type下的不同逻辑处理可以用不同的path"
  * 	param: "请求参"
  * }
  */
-import {send} from './ws';
-
-
+import { send } from './ws';
 
 // 获取config
 export let fetchConfig = () => {
@@ -19,107 +17,106 @@ export let fetchConfig = () => {
 };
 
 // 更新rule
-export let updateRule = (data) => {
+export let updateRule = data => {
 	if (data && data.length >= 0) {
 		let result = {
 			param: {
-				rules: data
+				rules: data,
 			},
-			path: "rule"
+			path: 'rule',
 		};
 		return send('saveConfig')(result);
 	}
 };
 
 // 更新远程地址
-export let remoteUpdateRule = (url) => {
+export let remoteUpdateRule = url => {
 	if (url) {
 		let result = {
 			param: {
-				url: url
+				url: url,
 			},
-			path: "remoteUpdateRule"
+			path: 'remoteUpdateRule',
 		};
 		return send('remoteUpdateRule')(result);
 	}
 };
 
 // 更新缓存
-export let disCache =(status) => {
+export let disCache = status => {
 	status = !!status;
 	let result = {
 		param: {
-			status: status
+			status: status,
 		},
-		path: "disCache"
+		path: 'disCache',
 	};
 	return send('saveConfig')(result);
 };
 
-export let cacheFlush =(status) => {
+export let cacheFlush = status => {
 	status = !!status;
 	let result = {
 		param: {
-			status: status
+			status: status,
 		},
-		path: "cacheFlush"
+		path: 'cacheFlush',
 	};
 	return send('saveConfig')(result);
 };
-
 
 // 更新监控状态
-export let monitorStatus = (status) => {
+export let monitorStatus = status => {
 	status = !!status;
 	let result = {
 		param: {
-			monitorStatus: status
+			monitorStatus: status,
 		},
-		path: "monitor"
+		path: 'monitor',
 	};
 	return send('saveConfig')(result);
 };
 
 // 更新过滤状态
-export let monitorFilterStatus = (status) => {
+export let monitorFilterStatus = status => {
 	status = !!status;
 	let result = {
 		param: {
-			monitorFilterStatus: status
+			monitorFilterStatus: status,
 		},
-		path: "monitor"
+		path: 'monitor',
 	};
 	return send('saveConfig')(result);
 };
 
 // 更新过滤类型
-export let monitorFilterType = (type) => {
+export let monitorFilterType = type => {
 	status = !!status;
 	let result = {
 		param: {
-			monitorFilterType: type
+			monitorFilterType: type,
 		},
-		path: "monitor"
+		path: 'monitor',
 	};
 	return send('saveConfig')(result);
 };
 
 // 更新是否隐藏 dataUrl，暂时无用
-export let hiddenDataUrl = (status) => {
+export let hiddenDataUrl = status => {
 	status = !!status;
 	let result = {
 		param: {
-			hiddenDataUrl: status
+			hiddenDataUrl: status,
 		},
-		path: "monitor"
+		path: 'monitor',
 	};
 	return send('saveConfig')(result);
 };
 
-export let getConDetail = (param) => {
+export let getConDetail = param => {
 	let result = {
 		param,
-		path: "getConDetail"
+		path: 'getConDetail',
 	};
 	return send('getConDetail')(result);
 };
@@ -133,5 +130,5 @@ export default {
 	monitorFilterStatus,
 	monitorFilterType,
 	hiddenDataUrl,
-	cacheFlush
+	cacheFlush,
 };

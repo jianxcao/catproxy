@@ -24,7 +24,7 @@ class MonacoEditor extends React.Component {
 	// 	// let {width, height, value, defaultValue, language, theme, options, editorDidMount, editorWillMount, onChange, requireConfig};
 	// 	return true;
 	// }
-	
+
 	editorWillMount(monaco) {
 		const { editorWillMount } = this.props;
 		editorWillMount(monaco);
@@ -62,14 +62,14 @@ class MonacoEditor extends React.Component {
 	}
 	destroyMonaco() {
 		if (typeof this.editor !== 'undefined') {
-			let {containerElement} = this.refs;
+			let { containerElement } = this.refs;
 			if (containerElement) {
 				let div = document.createElement(div);
 				div.appendChild(containerElement);
 				// 设置延迟删除，否则 MonacoEditor会报错
 				window.setTimeout(() => {
 					let model = this.editor.getModel();
-					model.setValue("");
+					model.setValue('');
 					if (model) {
 						model.dispose();
 					}
@@ -87,21 +87,13 @@ class MonacoEditor extends React.Component {
 			width: fixedWidth,
 			height: fixedHeight,
 		};
-		return (
-			<div ref="container" style={style} className="react-monaco-editor-container"></div>
-		);
+		return <div ref='container' style={style} className='react-monaco-editor-container'></div>;
 	}
 }
 
 MonacoEditor.propTypes = {
-	width: PropTypes.oneOfType([
-		React.PropTypes.string,
-		React.PropTypes.number,
-	]),
-	height: PropTypes.oneOfType([
-		React.PropTypes.string,
-		React.PropTypes.number,
-	]),
+	width: PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.number]),
+	height: PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.number]),
 	value: PropTypes.string,
 	defaultValue: PropTypes.string,
 	language: PropTypes.string,
@@ -118,12 +110,12 @@ MonacoEditor.defaultProps = {
 	height: '100%',
 	value: null,
 	defaultValue: '',
-	language: "plaintext",
+	language: 'plaintext',
 	theme: 'vs',
 	options: {},
 	editorDidMount: noop,
 	editorWillMount: noop,
-	onChange: noop
+	onChange: noop,
 };
 
 export default MonacoEditor;

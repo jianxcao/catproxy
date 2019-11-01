@@ -1,12 +1,12 @@
 const ruleType = {
-	host: "host",
-	localFile: "localFile",
-	localDir: "localDir",
-	remoteFile: "remoteFile",
-	weinre: "weinre"
+	host: 'host',
+	localFile: 'localFile',
+	localDir: 'localDir',
+	remoteFile: 'remoteFile',
+	weinre: 'weinre',
 };
 
-let checkRules = (branch) => {
+let checkRules = branch => {
 	let rules = branch.rules;
 	if (rules && rules.length >= 0 && typeof rules === 'object') {
 		// 空数组是合法的
@@ -27,7 +27,7 @@ let checkRules = (branch) => {
 	}
 };
 
-let checkBranch = (branchs) => {
+let checkBranch = branchs => {
 	if (branchs && branchs.length >= 0 && typeof branchs === 'object') {
 		// 空数组是合法的
 		if (branchs.length === 0) {
@@ -73,7 +73,7 @@ let checkBranch = (branchs) => {
  *}]
  * @return {[type]}       如果是就返回true，其他都不是
  */
-export default (hosts) => {
+export default hosts => {
 	if (hosts && hosts.length >= 0 && typeof hosts === 'object') {
 		// 空数组是合法的
 		if (hosts.length === 0) {

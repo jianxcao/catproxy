@@ -1,4 +1,4 @@
-import {keymirror as km} from "../util";
+import { keymirror as km } from '../util';
 let result;
 export const {
 	// 增加数据
@@ -8,15 +8,15 @@ export const {
 	// 过滤器显示隐藏状态
 	CLEAR_MONITOR_LIST,
 	// 当前打开详情的数据
-	CUR_CON_DETAIL_DATA
-} = result = km([
+	CUR_CON_DETAIL_DATA,
+} = (result = km([
 	// 禁止缓存
-	"ADD_MONITOR_LIST",
+	'ADD_MONITOR_LIST',
 	// 录制状态
-	"UPDATE_MONITOR_LIST",
+	'UPDATE_MONITOR_LIST',
 	// 过滤器显示隐藏状态
-	"CLEAR_MONITOR_LIST",
+	'CLEAR_MONITOR_LIST',
 	// 当前打开详情的数据
-	"CUR_CON_DETAIL_DATA"
-]);
+	'CUR_CON_DETAIL_DATA',
+]));
 export default result;

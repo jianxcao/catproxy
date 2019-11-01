@@ -1,18 +1,18 @@
 import ReactDom, { render } from 'react-dom';
 import React, { PropTypes, Component, Children } from 'react';
-import {Provider,connect } from 'react-redux';
-import {bindActionCreators} from 'redux';
-import {fetchConData} from '../action/fetchAction';
-import {loadingConData} from '../action/loadingAction';
+import { Provider, connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { fetchConData } from '../action/fetchAction';
+import { loadingConData } from '../action/loadingAction';
 import Loading from '../loading';
 import cx from 'classnames';
-import Immutable, {List, Map} from 'immutable';
+import Immutable, { List, Map } from 'immutable';
 import ResToolBar from './resToolBar';
-import {jsonParse} from '../util';
+import { jsonParse } from '../util';
 import JsonTreeView from './jsonTreeView';
 import Editor from './editor';
-import {extLanguage} from './languageHelper';
-import {shouldEqual} from '../util';
+import { extLanguage } from './languageHelper';
+import { shouldEqual } from '../util';
 const isImage = /^image\/.+/;
 class ViewResData extends Component {
 	constructor() {
@@ -26,15 +26,15 @@ class ViewResData extends Component {
 		data: PropTypes.object.isRequired,
 		sendFetchConData: PropTypes.func,
 		loading: PropTypes.object,
-		resBodyData: PropTypes.object
-	}
+		resBodyData: PropTypes.object,
+	};
 	static defaultProps = {
-		resBodyData: null
-	}
+		resBodyData: null,
+	};
 	componentWillMount() {
-		let {sendFetchConData, data} = this.props;
+		let { sendFetchConData, data } = this.props;
 		let id = data.get('resBodyDataId');
-		let charset = data.get('resCharset') || "utf8";
+		let charset = data.get('resCharset') || 'utf8';
 		let status = data.get('status');
 		charset = charset.toLowerCase();
 		this.state = {
@@ -42,7 +42,7 @@ class ViewResData extends Component {
 			formatCode: true,
 			charset,
 			// 默认的时候language是null
-			language: null
+			language: null,
 		};
 		// 首次进入的时候发送请求
 		// 米有id有2种情况，一种是没有数据，一种是加载还没有返回成功
@@ -50,7 +50,7 @@ class ViewResData extends Component {
 			this.state.loading = true;
 			this.fetchData({
 				formatCode: this.state.formatCode,
-				charset: this.state.charset
+				charset: this.state.charset,
 			});
 		} else {
 			if (!status) {
@@ -61,8 +61,8 @@ class ViewResData extends Component {
 		}
 	}
 	componentWillReceiveProps(nextProps) {
-		let {width, resBodyData} = this.props;
-		let {width: w, resBodyData: nextResBodyData} = nextProps;
+		let { width, resBodyData } = this.props;
+		let { width: w, resBodyData: nextResBodyData } = nextProps;
 		if (this.editor && (width !== w || this._checkResBodyData(resBodyData, nextResBodyData))) {
 			this.editor.layout();
 		}
@@ -72,37 +72,39 @@ class ViewResData extends Component {
 		return !shouldEqual(oldData, newData);
 	}
 	shouldComponentUpdate(nextProps, nextState) {
-		let {resBodyData, data} = this.props;
+		let { resBodyData, data } = this.props;
 		// width不需要处理，就是width改了不需要修改子节点
 		// nextResBodyData 是异步获取的，所以需要检测 nextResBodyData 的id和 nextData的id
-		let {resBodyData: nextResBodyData = {}, data: nextData} = nextProps;
-		let {loading, formatCode, charset, language} = this.state;
-		let {loading: nextLoading, formatCode: nextFormatCode, charset: nextCharset, nextLanguage} = nextState;
-		return loading !== nextLoading ||
-						this._checkResBodyData(resBodyData, nextResBodyData) ||
-						formatCode !== nextFormatCode ||
-						charset !== nextCharset ||
-						language !== nextLanguage ||
-						(data && nextData ? !nextData.equals(data) : data !== nextData);
+		let { resBodyData: nextResBodyData = {}, data: nextData } = nextProps;
+		let { loading, formatCode, charset, language } = this.state;
+		let { loading: nextLoading, formatCode: nextFormatCode, charset: nextCharset, nextLanguage } = nextState;
+		return (
+			loading !== nextLoading ||
+			this._checkResBodyData(resBodyData, nextResBodyData) ||
+			formatCode !== nextFormatCode ||
+			charset !== nextCharset ||
+			language !== nextLanguage ||
+			(data && nextData ? !nextData.equals(data) : data !== nextData)
+		);
 	}
 
-	componentWillUnmount () {
+	componentWillUnmount() {
 		this.editor = null;
 	}
 	/**
 	 * 参数对象
-	 * 
+	 *
 	 */
-	fetchData({formatCode, charset}) {
-		let {sendFetchConData} = this.props;
-		let {data} = this.props;
+	fetchData({ formatCode, charset }) {
+		let { sendFetchConData } = this.props;
+		let { data } = this.props;
 		let id = data.get('resBodyDataId');
 		let status = data.get('status');
 		let ext = data.get('ext');
-		let contentType = data.getIn(['resHeaders', 'content-type']);	
+		let contentType = data.getIn(['resHeaders', 'content-type']);
 		if (formatCode === undefined) {
 			formatCode = this.state.formatCode;
-		}	
+		}
 		if (charset === undefined) {
 			charset = this.state.charset;
 		}
@@ -111,7 +113,7 @@ class ViewResData extends Component {
 			charset,
 			id,
 			ext,
-			contentType
+			contentType,
 		});
 	}
 	// 修改编码
@@ -121,10 +123,10 @@ class ViewResData extends Component {
 			loading: true,
 			resBodyData: null,
 		});
-		
+
 		this.fetchData({
-			charset
-		});		
+			charset,
+		});
 	}
 	// 是否格式化（美化代码 仅仅js css html有用）
 	changeFormatCode(formatCode) {
@@ -132,22 +134,22 @@ class ViewResData extends Component {
 			formatCode,
 			loading: true,
 			resBodyData: null,
-		});	
+		});
 		this.fetchData({
-			formatCode
+			formatCode,
 		});
 	}
 	// 用户主动改变语言
 	changeLanguage(language) {
-		this.setState({language});
+		this.setState({ language });
 	}
 	render() {
-		let {data, resBodyData} = this.props;
+		let { data, resBodyData } = this.props;
 		let isResbinary = data.get('isResbinary');
 		let id = data.get('resBodyDataId');
 		let ext = data.get('ext');
 		let resHeaders = data.get('resHeaders');
-		let defText = <span className="dataNoParse">二进制数据!!!</span>;
+		let defText = <span className='dataNoParse'>二进制数据!!!</span>;
 		let loading = this.state;
 		let result = <div></div>;
 		// 数据已经单独冲后台加载成功 -- 并且就是当前打开tab得数据
@@ -157,26 +159,26 @@ class ViewResData extends Component {
 			// 不存在id表示数据没有在后天存在
 			if (isResbinary) {
 				if (resHeaders) {
-					let contentType = resHeaders.get("content-type");
+					let contentType = resHeaders.get('content-type');
 					if (isImage.test(contentType)) {
-						let blob = new Blob([new Int8Array(resBodyData.data)], {'type': contentType});
+						let blob = new Blob([new Int8Array(resBodyData.data)], { type: contentType });
 						let myURl = URL.createObjectURL(blob);
-						result =  (
-							<div className="imagePreview">
+						result = (
+							<div className='imagePreview'>
 								<img src={myURl} />
 							</div>
 						);
 					} else {
-						result =  defText;
+						result = defText;
 					}
 				} else {
-					result =  defText;
+					result = defText;
 				}
 			} else {
-				result =  t === "string" ? this.renderResData() : defText;
+				result = t === 'string' ? this.renderResData() : defText;
 			}
 		} else {
-			result = <Loading className="pageLoading" />;;
+			result = <Loading className='pageLoading' />;
 		}
 		return result;
 	}
@@ -185,45 +187,48 @@ class ViewResData extends Component {
 		this.editor = editor;
 	}
 	renderResData() {
-		let {resBodyData, data} = this.props;
-		let {formatCode, charset, language} = this.state;
+		let { resBodyData, data } = this.props;
+		let { formatCode, charset, language } = this.state;
 		// 这个ext是根据内容修正后的ext，因为经常 有请求的ext和实际内容不同，
 		// 需要修正，其次有些请求的contentType和实际内容太也不同，需要修正，这里只修正json和jsonp
 		let ext = resBodyData.ext;
 		// state 取不到就取默认
-		language = language || extLanguage[ext] || "plaintext";
-		let result = "";
+		language = language || extLanguage[ext] || 'plaintext';
+		let result = '';
 		// 如果格式化代码则带换行，否则不带
 		let opt = {
-			wrappingColumn: formatCode ? 300: -1
+			wrappingColumn: formatCode ? 300 : -1,
 		};
 		// 显示编辑器
 		result = <Editor data={resBodyData.data} language={language} editorDidMount={this.editorDidMount} opt={opt}></Editor>;
 		return (
-			<div className="codePreview">
+			<div className='codePreview'>
 				<ResToolBar
 					formatCode={formatCode}
 					charset={charset}
 					language={language}
-					changeFormatCode = {this.changeFormatCode}
-					changeCharset= {this.changeCharset}
+					changeFormatCode={this.changeFormatCode}
+					changeCharset={this.changeCharset}
 					changeLanguage={this.changeLanguage}
-				>
-				</ResToolBar>
-				<div className="code">{result}</div>
-			</div>);
+				></ResToolBar>
+				<div className='code'>{result}</div>
+			</div>
+		);
 	}
 }
 
 function mapStateToProps(state) {
 	return {
-		resBodyData: state.get('curConDetailData')
+		resBodyData: state.get('curConDetailData'),
 	};
 }
 
 function mapDispatchToProps(dispatch) {
 	return {
-		sendFetchConData: bindActionCreators(fetchConData, dispatch)
+		sendFetchConData: bindActionCreators(fetchConData, dispatch),
 	};
 }
-export default connect(mapStateToProps, mapDispatchToProps)(ViewResData);
+export default connect(
+	mapStateToProps,
+	mapDispatchToProps
+)(ViewResData);

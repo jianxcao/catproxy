@@ -1,61 +1,65 @@
 import ReactDom, { render } from 'react-dom';
 import React, { PropTypes, Component, Children } from 'react';
 import cx from 'classnames';
-import ViewData from "./viewData";
+import ViewData from './viewData';
 import isEmpty from 'lodash/isEmpty';
 import JsonTreeView from './jsonTreeView';
-import {jsonParse, isJSONStr, getPara} from '../util';
+import { jsonParse, isJSONStr, getPara } from '../util';
 import shallowCompare from 'react-addons-shallow-compare';
-export default class ReqData extends Component{
+export default class ReqData extends Component {
 	constructor() {
 		super();
 		this._handleSourceClick = this._handleSourceClick.bind(this);
 		this._handleEncodeClick = this._handleEncodeClick.bind(this);
 	}
-	static defaultProps = {
-	}
+	static defaultProps = {};
 
-	shouldComponentUpdate (nextProps, nextState) {
+	shouldComponentUpdate(nextProps, nextState) {
 		return shallowCompare(this, nextProps, nextState);
 	}
-		
-	componentWillMount () {
+
+	componentWillMount() {
 		this.state = {
 			// 在是url传 比如 & 相链接的时候，或者是个字符串的时候,该字段有效
 			isUrlDecode: false,
 			// 直接查看 返回的源文件是什么
-			isSource: false
+			isSource: false,
 		};
 	}
-	_handleEncodeClick (e) {
+	_handleEncodeClick(e) {
 		e.stopPropagation();
-		let {isUrlDecode} = this.state;
+		let { isUrlDecode } = this.state;
 		this.setState({
-			isUrlDecode: !isUrlDecode
+			isUrlDecode: !isUrlDecode,
 		});
 	}
-	_handleSourceClick (e) {
+	_handleSourceClick(e) {
 		e.stopPropagation();
 		e.stopPropagation();
-		let {isSource} = this.state;
+		let { isSource } = this.state;
 		this.setState({
-			isSource: !isSource
-		});		
+			isSource: !isSource,
+		});
 	}
 	parse(content, contentType) {
 		let queryObj = getPara(content);
-		let {isUrlDecode, isSource} = this.state;
+		let { isUrlDecode, isSource } = this.state;
 		let result;
 
 		// xml匹配
-		if (content.indexOf("<?xml") > -1) {
+		if (content.indexOf('<?xml') > -1) {
 			return content;
 		}
 		// 参数不匹配 不是这种键值对的东西
 		if (!isEmpty(queryObj)) {
 			result = [];
-			for(let key in queryObj) {
-				result.push(<div key={result.length}><span>{key}:&nbsp;</span><em>{isUrlDecode ? decodeURIComponent(queryObj[key]) : queryObj[key]}</em></div>);
+			for (let key in queryObj) {
+				result.push(
+					<div key={result.length}>
+						<span>{key}:&nbsp;</span>
+						<em>{isUrlDecode ? decodeURIComponent(queryObj[key]) : queryObj[key]}</em>
+					</div>
+				);
 			}
 			result.__queryString = true;
 			return result;
@@ -64,39 +68,50 @@ export default class ReqData extends Component{
 		if (isJSONStr.test(dConent)) {
 			try {
 				let js = jsonParse(dConent);
-				return (<JsonTreeView json={js} isUrlDecode={isUrlDecode}/>);
+				return <JsonTreeView json={js} isUrlDecode={isUrlDecode} />;
 				// 解析成功，加载json组件
-			} catch(e) {
+			} catch (e) {
 				console.error(e);
 			}
 		}
-		// 解析不了，原数据返回 
+		// 解析不了，原数据返回
 		return content;
 	}
 	render() {
-		let {header, content, expand, children, contentType, ...props} = this.props;
-		let {isUrlDecode, isSource} = this.state;
+		let { header, content, expand, children, contentType, ...props } = this.props;
+		let { isUrlDecode, isSource } = this.state;
 		let result = [];
 		let headers = [header];
-		contentType = contentType || "";
+		contentType = contentType || '';
 		// 是否需要解码功能按钮
 		let isHaveDecoder = !(contentType.indexOf('boundary=') > -1);
-		headers.push(<em className="source" key= "source" onClick={this._handleSourceClick}>{isSource ? "格式化" : "源格式"}</em>);
-		content = (content || "").trim();
+		headers.push(
+			<em className='source' key='source' onClick={this._handleSourceClick}>
+				{isSource ? '格式化' : '源格式'}
+			</em>
+		);
+		content = (content || '').trim();
 		if (content && !isSource) {
 			result = this.parse(content, contentType);
-		} else {// 源文件输出，或者为空
+		} else {
+			// 源文件输出，或者为空
 			result = content;
 		}
 		if (!result) {
-			result = "";
+			result = '';
 		}
 		if (isHaveDecoder !== false && !isSource && result.__queryString) {
 			delete result.__queryString;
-			headers.push(<em className="encode" key= "encode" onClick={this._handleEncodeClick}>{isUrlDecode ? "源编码" : "解码"}</em>);
+			headers.push(
+				<em className='encode' key='encode' onClick={this._handleEncodeClick}>
+					{isUrlDecode ? '源编码' : '解码'}
+				</em>
+			);
 		}
 		return (
-			<ViewData {...props} header={headers} content={result} expand={expand}>{children}</ViewData>
+			<ViewData {...props} header={headers} content={result} expand={expand}>
+				{children}
+			</ViewData>
 		);
-	};
+	}
 }

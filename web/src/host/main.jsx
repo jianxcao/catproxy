@@ -1,23 +1,21 @@
-import React, {PropTypes} from 'react';
+import React, { PropTypes } from 'react';
 import Paper from 'material-ui/Paper';
 import SubHeader from './subhead';
 import EditRules from './editRules';
-import { Provider,connect} from 'react-redux';
-import {bindActionCreators} from 'redux';
-import {
-	drawerStatus,
-} from './action/actions';
+import { Provider, connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { drawerStatus } from './action/actions';
 let outPaperStyle = {
-	width: "100%",
+	width: '100%',
 	textAlign: 'center',
 	display: 'block',
-	position: "relative"
+	position: 'relative',
 };
 const innerPaperStyle = {
-	height: "100%",
-	width: "100%",
+	height: '100%',
+	width: '100%',
 	display: 'block',
-	position: 'relative'
+	position: 'relative',
 };
 // 右侧主要面板
 class Main extends React.Component {
@@ -25,8 +23,7 @@ class Main extends React.Component {
 		super(props);
 	}
 
-	static propTypes = {
-	}
+	static propTypes = {};
 
 	render() {
 		if (this.props.drawerStatus) {
@@ -35,10 +32,10 @@ class Main extends React.Component {
 			outPaperStyle.paddingLeft = 0;
 		}
 		return (
-			<Paper style={outPaperStyle} zDepth={0} >
+			<Paper style={outPaperStyle} zDepth={0}>
 				<Paper style={innerPaperStyle} zDepth={0}>
-					<SubHeader/>
-					<EditRules/>
+					<SubHeader />
+					<EditRules />
 				</Paper>
 			</Paper>
 		);
@@ -46,13 +43,15 @@ class Main extends React.Component {
 }
 function mapStateToProps(state) {
 	return {
-		drawerStatus: state.get('drawerStatus')
+		drawerStatus: state.get('drawerStatus'),
 	};
 }
 function mapDispatchToProps(dispatch) {
 	return {
-		changeDrawerStatus: bindActionCreators(drawerStatus, dispatch)
+		changeDrawerStatus: bindActionCreators(drawerStatus, dispatch),
 	};
 }
-export default connect(mapStateToProps, mapDispatchToProps)(Main);
-
+export default connect(
+	mapStateToProps,
+	mapDispatchToProps
+)(Main);

@@ -37,12 +37,11 @@ export default (host, port) => {
 				let { privateKey: key, cert } = getCert(host);
 				let server = https.createServer(
 					{
-						secureOptions:
-							constants.SSL_OP_NO_SSLv3 || constants.SSL_OP_NO_TLSv1,
+						secureOptions: constants.SSL_OP_NO_SSLv3 || constants.SSL_OP_NO_TLSv1,
 						key,
 						cert,
 						SNICallback,
-						rejectUnauthorized: false
+						rejectUnauthorized: false,
 					},
 					function(req, res) {
 						if (req.headers.upgrade) {
@@ -59,9 +58,7 @@ export default (host, port) => {
 				});
 
 				server.listen(port);
-				server.on('error', err =>
-					log.error(err + 'inner https prxoy server err:' + err)
-				);
+				server.on('error', err => log.error(err + 'inner https prxoy server err:' + err));
 				return { server, port };
 			})
 			.then(null, err => log.error('create https proxy server error:' + err))

@@ -7,7 +7,7 @@ import path from 'path';
 import Promise from 'promise';
 import URL from 'url';
 import dns from 'dns';
-import {getUrl} from '../tools';
+import { getUrl } from '../tools';
 let parseOneRule, parseBranch, parseOneBranch, execParse, standardUrl;
 let isStringReg = /^\/.+\/$/;
 let isStartHttp = /^http(s)?:\/\//;
@@ -18,9 +18,9 @@ let escapeReg = /(\*|\.|\?|\+|\$|\^|\[|\]|\(|\)|\{|\}|\||\\|\/)/g;
  * 保存规则
  * @param  {[type]} rules 规则数据
  */
-export let saveRules = (rules)=> {
+export let saveRules = rules => {
 	// 覆盖旧的rule
-	config.set('hosts',  rules);
+	config.set('hosts', rules);
 	// 存入文件中
 	config.save('hosts');
 };
@@ -29,7 +29,7 @@ export let saveRules = (rules)=> {
  * 获取规则
  * @return {[Array]} 获取到得规则对象
  */
-export let getRules =()=> {
+export let getRules = () => {
 	return config.get('hosts') || [];
 };
 
@@ -55,38 +55,40 @@ export let parseRule = messageInfo => {
 	}
 	// 多个信息以|| 分割
 	messageInfo.ruleInfo = [];
-	return execParse(rules.map(current => {
-		return {
-			fun: parseOneRule,
-			param: [current, messageInfo]
-		};
-	}))
-		.then(result => {
-			if (result) {
-				delete result.__match;
-				messageInfo.ruleInfo = 	messageInfo.ruleInfo.join('||');
-				if (!messageInfo.ruleInfo) {
-					delete messageInfo.ruleInfo;
-				}
-				return result;
+	return execParse(
+		rules.map(current => {
+			return {
+				fun: parseOneRule,
+				param: [current, messageInfo],
+			};
+		})
+	).then(result => {
+		if (result) {
+			delete result.__match;
+			messageInfo.ruleInfo = messageInfo.ruleInfo.join('||');
+			if (!messageInfo.ruleInfo) {
+				delete messageInfo.ruleInfo;
 			}
-			return messageInfo;
-		});
+			return result;
+		}
+		return messageInfo;
+	});
 };
 
 parseOneRule = (group, messageInfo) => {
 	let branches;
 	branches = group.branch;
 	// 如果禁用这个分组直接跳出,不存在分支
-	if (group.disable || !branches || !branches.length  || messageInfo.__match) {
+	if (group.disable || !branches || !branches.length || messageInfo.__match) {
 		return;
 	}
-	return execParse(branches.map(current => {
-		return {
-			fun: parseBranch,
-			param: [current, messageInfo, group.name]
-		};
-	})
+	return execParse(
+		branches.map(current => {
+			return {
+				fun: parseBranch,
+				param: [current, messageInfo, group.name],
+			};
+		})
 	);
 };
 
@@ -95,21 +97,22 @@ parseBranch = (branch, messageInfo, name) => {
 	if (branch.disable || !rules || !rules.length || messageInfo.__match) {
 		return;
 	}
-	return execParse(rules.map(current => {
-		return {
-			fun: parseOneBranch,
-			param: [current, messageInfo, name, branch.name]
-		};
-	})
+	return execParse(
+		rules.map(current => {
+			return {
+				fun: parseOneBranch,
+				param: [current, messageInfo, name, branch.name],
+			};
+		})
 	);
 };
 
 parseOneBranch = (rule, messageInfo, groupName, branchName) => {
-	let {test, exec, type, virtualPath = ''} = rule;
+	let { test, exec, type, virtualPath = '' } = rule;
 	if (isStringReg.test(test)) {
-		test = test.slice(1, test.length -1);
+		test = test.slice(1, test.length - 1);
 	} else {
-		test = isStartHttp.test(test) ? test : (messageInfo.protocol === 'https' ? "https://" + test : "http://" + test);
+		test = isStartHttp.test(test) ? test : messageInfo.protocol === 'https' ? 'https://' + test : 'http://' + test;
 		test = test.replace(escapeReg, '\\$1');
 		test = '^' + test;
 	}
@@ -135,10 +138,10 @@ parseOneBranch = (rule, messageInfo, groupName, branchName) => {
 		let execObj = standardUrl(newUrl, messageInfo.protocol);
 		messageInfo.host = execObj.host;
 		messageInfo.protocol = execObj.protocol.split(':')[0];
-		messageInfo.port = execObj.port ? execObj.port : (messageInfo.protocol === 'https' ? 443 : 80);
-		messageInfo.path = type === 'host' ? messageInfo.path : execObj.path;	
+		messageInfo.port = execObj.port ? execObj.port : messageInfo.protocol === 'https' ? 443 : 80;
+		messageInfo.path = type === 'host' ? messageInfo.path : execObj.path;
 		messageInfo.replaceUrl = execObj.href;
-		messageInfo.ruleInfo.push( `正则替换url：${newUrl}`);
+		messageInfo.ruleInfo.push(`正则替换url：${newUrl}`);
 		return;
 	}
 	// 已经匹配了
@@ -147,63 +150,63 @@ parseOneBranch = (rule, messageInfo, groupName, branchName) => {
 	}
 	messageInfo.__match = true;
 	log.debug(`解析规则,当前url:${currentUrl}, 规则类型:${type},规则正则${test},规则执行${exec}`);
-	switch(type){
-	// host模式下只能修改 host protocol port
-	case('host'):
+	switch (type) {
+		// host模式下只能修改 host protocol port
+		case 'host':
 		// 远程文件替换整个url路径包括参数
-	case('remoteFile'):
-		if (exec) {
-			// 转换成一个url的对象
-			let execObj = standardUrl(exec, messageInfo.protocol);
-			messageInfo.host = execObj.host;
-			messageInfo.protocol = execObj.protocol.split(':')[0];
-			messageInfo.port = execObj.port ? execObj.port : (messageInfo.protocol === 'https' ? 443 : 80);
-			messageInfo.path = type === 'host' ? messageInfo.path : execObj.path;
-			// log.debug('', messageInfo.protocol, messageInfo.port, exec);
-			messageInfo.ruleInfo.push(`分组:${groupName}-分支:${branchName}-规则类型:${type}-规则正则:${test}-规则执行:${exec}`);
-		} else  {
-			// 没有配置exec如果是 host就访问线上，如果是 remoteFile就跳过
-			if (type === 'host') {
-				return new Promise((resolve, reject) => {
-					dns.resolve(messageInfo.host.split(':')[0], function(err, addresses) {
-						if (err || !addresses || !addresses.length) {
-							log.error(`规则解析中, dns解析出现错误，规则类型:${type},规则正则${test}`);
-							reject(messageInfo);
-						} else {
-							messageInfo.host = addresses[0];
-							resolve(messageInfo);
-						}
+		case 'remoteFile':
+			if (exec) {
+				// 转换成一个url的对象
+				let execObj = standardUrl(exec, messageInfo.protocol);
+				messageInfo.host = execObj.host;
+				messageInfo.protocol = execObj.protocol.split(':')[0];
+				messageInfo.port = execObj.port ? execObj.port : messageInfo.protocol === 'https' ? 443 : 80;
+				messageInfo.path = type === 'host' ? messageInfo.path : execObj.path;
+				// log.debug('', messageInfo.protocol, messageInfo.port, exec);
+				messageInfo.ruleInfo.push(`分组:${groupName}-分支:${branchName}-规则类型:${type}-规则正则:${test}-规则执行:${exec}`);
+			} else {
+				// 没有配置exec如果是 host就访问线上，如果是 remoteFile就跳过
+				if (type === 'host') {
+					return new Promise((resolve, reject) => {
+						dns.resolve(messageInfo.host.split(':')[0], function(err, addresses) {
+							if (err || !addresses || !addresses.length) {
+								log.error(`规则解析中, dns解析出现错误，规则类型:${type},规则正则${test}`);
+								reject(messageInfo);
+							} else {
+								messageInfo.host = addresses[0];
+								resolve(messageInfo);
+							}
+						});
 					});
-				});
+				}
 			}
-		}
-		break;
-	case('redirect') :
-		if (exec) {
-			messageInfo.redirect = isStartHttp.test(exec) ? exec : messageInfo.protocol + '://' + exec;
-			messageInfo.ruleInfo.push(`分组:${groupName}-分支:${branchName}-规则类型:${type}-规则正则:${test}-规则执行:${exec}`);
-		}
-		break;
-	case('localFile'):
-		if (exec) {
-			messageInfo.sendToFile = exec;
-			messageInfo.ruleInfo.push(`分组:${groupName}-分支:${branchName}-规则类型:${type}-规则正则:${test}-规则执行:${exec}`);
-		}
-		break;
-	case('localDir'):
-		if (exec) {
-			// 去掉hash和param
-			let p = messageInfo.path.split('?')[0];
-			p = messageInfo.path.split('#')[0];
-			if (!isStartSlash.test(virtualPath)) {
-				virtualPath = '/' + virtualPath;
+			break;
+		case 'redirect':
+			if (exec) {
+				messageInfo.redirect = isStartHttp.test(exec) ? exec : messageInfo.protocol + '://' + exec;
+				messageInfo.ruleInfo.push(`分组:${groupName}-分支:${branchName}-规则类型:${type}-规则正则:${test}-规则执行:${exec}`);
 			}
-			p = p.replace(new RegExp('^' + virtualPath), '');
-			messageInfo.sendToFile = path.join(exec, p);
-			messageInfo.ruleInfo.push(`分组:${groupName}-分支:${branchName}-规则类型:${type}-规则正则:${test}-规则执行:${exec}`);
-		}
-		break;
-	default:
+			break;
+		case 'localFile':
+			if (exec) {
+				messageInfo.sendToFile = exec;
+				messageInfo.ruleInfo.push(`分组:${groupName}-分支:${branchName}-规则类型:${type}-规则正则:${test}-规则执行:${exec}`);
+			}
+			break;
+		case 'localDir':
+			if (exec) {
+				// 去掉hash和param
+				let p = messageInfo.path.split('?')[0];
+				p = messageInfo.path.split('#')[0];
+				if (!isStartSlash.test(virtualPath)) {
+					virtualPath = '/' + virtualPath;
+				}
+				p = p.replace(new RegExp('^' + virtualPath), '');
+				messageInfo.sendToFile = path.join(exec, p);
+				messageInfo.ruleInfo.push(`分组:${groupName}-分支:${branchName}-规则类型:${type}-规则正则:${test}-规则执行:${exec}`);
+			}
+			break;
+		default:
 	}
 	return messageInfo;
 };
@@ -215,7 +218,7 @@ standardUrl = (originalUrl, protocol) => {
 
 /**
  * 按tasks的顺序执行promise
- * 
+ *
  * @param  {[array]} tasks  [任务列表]
  * [{
  * 	fun: fun,
@@ -274,20 +277,18 @@ execParse = (tasks, index, preResult) => {
 // 	exec: "http://192.168.199.100/test?aaa"
 // }, messageInfo);
 
-
 // parseOneBranch({
 // 	type: "remoteFile",
 // 	test: '/zhuhu.com/test/',
 // 	exec: "http://192.168.199.100/test?aaa"
 // }, messageInfo);
-// 
+//
 
 // parseOneBranch({
 // 	type: "localFile",
 // 	test: '/zhuhu.com/test/',
 // 	exec: "D:/test/1111/1222"
 // }, messageInfo);
-
 
 // parseOneBranch({
 // 	type: "localDir",
@@ -296,6 +297,4 @@ execParse = (tasks, index, preResult) => {
 // 	virtualPath: "/test/"
 // }, messageInfo);
 
-
 // console.log(standardUrl("test:8080?a=1"));
-

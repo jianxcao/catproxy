@@ -1,9 +1,9 @@
-import ReactDom, {render} from 'react-dom';
-import React, {PropTypes, Component, isValidElement, cloneElement} from 'react';
-import {MenuItem, Clearfix} from 'react-bootstrap';
+import ReactDom, { render } from 'react-dom';
+import React, { PropTypes, Component, isValidElement, cloneElement } from 'react';
+import { MenuItem, Clearfix } from 'react-bootstrap';
 import AdjustPos from './adjustpos';
 import Clipboard from 'clipboard';
-export default class RightMenu extends Component{
+export default class RightMenu extends Component {
 	constructor(...props) {
 		super(...props);
 		this._onSelect = this._onSelect.bind(this);
@@ -11,18 +11,18 @@ export default class RightMenu extends Component{
 	static propTypes = {
 		destroy: PropTypes.func.isRequired,
 		left: PropTypes.number.isRequired,
-		top: PropTypes.number.isRequired
-	}
+		top: PropTypes.number.isRequired,
+	};
 	// 组件已经加载
-	componentDidMount () {
-		let {menus} = this.props;
+	componentDidMount() {
+		let { menus } = this.props;
 		this.clipborad = new Clipboard('.dropdown-menu a[data-index]', {
 			text: function(trigger) {
 				let index = trigger.getAttribute('data-copy');
 				if (index === 'copy') {
 					return document.getSelection().toString();
 				} else {
-					let copy = (menus[index] || "").copy || "";
+					let copy = (menus[index] || '').copy || '';
 					if (copy) {
 						if (typeof copy === 'object') {
 							copy = JSON.stringify(copy);
@@ -32,7 +32,7 @@ export default class RightMenu extends Component{
 					}
 					return copy;
 				}
-			}
+			},
 		});
 	}
 	componentWillUnmount() {
@@ -42,7 +42,7 @@ export default class RightMenu extends Component{
 		}
 	}
 	_onSelect(eventKey, e) {
-		let {menuClickEvt, destroy} = this.props;
+		let { menuClickEvt, destroy } = this.props;
 		if (menuClickEvt) {
 			let result = menuClickEvt.call(undefined, eventKey);
 			if (result === false) {
@@ -52,16 +52,20 @@ export default class RightMenu extends Component{
 		destroy();
 	}
 	render() {
-		let {left, top, menus, menuClickEvt, className, destroy, ...otherProps} = this.props;
+		let { left, top, menus, menuClickEvt, className, destroy, ...otherProps } = this.props;
 		let menu = <div></div>;
 		let menuStyle = {
 			left,
 			top,
-			display:"block"
+			display: 'block',
 		};
-		let copyItem = "";
-		if (document.getSelection && document.getSelection().toString() !== "") {
-			copyItem = <MenuItem  key="copy" eventKey="copy" data-copy="copy" data-index="copy" className="copy" onSelect={this._onSelect}>复制</MenuItem>;
+		let copyItem = '';
+		if (document.getSelection && document.getSelection().toString() !== '') {
+			copyItem = (
+				<MenuItem key='copy' eventKey='copy' data-copy='copy' data-index='copy' className='copy' onSelect={this._onSelect}>
+					复制
+				</MenuItem>
+			);
 		}
 		let items = [];
 		// 直接传递了一个  react Element
@@ -77,7 +81,7 @@ export default class RightMenu extends Component{
 					let props = {
 						disabled: !!current.disabled,
 						header: !!current.header,
-						divider: !!current.divider
+						divider: !!current.divider,
 					};
 					if (current.title) {
 						props.title = current.title;
@@ -86,33 +90,41 @@ export default class RightMenu extends Component{
 						props.eventKey = current.eventKey;
 					}
 					if (!current.href) {
-						props.href = "javascript:void(0);";
+						props.href = 'javascript:void(0);';
 					} else {
 						props.href = current.href;
 					}
 					if (current.copy) {
-						props["data-copy"] = index;
+						props['data-copy'] = index;
 					}
 					if (current.target) {
 						props.target = current.target;
 					}
-					return (<MenuItem {...props} key={index} data-index={index} onSelect={this._onSelect}>{current.text}</MenuItem>);
+					return (
+						<MenuItem {...props} key={index} data-index={index} onSelect={this._onSelect}>
+							{current.text}
+						</MenuItem>
+					);
 				}
 			});
 			if (className) {
-				className = className + " dropdown-menu";
+				className = className + ' dropdown-menu';
 			} else {
 				className = 'dropdown-menu';
 			}
 		}
 		menu = (
-			<div><Clearfix>
-				<AdjustPos left = {left} top ={top}>
-					<ul className={className} style={menuStyle} {...otherProps}>
-						{copyItem}{items}
-					</ul>
-				</AdjustPos>
-			</Clearfix></div>);
+			<div>
+				<Clearfix>
+					<AdjustPos left={left} top={top}>
+						<ul className={className} style={menuStyle} {...otherProps}>
+							{copyItem}
+							{items}
+						</ul>
+					</AdjustPos>
+				</Clearfix>
+			</div>
+		);
 		return menu;
 	}
-};
+}

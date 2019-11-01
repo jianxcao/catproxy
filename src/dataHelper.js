@@ -113,13 +113,7 @@ export const getReqType = result => {
 		// svg不能算是字体文件，因为svg可能是别的文件
 		// font/woff2  application/x-font-ttf 2种都是font
 		type = 'font';
-	} else if (
-		ext === 'js' ||
-		ext === 'jsx' ||
-		ext === 'es6' ||
-		ext === 'json' ||
-		ext === 'map'
-	) {
+	} else if (ext === 'js' || ext === 'jsx' || ext === 'es6' || ext === 'json' || ext === 'map') {
 		type = 'js';
 	} else if (ext === 'css' || ext === 'less' || ext === 'sass') {
 		type = 'css';
@@ -136,7 +130,7 @@ const supportEncode = ['UTF-8', 'GBK', 'GB2312', 'UTF8'];
 const supportBetuifyType = {
 	js: ['javascript', 'js', 'es6', 'jsx', 'json', 'jsonp'],
 	css: ['css', 'less', 'scass'],
-	html: ['html', 'htm', 'ejs']
+	html: ['html', 'htm', 'ejs'],
 };
 /**
  * 按照指定格式美化代码 js-betuify

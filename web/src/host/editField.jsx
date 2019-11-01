@@ -3,12 +3,10 @@ import TextField from 'material-ui/TextField';
 // 可编辑字段
 let style = {
 	display: 'inline-block',
-	width: "56%",
-	marginLeft: "82px"
+	width: '56%',
+	marginLeft: '82px',
 };
-let inputStyle = {
-
-};
+let inputStyle = {};
 export default class EditField extends React.Component {
 	constructor(props) {
 		super(props);
@@ -18,12 +16,12 @@ export default class EditField extends React.Component {
 		valueChange: React.PropTypes.func,
 		editStatus: React.PropTypes.func,
 		isEditor: React.PropTypes.bool,
-		val: React.PropTypes.string
-	}
+		val: React.PropTypes.string,
+	};
 	static defaultProps = {
-		val: "",
-		isEditor: false
-	}
+		val: '',
+		isEditor: false,
+	};
 
 	// 组件更新过了
 	componentDidUpdate(prevProps, prevState) {
@@ -45,21 +43,23 @@ export default class EditField extends React.Component {
 		evt.preventDefault();
 		evt.stopPropagation();
 	}
-	
-	render(){
+
+	render() {
 		if (this.props.isEditor) {
-			return (<TextField
-				name="myTextInput"
-				ref="myTextInput"
-				style={style}
-				inputStyle={inputStyle}
-				defaultValue={this.props.val}
-				onClick={this.handleInputClick}
-				onMouseDown={this.handleInputClick}
-				onBlur={this.handleChaneToText}
-			/>);
+			return (
+				<TextField
+					name='myTextInput'
+					ref='myTextInput'
+					style={style}
+					inputStyle={inputStyle}
+					defaultValue={this.props.val}
+					onClick={this.handleInputClick}
+					onMouseDown={this.handleInputClick}
+					onBlur={this.handleChaneToText}
+				/>
+			);
 		} else {
-			return (<div style={style}>{this.props.val}</div>);
+			return <div style={style}>{this.props.val}</div>;
 		}
 	}
 }

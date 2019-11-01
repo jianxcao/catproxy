@@ -1,5 +1,5 @@
-import React,{PropTypes, Component} from 'react';
-import ReactDom, {render, findDOMNode, unmountComponentAtNode} from 'react-dom';
+import React, { PropTypes, Component } from 'react';
+import ReactDom, { render, findDOMNode, unmountComponentAtNode } from 'react-dom';
 import QRrcode from './qrcode';
 import style from './qrcodeDialog.less';
 export class QrcodeDialog extends Component {
@@ -9,8 +9,8 @@ export class QrcodeDialog extends Component {
 		this.handelQrcodeMaskClick = this.handelQrcodeMaskClick.bind(this);
 	}
 	static propTypes = {
-		opt: PropTypes.object.isRequired
-	}
+		opt: PropTypes.object.isRequired,
+	};
 	destory() {
 		let node = findDOMNode(this);
 		window.setTimeout(() => {
@@ -22,7 +22,7 @@ export class QrcodeDialog extends Component {
 					p.removeChild(node);
 				}
 			}
-		}, 16);	
+		}, 16);
 	}
 	// 二维码点击
 	handelQrcodeClick(e) {
@@ -34,17 +34,22 @@ export class QrcodeDialog extends Component {
 		this.destory();
 	}
 	render() {
-		let {opt, ...props} = this.props;
-		return (<div className="qrcodeWrap" {...props}>
-			<div className="qrMask" onClick={this.handelQrcodeMaskClick}></div>
-			<div className="qrcode" onClick={this.handelQrcodeClick}><div className="closeBtn" onClick={this.destory}></div><QRrcode opt={opt}></QRrcode></div>
-		</div>);
+		let { opt, ...props } = this.props;
+		return (
+			<div className='qrcodeWrap' {...props}>
+				<div className='qrMask' onClick={this.handelQrcodeMaskClick}></div>
+				<div className='qrcode' onClick={this.handelQrcodeClick}>
+					<div className='closeBtn' onClick={this.destory}></div>
+					<QRrcode opt={opt}></QRrcode>
+				</div>
+			</div>
+		);
 	}
 }
 
 export default function qrcode(opt) {
 	let div = document.createElement('div');
-	div.id="qrCodeRoot";
+	div.id = 'qrCodeRoot';
 	document.body.appendChild(div);
 	let instance = render(<QrcodeDialog opt={opt}></QrcodeDialog>, div);
 	return {
@@ -52,6 +57,6 @@ export default function qrcode(opt) {
 			unmountComponentAtNode(div);
 			document.removeChild(div);
 		},
-		instance
+		instance,
 	};
-};
+}

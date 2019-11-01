@@ -1,7 +1,7 @@
-import keyMirror from "keyMirror";
+import keyMirror from 'keyMirror';
 
 export default keyMirror({
-	RESET_HOSTS:null,
+	RESET_HOSTS: null,
 	FETCH_FAILURE: null,
 	FETCH_SUCC: null,
 	FETCH: null,
@@ -26,5 +26,5 @@ export default keyMirror({
 	UPDATE_CURRENT_RULE: null,
 	DIS_CACHE: null,
 	REMOTE_UPDATE_RULE_URL: null,
-	CACHE_FLUSH: null
+	CACHE_FLUSH: null,
 });

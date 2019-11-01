@@ -7,6 +7,6 @@ export default () => (req, res, next) => {
 	if (rules && rules.length) {
 		res.json(rules);
 	} else {
-		next('没有可用的配置')	;
+		next('没有可用的配置');
 	}
 };

@@ -17,7 +17,7 @@ fse.emptyDirSync(fileCache);
 /**
  * 检测文件是否存在
  */
-let checkFileExits = (filePath) => {
+let checkFileExits = filePath => {
 	return new Promise((resolve, reject) => {
 		fs.stat(filePath, (err, exits) => {
 			if (err) {
@@ -42,7 +42,7 @@ let saveFile = (filePath, data) => {
 				return reject(err);
 			}
 			return resolve(filePath);
-		});	
+		});
 	});
 };
 /**
@@ -62,15 +62,15 @@ export let cacheFile = async (id, data) => {
  * id 文件名称
  * encode指定编码打开文件
  */
-export let getCacheFile = (id) => {
+export let getCacheFile = id => {
 	return new Promise(function(resolve, reject) {
 		let filePath = path.resolve(fileCache, id);
 		fs.readFile(filePath, (err, data) => {
 			if (err) {
 				reject(err.message);
-			};
+			}
 			resolve(data);
-		});		
+		});
 	});
 };
 

@@ -1,6 +1,6 @@
 /**
  * 做一个连接器用来控制下面所有的节点可以拖动
-*/
+ */
 var dragEle = null;
 let guid = 10101;
 let getGuid = () => {
@@ -11,12 +11,12 @@ export default (callback, getDragImage, props) => {
 	// 拖拽相关
 	return {
 		...props,
-		["data-drag-id"]: currentId,
+		['data-drag-id']: currentId,
 		draggable: true,
-		onDragStart (ev) {
+		onDragStart(ev) {
 			let target = ev.target;
 			let dragImgEle;
-			ev.dataTransfer.effectAllowed = "move";
+			ev.dataTransfer.effectAllowed = 'move';
 			if (ev.dataTransfer.setDragImage) {
 				if (typeof getDragImage === 'function') {
 					dragImgEle = getDragImage(target);
@@ -26,17 +26,15 @@ export default (callback, getDragImage, props) => {
 				}
 			}
 			dragEle = target;
-			ev.dataTransfer.setData("Text", target.getAttribute('data-drag-id'));
+			ev.dataTransfer.setData('Text', target.getAttribute('data-drag-id'));
 			return true;
 		},
 
-		onDragEnd (ev){
+		onDragEnd(ev) {
 			try {
 				dragEle = null;
-				ev.dataTransfer.clearData("Text");
-			} catch(e) {
-
-			}
+				ev.dataTransfer.clearData('Text');
+			} catch (e) {}
 			return false;
 		},
 
@@ -45,18 +43,18 @@ export default (callback, getDragImage, props) => {
 			return true;
 		},
 
-		onDragEnter(ev){
+		onDragEnter(ev) {
 			return true;
 		},
 
-		onDrop(ev){
-			var dragId = ev.dataTransfer.getData("Text");
+		onDrop(ev) {
+			var dragId = ev.dataTransfer.getData('Text');
 			var target = ev.target;
 			let isHaveSameParent = false;
 			if (!isHaveSameParent) {
 				let dropId;
-				while(target) {
-					if (dropId = target.getAttribute('data-drag-id')) {
+				while (target) {
+					if ((dropId = target.getAttribute('data-drag-id'))) {
 						if (dropId === dragId) {
 							isHaveSameParent = true;
 						}
@@ -71,6 +69,6 @@ export default (callback, getDragImage, props) => {
 					callback(dragEle, target);
 				}
 			}
-		}
+		},
 	};
 };

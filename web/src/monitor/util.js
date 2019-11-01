@@ -3,10 +3,10 @@ import isString from 'lodash/isString';
 import merge from 'lodash/merge';
 import isEqual from 'is-equal';
 import isPlainObject from 'lodash/isPlainObject';
-// 多行匹配 
+// 多行匹配
 export const isJSONStr = /(^(?:\s*\[)[\s\S]*(?:\]\s*)$|(^(?:\s*\{)[\s\S]*(?:\}\s*)$))/;
 export let keymirror = (...args) => {
-	return function middle(arr) {
+	return (function middle(arr) {
 		return arr.reduce((result, arg) => {
 			if (isArray(arg)) {
 				merge(result, middle(arg));
@@ -15,10 +15,10 @@ export let keymirror = (...args) => {
 			}
 			return result;
 		}, {});
-	}(args);
+	})(args);
 };
 
-export let upperFirstLetter =  (str) => {
+export let upperFirstLetter = str => {
 	if (typeof str === 'string') {
 		// 不做头部去空处理哦
 		return str.replace(/^.{1}/, first => first.toUpperCase());
@@ -32,18 +32,18 @@ export const isDataUrl = /^data:.+/;
 
 export function getPara(str) {
 	let data = {};
-	let arr = ("" + str).match(/([^=&#\?]+)=[^&#]+/g) || [];
-	arr.forEach((para) => {
-		var d = para.split("="),
-			val = (d[1]);
+	let arr = ('' + str).match(/([^=&#\?]+)=[^&#]+/g) || [];
+	arr.forEach(para => {
+		var d = para.split('='),
+			val = d[1];
 		if (data[d[0]] !== undefined) {
-			data[d[0]] += "," + val;
+			data[d[0]] += ',' + val;
 		} else {
 			data[d[0]] = val;
 		}
 	});
 	return data;
-};
+}
 
 /**
  * inlined Object.is polyfill to avoid requiring consumers ship their own
@@ -83,7 +83,7 @@ export function shouldEqual(objA, objB) {
 	for (var i = 0; i < keysA.length; i++) {
 		if (hasOwnProperty.call(objB, keysA[i])) {
 			// 递归判断，效率低，尽量一层解决问题
-			if ((isPlainObject(objA[keysA[i]]) && isPlainObject(objB[keysA[i]])) || (isArray(objA[keysA[i]]) && isArray(objB[keysA[i]])) ) {
+			if ((isPlainObject(objA[keysA[i]]) && isPlainObject(objB[keysA[i]])) || (isArray(objA[keysA[i]]) && isArray(objB[keysA[i]]))) {
 				if (!shouldEqual(objA[keysA[i]], objB[keysA[i]])) {
 					return false;
 				}
@@ -96,11 +96,10 @@ export function shouldEqual(objA, objB) {
 			return false;
 		}
 	}
-	return true;	
+	return true;
 }
 
 export function jsonParse(str) {
-	var json = (new Function("return " + str))();
+	var json = new Function('return ' + str)();
 	return json;
-};
-
+}

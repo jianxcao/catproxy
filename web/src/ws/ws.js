@@ -7,7 +7,7 @@ var ws, myMessage;
 var env = window.config.env;
 // 处理收到的事件
 // 接受处理
-let distributeReciveMethod = (ws) => {
+let distributeReciveMethod = ws => {
 	for (let type in reciveType) {
 		ws.on(reciveType[type], message => {
 			console.log('收到服务器端消息，消息类型: ' + reciveType[type]);
@@ -16,47 +16,46 @@ let distributeReciveMethod = (ws) => {
 			} else {
 				console.warn('收到消息后，没找到合适的处理方法: ' + reciveType[type]);
 			}
-		});		
+		});
 	}
 };
 export default myMessage = () => {
 	if (ws) {
 		if (!ws.connected) {
 			return new Promise(function(resolve, reject) {
-				ws.once('connect', function () {
+				ws.once('connect', function() {
 					console.log('connect');
 					distributeReciveMethod(ws);
 					resolve(ws);
-				});			
+				});
 			});
 		} else {
 			return Promise.resolve(ws);
 		}
 	}
 	ws = io.connect(window.config.wsServerUrl);
-	 ;
-	return new Promise((resolve)=> {
-		ws.once('connect', function () {
+	return new Promise(resolve => {
+		ws.once('connect', function() {
 			console.log('connect');
 			distributeReciveMethod(ws);
 			resolve(ws);
 		});
-		
-		ws.on('connect_timeout', ()=> {
+
+		ws.on('connect_timeout', () => {
 			console.log('connect_timeout');
 		});
-		
-		ws.on('reconnecting', ()=> {
+
+		ws.on('reconnecting', () => {
 			console.log('reconnecting');
 		});
-		
+
 		ws.on('connect_error', () => {
 			console.log('connect error');
 		});
-		
+
 		ws.on('close', () => {
 			ws = null;
-			console.log('ws关闭'); 
+			console.log('ws关闭');
 		});
 
 		ws.on('error', err => console.error(err));
@@ -73,14 +72,14 @@ export default myMessage = () => {
  * 	result: {'当前返回的数据'}
  * }
  */
-export let send = (type) => (data) => {
+export let send = type => data => {
 	return myMessage().then(ws => {
 		return new Promise((resolve, reject) => {
 			// 服务器链接失败
 			if (ws.disconnected) {
 				return reject({
 					status: status.ERROR,
-					result: "服务器歇菜了，赶紧去看一眼把"
+					result: '服务器歇菜了，赶紧去看一眼把',
 				});
 			}
 			console.log('向服务器发送请求, 请求类型' + sendType[type]);
