@@ -84,7 +84,7 @@
 		"lodash": "^4.17.11",
 		"material-ui": "^0.16.4",
 		"monaco-editor": "^0.7.0",
-		"npm": "^4.0.3",
+		"npm": "^6.13.4",
 		"prettier": "^1.18.2",
 		"react": "^15.4.0",
 		"react-addons-shallow-compare": "^15.6.2",
